@@ -2,59 +2,59 @@ abstract module declix.systemd.Unit;
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html
 class UnitSection {
-    after: String?
-    allowIsolate: String?
-    before: String?
-    bindsTo: String?
+    after: (String|Listing<String>)?
+    allowIsolate: Boolean?
+    before: (String|Listing<String>)?
+    bindsTo: (String|Listing<String>)?
     collectMode: String?
-    conflicts: String?
-    defaultDependencies: String?
+    conflicts: (String|Listing<String>)?
+    defaultDependencies: Boolean?
     description: String?
-    documentation: String?
+    documentation: (String|Listing<String>)?
     failureAction: String?
     failureActionExitStatus: String?
-    ignoreOnIsolate: String?
+    ignoreOnIsolate: Boolean?
     jobRunningTimeoutSec: String?
     jobTimeoutAction: String?
     jobTimeoutRebootArgument: String?
     jobTimeoutSec: String?
-    joinsNamespaceOf: String?
-    onFailure: String?
+    joinsNamespaceOf: (String|Listing<String>)?
+    onFailure: (String|Listing<String>)?
     onFailureJobMode: String?
-    onSuccess: String?
+    onSuccess: (String|Listing<String>)?
     onSuccessJobMode: String?
-    partOf: String?
-    propagatesReloadTo: String?
-    propagatesStopTo: String?
+    partOf: (String|Listing<String>)?
+    propagatesReloadTo: (String|Listing<String>)?
+    propagatesStopTo: (String|Listing<String>)?
     rebootArgument: String?
-    refuseManualStart: String?
-    refuseManualStop: String?
-    reloadPropagatedFrom: String?
-    requires: String?
-    requiresMountsFor: String?
-    requisite: String?
+    refuseManualStart: Boolean?
+    refuseManualStop: Boolean?
+    reloadPropagatedFrom: (String|Listing<String>)?
+    requires: (String|Listing<String>)?
+    requiresMountsFor: (String|Listing<String>)?
+    requisite: (String|Listing<String>)?
     sourcePath: String?
     startLimitAction: String?
     startLimitBurst: String?
     startLimitIntervalSec: String?
-    stopPropagatedFrom: String?
-    stopWhenUnneeded: String?
+    stopPropagatedFrom: (String|Listing<String>)?
+    stopWhenUnneeded: Boolean?
     successAction: String?
     successActionExitStatus: String?
-    surviveFinalKillSignal: String?
-    upholds: String?
-    wants: String?
-    wantsMountsFor: String?
+    surviveFinalKillSignal: Boolean?
+    upholds: (String|Listing<String>)?
+    wants: (String|Listing<String>)?
+    wantsMountsFor: (String|Listing<String>)?
 }
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html
 class InstallSection {
-    alias: String?
-    also: String?
+    alias: (String|Listing<String>)?
+    also: (String|Listing<String>)?
     defaultInstance: String?
-    requiredBy: String?
-    upheldBy: String?
-    wantedBy: String?
+    requiredBy: (String|Listing<String>)?
+    upheldBy: (String|Listing<String>)?
+    wantedBy: (String|Listing<String>)?
 }
 
 local class UnitFileRenderer extends ValueRenderer {
@@ -62,19 +62,22 @@ local class UnitFileRenderer extends ValueRenderer {
 
     function renderSections(map: Map): String = new Listing {
         for (name in map.keys) {
-            renderSection(name, map[name])
+            when (map[name] != null) {
+                renderSection(name, map[name])
+            }
         }
     }.join("\n")
 
     function renderSection(name: String, section: Any): String = 
-        "[\(name.capitalize())]\n" + new Listing {
-            for (name in section.toMap().keys) {
-                when (section.toMap()[name] != null) {
-                    renderProperty(name, section.toMap()[name])
-                }
-            }
-            ""
-    }.join("\n")
+        let (content = renderSectionProperties(section))
+        "[\(name.capitalize())]\n" + content + if (content == "") "" else "\n"
+    
+    function renderSectionProperties(section: Any): String = 
+        section.toMap().entries
+            .filter((entry) -> entry.value != null)
+            .map((entry) -> renderProperty(entry.key, entry.value))
+            .filter((rendered) -> rendered != "")
+            .join("\n")
 
     function renderProperty(name: String, value: Any): String = 
         if (value is Mapping) new Listing {
@@ -82,11 +85,19 @@ local class UnitFileRenderer extends ValueRenderer {
                 "\(name.capitalize())=\(key)=" + renderValue(value.toMap()[key])
             }
         }.join("\n")
-        else "\(name.capitalize())=" + renderValue(value)
+        else if (value is Listing && !value.isEmpty) new Listing {
+            for (item in value) {
+                "\(name.capitalize())=" + renderValue(item)
+            }
+        }.join("\n")
+        else if (value is Listing && value.isEmpty) ""
+        else if (value is String || value is Number || value is Boolean) "\(name.capitalize())=" + renderValue(value)
+        else throw("unexpected value type \(value.getClass()) for property \(name)")
 
     function renderValue(value: Any): String =
         if (value is String) value
         else if (value is Number) "\(value)"
+        else if (value is Boolean) if (value) "yes" else "no"
         else throw("unexpected value \(value.getClass())")
 }
 

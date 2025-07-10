@@ -23,14 +23,14 @@ local class ServiceSection {
     exitType: ServiceExitType?
     fileDescriptorStoreMax: String?
     fileDescriptorStorePreserve: String?
-    guessMainPID: String?
-    nonBlocking: String?
+    guessMainPID: Boolean?
+    nonBlocking: Boolean?
     notifyAccess: String?
     oOMPolicy: String?
     openFile: String?
     pIDFile: String?
     reloadSignal: String?
-    remainAfterExit: String?
+    remainAfterExit: Boolean?
     restart: String?
     restartForceExitStatus: String?
     restartMaxDelaySec: String?
@@ -38,7 +38,7 @@ local class ServiceSection {
     restartPreventExitStatus: String?
     restartSec: String?
     restartSteps: String?
-    rootDirectoryStartOnly: String?
+    rootDirectoryStartOnly: Boolean?
     runtimeMaxSec: String?
     runtimeRandomizedExtraSec: String?
     sockets: String?
@@ -58,8 +58,8 @@ local class ServiceSection {
     killMode: String?
     killSignal: String?
     restartKillSignal: String?
-    sendSIGHUP: String?
-    sendSIGKILL: String?
+    sendSIGHUP: Boolean?
+    sendSIGKILL: Boolean?
     watchdogSignal: String?
 
     function render(): String = new Listing {
