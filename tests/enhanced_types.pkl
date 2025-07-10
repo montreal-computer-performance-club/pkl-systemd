@@ -1,0 +1,96 @@
+amends "pkl:test"
+
+import "../Service.pkl"
+
+local testService = new Service {
+    unit = new {
+        description = "Test Service with Enhanced Types"
+        // Test Boolean types
+        defaultDependencies = false
+        allowIsolate = true
+        refuseManualStart = false
+        
+        // Test single String for union types
+        after = "network.target"
+        requires = "basic.target"
+        
+        // Test Listing for union types
+        wants = new Listing {
+            "network-online.target"
+            "time-sync.target"
+        }
+        
+        conflicts = new Listing {
+            "shutdown.target"
+        }
+        
+        // Test mixed usage
+        onFailure = "emergency.target"
+        documentation = new Listing {
+            "man:test(8)"
+            "https://example.com/docs"
+        }
+    }
+    
+    service = new {
+        type = "simple"
+        remainAfterExit = true
+        guessMainPID = false
+        nonBlocking = true
+        rootDirectoryStartOnly = false
+        sendSIGHUP = true
+        sendSIGKILL = false
+        execStart = "/usr/bin/test-service"
+        restart = "on-failure"
+        restartSec = "5"
+    }
+    
+    install = new {
+        // Test single value
+        wantedBy = "multi-user.target"
+        
+        // Test multiple values
+        also = new Listing {
+            "test-alt.service"
+            "test-backup.service"
+        }
+    }
+}
+
+facts {
+    ["Boolean values render as yes/no"] {
+        testService.output.text.contains("DefaultDependencies=no")
+        testService.output.text.contains("AllowIsolate=yes")
+        testService.output.text.contains("RefuseManualStart=no")
+        testService.output.text.contains("RemainAfterExit=yes")
+        testService.output.text.contains("GuessMainPID=no")
+        testService.output.text.contains("NonBlocking=yes")
+        testService.output.text.contains("RootDirectoryStartOnly=no")
+        testService.output.text.contains("SendSIGHUP=yes")
+        testService.output.text.contains("SendSIGKILL=no")
+    }
+    
+    ["Single string values render correctly"] {
+        testService.output.text.contains("After=network.target")
+        testService.output.text.contains("Requires=basic.target")
+        testService.output.text.contains("OnFailure=emergency.target")
+        testService.output.text.contains("WantedBy=multi-user.target")
+    }
+    
+    ["Multiple string values render as separate lines"] {
+        testService.output.text.contains("Wants=network-online.target")
+        testService.output.text.contains("Wants=time-sync.target")
+        testService.output.text.contains("Conflicts=shutdown.target")
+        testService.output.text.contains("Documentation=man:test(8)")
+        testService.output.text.contains("Documentation=https://example.com/docs")
+        testService.output.text.contains("Also=test-alt.service")
+        testService.output.text.contains("Also=test-backup.service")
+    }
+    
+    ["Service renders correctly"] {
+        testService.output.text.contains("Type=simple")
+        testService.output.text.contains("ExecStart=/usr/bin/test-service")
+        testService.output.text.contains("Restart=on-failure")
+        testService.output.text.contains("RestartSec=5")
+    }
+}

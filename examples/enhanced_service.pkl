@@ -1,0 +1,60 @@
+amends "../Service.pkl"
+
+unit = new {
+    description = "Enhanced Service Example"
+    
+    // Boolean values
+    defaultDependencies = false
+    allowIsolate = true
+    
+    // Single string dependencies
+    after = "network.target"
+    
+    // Multiple dependencies as Listing
+    wants = new Listing {
+        "network-online.target"
+        "time-sync.target"
+        "systemd-resolved.service"
+    }
+    
+    requires = new Listing {
+        "basic.target"
+        "sysinit.target"
+    }
+    
+    // Documentation can be multiple URLs
+    documentation = new Listing {
+        "man:enhanced-service(8)"
+        "https://example.com/docs/enhanced-service"
+    }
+    
+    // Conflict with shutdown
+    conflicts = "shutdown.target"
+}
+
+service = new {
+    type = "notify"
+    
+    // Boolean service options
+    remainAfterExit = false
+    guessMainPID = true
+    nonBlocking = false
+    rootDirectoryStartOnly = true
+    sendSIGHUP = true
+    sendSIGKILL = false
+    
+    execStart = "/usr/bin/enhanced-service --daemon"
+    restart = "on-failure"
+    restartSec = "10"
+    timeoutStartSec = 60
+}
+
+install = new {
+    wantedBy = "multi-user.target"
+    
+    // Multiple units that should also be enabled
+    also = new Listing {
+        "enhanced-service-helper.service"
+        "enhanced-service-monitor.timer"
+    }
+}
