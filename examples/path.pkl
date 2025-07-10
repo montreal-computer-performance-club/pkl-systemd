@@ -1,0 +1,34 @@
+amends "../Path.pkl"
+
+// Example path unit for watching configuration changes
+unit = new {
+    description = "Watch for configuration file changes"
+    documentation = "man:app-config-watcher(8)"
+    
+    // Ensure the target service exists
+    requires = "app-reload.service"
+    after = "app-reload.service"
+}
+
+path = new {
+    // Watch for changes in configuration directory
+    pathChanged = "/etc/myapp"
+    
+    // Also watch for new configuration files
+    pathExistsGlob = "/etc/myapp/*.conf"
+    
+    // Target service to activate
+    unit = "app-reload.service"
+    
+    // Create directories if needed
+    makeDirectory = true
+    directoryMode = "0755"
+    
+    // Rate limiting to prevent excessive triggering
+    triggerLimitIntervalSec = 5.s
+    triggerLimitBurst = 3
+}
+
+install = new {
+    wantedBy = "multi-user.target"
+}

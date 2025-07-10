@@ -1,0 +1,11 @@
+module declix.systemd.Device;
+
+extends "./Unit.pkl";
+
+unit: UnitSection
+install: InstallSection
+
+// https://www.freedesktop.org/software/systemd/man/latest/systemd.device.html
+// Device units do not have a dedicated [Device] section.
+// They only use the standard [Unit] and [Install] sections for configuration.
+// Device-specific configuration is done through udev properties, not systemd unit files.

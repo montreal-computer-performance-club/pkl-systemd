@@ -1,0 +1,50 @@
+amends "../Slice.pkl"
+
+// Example slice unit for resource management
+unit = new {
+    description = "Application slice for web services"
+    documentation = "https://example.com/docs/resource-management"
+    
+    // Slice hierarchy
+    requires = "-.slice"
+    after = "-.slice"
+}
+
+slice = new {
+    // CPU resource limits
+    cPUAccounting = true
+    cPUWeight = 200        // Lower than default (100-400 range typical)
+    cPUQuota = "50%"       // Limit to 50% of one CPU core
+    
+    // Memory resource limits
+    memoryAccounting = true
+    memoryHigh = "2G"      // Soft limit - will try to reclaim above this
+    memoryMax = "4G"       // Hard limit - OOM kill above this
+    memorySwapMax = "1G"   // Swap limit
+    
+    // Task limits
+    tasksAccounting = true
+    tasksMax = "1000"      // Maximum number of tasks/processes
+    
+    // IO resource limits
+    iOAccounting = true
+    iOWeight = 100         // Default IO priority
+    
+    // Memory pressure management
+    managedOOMSwap = "kill"
+    managedOOMMemoryPressure = "kill"
+    managedOOMMemoryPressureLimit = "80%"
+    
+    // Device access policy
+    devicePolicy = "strict"
+    deviceAllow = new Listing {
+        "/dev/null rw"
+        "/dev/zero rw"
+        "/dev/random r"
+        "/dev/urandom r"
+    }
+}
+
+install = new {
+    wantedBy = "slices.target"
+}

@@ -20,6 +20,13 @@ This package provides comprehensive Pkl modules for generating systemd unit file
 | `Timer.pkl` | Timer units for scheduled execution | [systemd.timer(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html) |
 | `Socket.pkl` | Socket units for socket-based activation | [systemd.socket(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.socket.html) |
 | `Mount.pkl` | Mount units for filesystem mounting | [systemd.mount(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.mount.html) |
+| `Target.pkl` | Target units for grouping and synchronization | [systemd.target(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.target.html) |
+| `Path.pkl` | Path units for file system monitoring | [systemd.path(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.path.html) |
+| `Swap.pkl` | Swap units for swap file/partition management | [systemd.swap(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.swap.html) |
+| `Automount.pkl` | Automount units for on-demand mounting | [systemd.automount(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.automount.html) |
+| `Slice.pkl` | Slice units for resource management | [systemd.slice(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.slice.html) |
+| `Scope.pkl` | Scope units for managing external processes | [systemd.scope(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.scope.html) |
+| `Device.pkl` | Device units (automatically generated) | [systemd.device(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.device.html) |
 | `Unit.pkl` | Base unit with common properties | [systemd.unit(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html) |
 
 ## Quick Start
@@ -225,13 +232,85 @@ mount = new {
     options = "defaults,noatime,user_xattr"
     
     // Mount behavior
-    timeoutSec = "30"
+    timeoutSec = 30.s
     directoryMode = "0755"
     forceUnmount = true
 }
 
 install = new {
     wantedBy = "local-fs.target"
+}
+```
+
+### Target Example
+
+```pkl
+amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Target.pkl"
+
+unit = new {
+    description = "Web Stack Target"
+    wants = new Listing {
+        "nginx.service"
+        "postgresql.service"
+        "redis.service"
+    }
+    requires = "network.target"
+    allowIsolate = true
+}
+
+install = new {
+    wantedBy = "multi-user.target"
+}
+```
+
+### Path Example
+
+```pkl
+amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Path.pkl"
+
+unit = new {
+    description = "Watch for configuration changes"
+}
+
+path = new {
+    pathChanged = "/etc/myapp"
+    pathExistsGlob = "/etc/myapp/*.conf"
+    unit = "app-reload.service"
+    makeDirectory = true
+    triggerLimitIntervalSec = 5.s
+}
+
+install = new {
+    wantedBy = "multi-user.target"
+}
+```
+
+### Slice Example
+
+```pkl
+amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Slice.pkl"
+
+unit = new {
+    description = "Application resource slice"
+}
+
+slice = new {
+    // CPU limits
+    cPUAccounting = true
+    cPUWeight = 200
+    cPUQuota = "50%"
+    
+    // Memory limits
+    memoryAccounting = true
+    memoryHigh = "2G"
+    memoryMax = "4G"
+    
+    // Task limits
+    tasksMax = "1000"
+}
+
+install = new {
+    wantedBy = "slices.target"
 }
 ```
 
@@ -320,15 +399,30 @@ pkl test tests/validation.pkl
 
 See the `examples/` directory for comprehensive examples:
 
+**Service Units:**
 - `service.pkl` - Basic service configuration
 - `enhanced_service.pkl` - Service with advanced features
 - `advanced_service.pkl` - Production-ready service with full configuration
+
+**Timer Units:**
 - `timer.pkl` - Basic timer
 - `backup_timer.pkl` - Comprehensive timer with all options
+
+**Socket Units:**
 - `socket.pkl` - Basic socket
 - `web_socket.pkl` - Advanced socket with multiple listeners
+
+**Mount Units:**
 - `mount.pkl` - Basic filesystem mount
 - `network_mount.pkl` - NFS mount with full configuration
+- `automount.pkl` - On-demand automount for network filesystems
+
+**Other Unit Types:**
+- `target.pkl` - Target unit for grouping services
+- `path.pkl` - Path unit for monitoring configuration changes
+- `swap.pkl` - Swap unit for swap file management
+- `slice.pkl` - Resource management slice for applications
+- `scope.pkl` - Scope unit for external process management
 
 ## Installation
 
@@ -350,19 +444,25 @@ This package closely follows the official systemd documentation. When adding new
 4. Add comprehensive tests and examples
 5. Update documentation
 
-## Future Work
+## Complete systemd Support
 
-Additional systemd unit types that could be added:
+This package now provides **complete systemd unit file support** with all 11 unit types:
 
-- [ ] Device units (`systemd.device`)
-- [ ] Automount units (`systemd.automount`) 
-- [ ] Swap units (`systemd.swap`)
-- [ ] Target units (`systemd.target`)
-- [ ] Path units (`systemd.path`)
-- [ ] Slice units (`systemd.slice`)
-- [ ] Scope units (`systemd.scope`)
+✅ **Service units** (`systemd.service`) - Process management  
+✅ **Timer units** (`systemd.timer`) - Scheduled task execution  
+✅ **Socket units** (`systemd.socket`) - Socket-based activation  
+✅ **Mount units** (`systemd.mount`) - Filesystem mounting  
+✅ **Target units** (`systemd.target`) - Unit grouping and synchronization  
+✅ **Path units** (`systemd.path`) - File system monitoring  
+✅ **Swap units** (`systemd.swap`) - Swap space management  
+✅ **Automount units** (`systemd.automount`) - On-demand mounting  
+✅ **Slice units** (`systemd.slice`) - Resource management and cgroups  
+✅ **Scope units** (`systemd.scope`) - External process management  
+✅ **Device units** (`systemd.device`) - Device representation  
 
-Additional features:
-- [ ] Duration type constraints (e.g., `"5min"`, `"1h"`)
-- [ ] Byte size constraints (e.g., `"1M"`, `"512K"`)
+## Future Enhancements
+
 - [ ] pkldoc documentation generation
+- [ ] Advanced Duration validation with systemd-specific units
+- [ ] Byte size type constraints (e.g., `"1M"`, `"512K"`)
+- [ ] Additional systemd specifier support

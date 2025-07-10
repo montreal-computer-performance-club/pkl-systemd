@@ -1,0 +1,11 @@
+module declix.systemd.Target;
+
+extends "./Unit.pkl";
+
+unit: UnitSection
+install: InstallSection
+
+// https://www.freedesktop.org/software/systemd/man/latest/systemd.target.html
+// Target units do not have a dedicated [Target] section.
+// They only use the standard [Unit] and [Install] sections for configuration.
+// Targets are used to group units and provide synchronization points.

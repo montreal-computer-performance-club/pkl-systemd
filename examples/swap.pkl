@@ -1,0 +1,36 @@
+amends "../Swap.pkl"
+
+// Example swap unit for swap file
+unit = new {
+    description = "Swap file /swapfile"
+    documentation = new Listing {
+        "man:swapon(8)"
+        "man:systemd.swap(5)"
+    }
+    
+    // Dependencies
+    requires = "local-fs.target"
+    after = "local-fs.target"
+    
+    // Conflicts with shutdown
+    conflicts = "umount.target"
+    before = "umount.target"
+}
+
+swap = new {
+    // Swap file path
+    what = "/swapfile"
+    
+    // Priority (higher number = higher priority)
+    priority = 10
+    
+    // Swap options
+    options = "defaults"
+    
+    // Timeout for swap operations
+    timeoutSec = 30.s
+}
+
+install = new {
+    wantedBy = "swap.target"
+}

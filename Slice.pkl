@@ -1,0 +1,82 @@
+module declix.systemd.Slice;
+
+extends "./Unit.pkl";
+
+unit: UnitSection
+install: InstallSection
+slice: SliceSection
+
+// https://www.freedesktop.org/software/systemd/man/latest/systemd.slice.html
+// https://www.freedesktop.org/software/systemd/man/latest/systemd.resource-control.html
+class SliceSection {
+    // CPU accounting and limits
+    cPUAccounting: Boolean?
+    cPUWeight: UInt?
+    startupCPUWeight: UInt?
+    cPUQuota: String?
+    cPUAffinity: String?
+    allowedCPUs: String?
+    startupAllowedCPUs: String?
+    
+    // Memory accounting and limits
+    memoryAccounting: Boolean?
+    memoryMin: String?
+    memoryLow: String?
+    memoryHigh: String?
+    memoryMax: String?
+    memorySwapMax: String?
+    memoryZSwapMax: String?
+    memoryZSwapWriteback: Boolean?
+    allowedMemoryNodes: String?
+    startupAllowedMemoryNodes: String?
+    
+    // Memory pressure and OOM management
+    managedOOMSwap: ManagedOOMMode?
+    managedOOMMemoryPressure: ManagedOOMMode?
+    managedOOMMemoryPressureLimit: String?
+    managedOOMPreference: ManagedOOMPreference?
+    
+    // Tasks accounting and limits
+    tasksAccounting: Boolean?
+    tasksMax: String?
+    
+    // IO accounting and limits
+    iOAccounting: Boolean?
+    iOWeight: UInt?
+    startupIOWeight: UInt?
+    iODeviceWeight: String?
+    iOReadBandwidthMax: String?
+    iOWriteBandwidthMax: String?
+    iOReadIOPSMax: String?
+    iOWriteIOPSMax: String?
+    iODeviceLatencyTargetSec: String?
+    
+    // Legacy Block IO (deprecated)
+    blockIOAccounting: Boolean?
+    blockIOWeight: UInt?
+    startupBlockIOWeight: UInt?
+    blockIODeviceWeight: String?
+    blockIOReadBandwidth: String?
+    blockIOWriteBandwidth: String?
+    
+    // Device access control
+    deviceAllow: (String|Listing<String>)?
+    devicePolicy: DevicePolicy?
+    
+    // IP accounting and filtering
+    iPAccounting: Boolean?
+    iPAddressAllow: (String|Listing<String>)?
+    iPAddressDeny: (String|Listing<String>)?
+    iPIngressFilterPath: (String|Listing<String>)?
+    iPEgressFilterPath: (String|Listing<String>)?
+    
+    // Control group delegation
+    delegate: Boolean?
+    disableControllers: (String|Listing<String>)?
+    managedOOMRoot: Boolean?
+}
+
+// Type aliases for slice configuration
+local typealias ManagedOOMMode = "auto" | "kill"
+local typealias ManagedOOMPreference = "none" | "avoid" | "omit"
+local typealias DevicePolicy = "auto" | "closed" | "strict"

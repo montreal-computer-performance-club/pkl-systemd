@@ -1,0 +1,18 @@
+module declix.systemd.Automount;
+
+extends "./Unit.pkl";
+
+unit: UnitSection
+install: InstallSection
+automount: AutomountSection
+
+// https://www.freedesktop.org/software/systemd/man/latest/systemd.automount.html
+class AutomountSection {
+    // Mandatory - automount point directory
+    where: String
+    
+    // Optional automount configuration
+    extraOptions: String?
+    directoryMode: String?
+    timeoutIdleSec: Duration?
+}

@@ -1,0 +1,42 @@
+amends "../Automount.pkl"
+
+// Example automount unit for on-demand mounting
+unit = new {
+    description = "Automount for user home directories"
+    documentation = new Listing {
+        "man:systemd.automount(5)"
+        "man:autofs(8)"
+    }
+    
+    // Dependencies
+    requires = new Listing {
+        "network.target"
+        "nfs-client.target"
+    }
+    after = new Listing {
+        "network.target" 
+        "nfs-client.target"
+    }
+    
+    // Conflicts with shutdown
+    conflicts = "umount.target"
+    before = "umount.target"
+}
+
+automount = new {
+    // Automount point
+    where = "/home/users"
+    
+    // Extra autofs options
+    extraOptions = "timeout=60,retry=1"
+    
+    // Directory permissions
+    directoryMode = "0755"
+    
+    // Idle timeout - unmount after 5 minutes of inactivity
+    timeoutIdleSec = 5.min
+}
+
+install = new {
+    wantedBy = "remote-fs.target"
+}
