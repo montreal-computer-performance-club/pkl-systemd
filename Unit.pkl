@@ -2,50 +2,90 @@ abstract module declix.systemd.Unit;
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html
 class UnitSection {
-    after: (String|Listing<String>)?
-    allowIsolate: Boolean?
-    before: (String|Listing<String>)?
-    bindsTo: (String|Listing<String>)?
-    collectMode: String?
-    conflicts: (String|Listing<String>)?
-    defaultDependencies: Boolean?
+    // Description and documentation
     description: String?
     documentation: (String|Listing<String>)?
-    failureAction: String?
-    failureActionExitStatus: String?
-    ignoreOnIsolate: Boolean?
-    jobRunningTimeoutSec: String?
-    jobTimeoutAction: String?
-    jobTimeoutRebootArgument: String?
-    jobTimeoutSec: String?
-    joinsNamespaceOf: (String|Listing<String>)?
-    onFailure: (String|Listing<String>)?
-    onFailureJobMode: String?
-    onSuccess: (String|Listing<String>)?
-    onSuccessJobMode: String?
+    
+    // Dependencies
+    wants: (String|Listing<String>)?
+    requires: (String|Listing<String>)?
+    requisite: (String|Listing<String>)?
+    bindsTo: (String|Listing<String>)?
     partOf: (String|Listing<String>)?
+    upholds: (String|Listing<String>)?
+    conflicts: (String|Listing<String>)?
+    
+    // Ordering
+    before: (String|Listing<String>)?
+    after: (String|Listing<String>)?
+    
+    // Failure and success handling
+    onFailure: (String|Listing<String>)?
+    onSuccess: (String|Listing<String>)?
+    onFailureJobMode: JobMode?
+    onSuccessJobMode: JobMode?
+    
+    // Reload and stop propagation
     propagatesReloadTo: (String|Listing<String>)?
+    reloadPropagatedFrom: (String|Listing<String>)?
     propagatesStopTo: (String|Listing<String>)?
+    stopPropagatedFrom: (String|Listing<String>)?
+    
+    // Namespace joining
+    joinsNamespaceOf: (String|Listing<String>)?
+    
+    // Mount dependencies
+    requiresMountsFor: (String|Listing<String>)?
+    wantsMountsFor: (String|Listing<String>)?
+    
+    // Job configuration
+    jobTimeoutSec: Duration?
+    jobRunningTimeoutSec: Duration?
+    jobTimeoutAction: JobTimeoutAction?
+    jobTimeoutRebootArgument: String?
+    
+    // Failure and success actions
+    failureAction: UnitAction?
+    failureActionExitStatus: String?
+    successAction: UnitAction?
+    successActionExitStatus: String?
+    
+    // Start limit configuration
+    startLimitAction: UnitAction?
+    startLimitBurst: UInt?
+    startLimitIntervalSec: Duration?
+    
+    // Reboot configuration
     rebootArgument: String?
+    
+    // Isolation and dependencies
+    allowIsolate: Boolean?
+    ignoreOnIsolate: Boolean?
+    defaultDependencies: Boolean?
+    
+    // Stop configuration
+    stopWhenUnneeded: Boolean?
     refuseManualStart: Boolean?
     refuseManualStop: Boolean?
-    reloadPropagatedFrom: (String|Listing<String>)?
-    requires: (String|Listing<String>)?
-    requiresMountsFor: (String|Listing<String>)?
-    requisite: (String|Listing<String>)?
+    
+    // Advanced options
+    collectMode: CollectMode?
     sourcePath: String?
-    startLimitAction: String?
-    startLimitBurst: String?
-    startLimitIntervalSec: String?
-    stopPropagatedFrom: (String|Listing<String>)?
-    stopWhenUnneeded: Boolean?
-    successAction: String?
-    successActionExitStatus: String?
     surviveFinalKillSignal: Boolean?
-    upholds: (String|Listing<String>)?
-    wants: (String|Listing<String>)?
-    wantsMountsFor: (String|Listing<String>)?
 }
+
+// Job modes for failure/success handling
+local typealias JobMode = "fail" | "replace" | "replace-irreversibly" | "isolate" | "flush" | "ignore-dependencies" | "ignore-requirements"
+
+// Job timeout actions
+local typealias JobTimeoutAction = "none" | "reboot" | "reboot-force" | "reboot-immediate" | "poweroff" | "poweroff-force" | "poweroff-immediate" | "exit" | "exit-force" | "halt" | "halt-force" | "halt-immediate" | "kexec" | "kexec-force" | "suspend" | "hibernate" | "hybrid-sleep" | "suspend-then-hibernate" | "lock"
+
+// Unit actions for failure/success
+local typealias UnitAction = "none" | "reboot" | "reboot-force" | "reboot-immediate" | "poweroff" | "poweroff-force" | "poweroff-immediate" | "exit" | "exit-force" | "halt" | "halt-force" | "halt-immediate" | "kexec" | "kexec-force" | "suspend" | "hibernate" | "hybrid-sleep" | "suspend-then-hibernate"
+
+
+// Collect mode for cleanup
+local typealias CollectMode = "inactive" | "inactive-or-failed"
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html
 class InstallSection {
@@ -91,13 +131,14 @@ local class UnitFileRenderer extends ValueRenderer {
             }
         }.join("\n")
         else if (value is Listing && value.isEmpty) ""
-        else if (value is String || value is Number || value is Boolean) "\(name.capitalize())=" + renderValue(value)
+        else if (value is String || value is Number || value is Boolean || value is Duration) "\(name.capitalize())=" + renderValue(value)
         else throw("unexpected value type \(value.getClass()) for property \(name)")
 
     function renderValue(value: Any): String =
         if (value is String) value
         else if (value is Number) "\(value)"
         else if (value is Boolean) if (value) "yes" else "no"
+        else if (value is Duration) "\(value.toUnit("s").value)"
         else throw("unexpected value \(value.getClass())")
 }
 

@@ -1,0 +1,135 @@
+amends "../Service.pkl"
+
+// Advanced systemd service example demonstrating complex configurations
+unit = new {
+    description = "Advanced microservice with comprehensive configuration"
+    documentation = new Listing {
+        "man:advanced-service(8)"
+        "https://example.com/docs/advanced-service"
+        "file:///usr/share/doc/advanced-service/README.md"
+    }
+    
+    // Dependencies and ordering
+    wants = new Listing {
+        "network-online.target"
+        "time-sync.target"
+        "systemd-resolved.service"
+    }
+    requires = "basic.target"
+    after = new Listing {
+        "network-online.target"
+        "systemd-resolved.service"
+    }
+    before = "multi-user.target"
+    
+    // Conflict and isolation settings
+    conflicts = "shutdown.target"
+    allowIsolate = false
+    defaultDependencies = true
+    
+    // Failure handling
+    onFailure = "notify-failure@%n.service"
+    startLimitBurst = 5
+    startLimitIntervalSec = 5.min
+    startLimitAction = "reboot"
+    
+    // Resource requirements
+    requiresMountsFor = new Listing {
+        "/var/lib/advanced-service"
+        "/run/advanced-service"
+    }
+}
+
+service = new {
+    // Service type and main process
+    type = "notify"
+    exitType = "main"
+    remainAfterExit = false
+    guessMainPID = false
+    pidFile = "/run/advanced-service/service.pid"
+    busName = "com.example.AdvancedService"
+    
+    // Execution commands
+    execStartPre = new Listing {
+        "/usr/bin/mkdir -p /run/advanced-service"
+        "/usr/bin/chown advanced-service:advanced-service /run/advanced-service"
+        "/usr/bin/advanced-service --validate-config"
+    }
+    execStart = "/usr/bin/advanced-service --daemon --config=/etc/advanced-service/config.yaml"
+    execStartPost = "/usr/bin/advanced-service --post-start-hook"
+    execReload = "/bin/kill -HUP $MAINPID"
+    execStop = "/usr/bin/advanced-service --graceful-shutdown"
+    execStopPost = "/usr/bin/rm -rf /run/advanced-service"
+    
+    // Restart configuration
+    restart = "on-failure"
+    restartSec = 10.s
+    restartSteps = 3
+    restartMaxDelaySec = 1.min
+    restartMode = "normal"
+    restartForceExitStatus = new Listing {
+        "SIGKILL"
+        "SIGABRT"
+    }
+    restartPreventExitStatus = "SIGUSR1"
+    
+    // Timeout configuration
+    timeoutStartSec = 1.min
+    timeoutStopSec = 30.s
+    timeoutAbortSec = 10.s
+    timeoutStartFailureMode = "terminate"
+    timeoutStopFailureMode = "kill"
+    
+    // Runtime limits
+    runtimeMaxSec = 24.h
+    runtimeRandomizedExtraSec = 1.h
+    
+    // Watchdog
+    watchdogSec = 30.s
+    watchdogSignal = "SIGTERM"
+    
+    // Kill settings
+    killMode = "mixed"
+    killSignal = "SIGTERM"
+    finalKillSignal = "SIGKILL"
+    sendSIGHUP = true
+    sendSIGKILL = true
+    
+    // Environment variables
+    environment = new {
+        ["SERVICE_ENV"] = "production"
+        ["LOG_LEVEL"] = "info"
+        ["CONFIG_FILE"] = "/etc/advanced-service/config.yaml"
+        ["DATA_DIR"] = "/var/lib/advanced-service"
+    }
+    environmentFile = new Listing {
+        "/etc/advanced-service/environment"
+        "/etc/advanced-service/secrets.env"
+    }
+    
+    // Status and notifications
+    successExitStatus = new Listing {
+        "0"
+        "SIGUSR1"
+    }
+    notifyAccess = "main"
+    
+    // File descriptors
+    fileDescriptorStoreMax = 10
+    fileDescriptorStorePreserve = "restart"
+    
+    // Advanced options
+    nonBlocking = false
+    rootDirectoryStartOnly = false
+    oomPolicy = "stop"
+}
+
+install = new {
+    wantedBy = "multi-user.target"
+    requiredBy = "application.target"
+    also = new Listing {
+        "advanced-service-monitor.timer"
+        "advanced-service-backup.service"
+    }
+    alias = "microservice.service"
+}

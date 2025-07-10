@@ -1,0 +1,58 @@
+amends "../Timer.pkl"
+
+// Comprehensive timer example for daily backup operations
+unit = new {
+    description = "Daily backup timer with flexible scheduling"
+    documentation = "man:backup-service(8)"
+    
+    // Ensure we have network and storage available
+    requires = new Listing {
+        "network.target"
+        "local-fs.target"
+    }
+    after = new Listing {
+        "network-online.target"
+        "backup.service"
+    }
+    
+    // Don't run during shutdown
+    conflicts = "shutdown.target"
+    before = "shutdown.target"
+    
+    // Mount requirements for backup storage
+    requiresMountsFor = "/backup/storage"
+}
+
+timer = new {
+    // Calendar-based scheduling - daily at 2:30 AM
+    onCalendar = "daily"
+    
+    // Monotonic timers for fallback scheduling
+    onBootSec = 15.min        // Run 15 minutes after boot if missed
+    onUnitActiveSec = 24.h    // Ensure it runs at least every 24 hours
+    
+    // Timer precision and randomization
+    accuracySec = 1.min               // Timer accuracy within 1 minute
+    randomizedDelaySec = 30.min       // Random delay up to 30 minutes
+    fixedRandomDelay = false           // Different random delay each time
+    
+    // System state triggers
+    onClockChange = true      // Reschedule if system clock changes
+    onTimezoneChange = true   // Reschedule if timezone changes
+    
+    // Timer behavior
+    unit = "backup.service"   // Explicitly specify the service to run
+    persistent = true         // Run missed timers after system restart
+    wakeSystem = false        // Don't wake system from suspend
+    remainAfterElapse = false // Don't keep timer around after elapse
+    
+    // Advanced scheduling control
+    deferReactivation = true  // Defer reactivation until current run completes
+}
+
+install = new {
+    wantedBy = "timers.target"
+    
+    // Also enable the backup service when this timer is enabled
+    also = "backup.service"
+}

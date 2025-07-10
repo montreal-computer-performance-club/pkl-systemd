@@ -1,0 +1,337 @@
+amends "pkl:test"
+
+import "../Service.pkl"
+import "../Timer.pkl"
+import "../Socket.pkl"
+import "../Mount.pkl"
+
+// Comprehensive type testing for all systemd modules
+
+local testService = new Service {
+    unit = new {
+        description = "Comprehensive Service Type Test"
+        
+        // Test all union type properties with both String and Listing<String>
+        documentation = new Listing {
+            "man:test(8)"
+            "https://example.com/docs"
+            "file:///usr/share/doc/test/README"
+        }
+        
+        // Dependencies - test mixed single and multiple values
+        wants = "basic.target"
+        requires = new Listing {
+            "network.target"
+            "time-sync.target"
+        }
+        after = new Listing {
+            "network.target"
+            "systemd-resolved.service"
+        }
+        before = "multi-user.target"
+        
+        // Test all boolean properties
+        defaultDependencies = false
+        allowIsolate = true
+        ignoreOnIsolate = false
+        stopWhenUnneeded = true
+        refuseManualStart = false
+        refuseManualStop = true
+        surviveFinalKillSignal = false
+        
+        // Test type aliases
+        onFailureJobMode = "replace"
+        collectMode = "inactive-or-failed"
+        failureAction = "reboot-immediate"
+        startLimitAction = "poweroff"
+        
+        // Test numeric and string timeouts
+        startLimitBurst = 5
+        startLimitIntervalSec = 5.min
+        jobTimeoutSec = 0.s  // 0 means infinity in systemd
+    }
+    
+    service = new {
+        // Test all service type aliases
+        type = "notify-reload"
+        exitType = "cgroup"
+        restart = "on-abnormal"
+        restartMode = "direct"
+        killMode = "mixed"
+        notifyAccess = "exec"
+        oomPolicy = "kill"
+        
+        // Test execution commands with multiple values
+        execStartPre = new Listing {
+            "/usr/bin/pre-start-1"
+            "/usr/bin/pre-start-2"
+        }
+        execStart = "/usr/bin/main-service"
+        execStop = new Listing {
+            "/usr/bin/graceful-stop"
+            "/usr/bin/cleanup"
+        }
+        
+        // Test environment handling
+        environment = new {
+            ["SERVICE_MODE"] = "test"
+            ["DEBUG"] = "true"
+            ["CONFIG_PATH"] = "/etc/test/config.yaml"
+        }
+        environmentFile = new Listing {
+            "/etc/default/test-service"
+            "/run/secrets/test-env"
+        }
+        
+        // Test all boolean service properties
+        remainAfterExit = true
+        guessMainPID = false
+        nonBlocking = true
+        rootDirectoryStartOnly = false
+        sendSIGHUP = true
+        sendSIGKILL = false
+        
+        // Test timeout configurations
+        timeoutStartSec = 30.s
+        timeoutStopSec = 15.s
+        runtimeMaxSec = 1.h
+        watchdogSec = 10.s
+        
+        // Test file descriptor settings
+        fileDescriptorStoreMax = 100
+        sockets = new Listing {
+            "test.socket"
+            "test-admin.socket"
+        }
+    }
+    
+    install = new {
+        wantedBy = new Listing {
+            "multi-user.target"
+            "graphical.target"
+        }
+        requiredBy = "application.target"
+        also = "test-helper.service"
+        alias = new Listing {
+            "test.service"
+            "legacy-test.service"
+        }
+    }
+}
+
+local testTimer = new Timer {
+    unit = new {
+        description = "Comprehensive Timer Type Test"
+        requires = "time-sync.target"
+        after = "time-sync.target"
+    }
+    
+    timer = new {
+        // Test all timer properties
+        onActiveSec = 30.min
+        onBootSec = 15.min
+        onStartupSec = 1.h
+        onUnitActiveSec = 24.h
+        onUnitInactiveSec = 6.h
+        onCalendar = "Mon..Fri 09:00"
+        
+        accuracySec = 1.min
+        randomizedDelaySec = 10.min
+        
+        // Test all boolean timer properties
+        fixedRandomDelay = true
+        onClockChange = false
+        onTimezoneChange = true
+        persistent = true
+        wakeSystem = false
+        remainAfterElapse = true
+        deferReactivation = false
+        
+        unit = "test-job.service"
+    }
+    
+    install = new {
+        wantedBy = "timers.target"
+    }
+}
+
+local testSocket = new Socket {
+    unit = new {
+        description = "Comprehensive Socket Type Test"
+        requires = "network.target"
+        conflicts = "shutdown.target"
+    }
+    
+    socket = new {
+        // Test multiple listen types
+        listenStream = new Listing {
+            "127.0.0.1:8080"
+            "/run/test.sock"
+        }
+        listenDatagram = "0.0.0.0:9090"
+        
+        // Test all boolean socket properties
+        accept = true
+        writable = false
+        flushPending = true
+        keepAlive = true
+        noDelay = false
+        reusePort = true
+        freeBind = false
+        transparent = true
+        broadcast = false
+        passCredentials = true
+        passSecurity = false
+        passPacketInfo = true
+        removeOnStop = true
+        passFileDescriptorsToExec = false
+        
+        // Test numeric properties
+        backlog = 256
+        maxConnections = 1000
+        maxConnectionsPerSource = 10
+        priority = 5
+        receiveBuffer = 32768
+        sendBuffer = 32768
+        pipeSize = 4096
+        
+        // Test string properties
+        socketUser = "test-user"
+        socketGroup = "test-group"
+        socketMode = "0660"
+        bindToDevice = "eth0"
+        timestamping = "software"
+        
+        service = "test.service"
+    }
+    
+    install = new {
+        wantedBy = "sockets.target"
+        requiredBy = "test.service"
+    }
+}
+
+local testMount = new Mount {
+    unit = new {
+        description = "Comprehensive Mount Type Test"
+        requires = "network-online.target"
+        conflicts = "umount.target"
+        requiresMountsFor = "/mnt"
+    }
+    
+    mount = new {
+        what = "/dev/disk/by-uuid/test-uuid-12345"
+        where = "/mnt/test-data"
+        type = "ext4"
+        options = "defaults,noatime,user_xattr,acl"
+        
+        // Test all boolean mount properties
+        sloppyOptions = true
+        lazyUnmount = false
+        readWriteOnly = true
+        forceUnmount = false
+        
+        directoryMode = "0755"
+        timeoutSec = 30.s
+    }
+    
+    install = new {
+        wantedBy = "local-fs.target"
+        requiredBy = "test-data.service"
+    }
+}
+
+facts {
+    ["Service type aliases work correctly"] {
+        testService.output.text.contains("Type=notify-reload")
+        testService.output.text.contains("ExitType=cgroup")
+        testService.output.text.contains("Restart=on-abnormal")
+        testService.output.text.contains("RestartMode=direct")
+        testService.output.text.contains("KillMode=mixed")
+        testService.output.text.contains("NotifyAccess=exec")
+        testService.output.text.contains("OomPolicy=kill")
+    }
+    
+    ["Unit boolean properties render as yes/no"] {
+        testService.output.text.contains("DefaultDependencies=no")
+        testService.output.text.contains("AllowIsolate=yes")
+        testService.output.text.contains("IgnoreOnIsolate=no")
+        testService.output.text.contains("StopWhenUnneeded=yes")
+        testService.output.text.contains("RefuseManualStart=no")
+        testService.output.text.contains("RefuseManualStop=yes")
+        testService.output.text.contains("SurviveFinalKillSignal=no")
+    }
+    
+    ["Service boolean properties render as yes/no"] {
+        testService.output.text.contains("RemainAfterExit=yes")
+        testService.output.text.contains("GuessMainPID=no")
+        testService.output.text.contains("NonBlocking=yes")
+        testService.output.text.contains("RootDirectoryStartOnly=no")
+        testService.output.text.contains("SendSIGHUP=yes")
+        testService.output.text.contains("SendSIGKILL=no")
+    }
+    
+    ["Environment variables render correctly"] {
+        testService.output.text.contains("Environment=SERVICE_MODE=test")
+        testService.output.text.contains("Environment=DEBUG=true")
+        testService.output.text.contains("Environment=CONFIG_PATH=/etc/test/config.yaml")
+    }
+    
+    ["Multiple environment files render separately"] {
+        testService.output.text.contains("EnvironmentFile=/etc/default/test-service")
+        testService.output.text.contains("EnvironmentFile=/run/secrets/test-env")
+    }
+    
+    ["Timer boolean properties render correctly"] {
+        testTimer.output.text.contains("FixedRandomDelay=yes")
+        testTimer.output.text.contains("OnClockChange=no")
+        testTimer.output.text.contains("OnTimezoneChange=yes")
+        testTimer.output.text.contains("Persistent=yes")
+        testTimer.output.text.contains("WakeSystem=no")
+        testTimer.output.text.contains("RemainAfterElapse=yes")
+        testTimer.output.text.contains("DeferReactivation=no")
+    }
+    
+    ["Socket boolean properties render correctly"] {
+        testSocket.output.text.contains("Accept=yes")
+        testSocket.output.text.contains("Writable=no")
+        testSocket.output.text.contains("FlushPending=yes")
+        testSocket.output.text.contains("KeepAlive=yes")
+        testSocket.output.text.contains("NoDelay=no")
+        testSocket.output.text.contains("ReusePort=yes")
+        testSocket.output.text.contains("FreeBind=no")
+        testSocket.output.text.contains("Transparent=yes")
+        testSocket.output.text.contains("Broadcast=no")
+        testSocket.output.text.contains("PassCredentials=yes")
+        testSocket.output.text.contains("PassSecurity=no")
+        testSocket.output.text.contains("PassPacketInfo=yes")
+        testSocket.output.text.contains("RemoveOnStop=yes")
+        testSocket.output.text.contains("PassFileDescriptorsToExec=no")
+    }
+    
+    ["Mount boolean properties render correctly"] {
+        testMount.output.text.contains("SloppyOptions=yes")
+        testMount.output.text.contains("LazyUnmount=no")
+        testMount.output.text.contains("ReadWriteOnly=yes")
+        testMount.output.text.contains("ForceUnmount=no")
+    }
+    
+    ["Multiple listen addresses render separately"] {
+        testSocket.output.text.contains("ListenStream=127.0.0.1:8080")
+        testSocket.output.text.contains("ListenStream=/run/test.sock")
+    }
+    
+    ["Unit type aliases render correctly"] {
+        testService.output.text.contains("OnFailureJobMode=replace")
+        testService.output.text.contains("CollectMode=inactive-or-failed")
+        testService.output.text.contains("FailureAction=reboot-immediate")
+        testService.output.text.contains("StartLimitAction=poweroff")
+    }
+    
+    ["Numeric properties render as numbers"] {
+        testService.output.text.contains("StartLimitBurst=5")
+        testSocket.output.text.contains("Backlog=256")
+        testSocket.output.text.contains("MaxConnections=1000")
+        testSocket.output.text.contains("Priority=5")
+    }
+}

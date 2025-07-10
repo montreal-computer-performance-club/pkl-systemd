@@ -14,13 +14,13 @@ service = new {
         ["PODMAN_SYSTEMD_UNIT"] = "%n"
     }
     restart = "always"
-    timeoutStopSec = 70
+    timeoutStopSec = 70.s
     execStartPre = "/usr/bin/rm -f %t/%n.pid %t/%n.cid"
-    execStop="/usr/bin/sh -c \"podman rm -f `cat %t/%n.cid`\""
-    execReload="podman restart \(serviceName)"
+    execStop = "/usr/bin/sh -c \"podman rm -f `cat %t/%n.cid`\""
+    execReload = "podman restart \(serviceName)"
     type = "forking"
     killMode = "control-group"
-    pIDFile = "%t/%n.pid"
+    pidFile = "%t/%n.pid"
 }
 
 install = new {

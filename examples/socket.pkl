@@ -1,9 +1,28 @@
 amends "../Socket.pkl"
 
 unit = new {
-    description = "test socket"
+    description = "Example socket for service communication"
+    requires = "network.target"
+    after = "network.target"
 }
 
 socket = new {
-    listenDatagram = "/var/run/foo.socket"
+    // Listen on a Unix domain socket
+    listenStream = "/var/run/example.socket"
+    
+    // Socket permissions
+    socketMode = "0660"
+    socketUser = "www-data"
+    socketGroup = "www-data"
+    
+    // Accept multiple connections
+    accept = true
+    maxConnections = 100
+    
+    // Remove socket file on stop
+    removeOnStop = true
+}
+
+install = new {
+    wantedBy = "sockets.target"
 }

@@ -1,0 +1,101 @@
+amends "../Mount.pkl"
+
+// Comprehensive mount example for network filesystem
+unit = new {
+    description = "NFS mount for shared application data"
+    documentation = new Listing {
+        "man:mount.nfs(8)"
+        "man:systemd.mount(5)"
+    }
+    
+    // Network and filesystem dependencies
+    requires = new Listing {
+        "network-online.target"
+        "rpcbind.service"
+        "nfs-client.target"
+    }
+    after = new Listing {
+        "network-online.target"
+        "rpcbind.service"
+        "nfs-client.target"
+        "remote-fs-pre.target"
+    }
+    before = new Listing {
+        "remote-fs.target"
+        "umount.target"
+        "shutdown.target"
+    }
+    
+    // Mount dependencies
+    wantsMountsFor = "/mnt"
+    
+    // Conflict with shutdown and unmount
+    conflicts = new Listing {
+        "umount.target"
+        "shutdown.target"
+    }
+    
+    // Start limit configuration for flaky network mounts
+    startLimitBurst = 3
+    startLimitIntervalSec = 60.s
+    startLimitAction = "none"
+    
+    // Failure handling
+    onFailure = "mount-failure-notify@%n.service"
+}
+
+mount = new {
+    // NFS server and export path
+    what = "nfs-server.example.com:/export/shared-data"
+    
+    // Local mount point
+    where = "/mnt/shared-data"
+    
+    // Filesystem type
+    type = "nfs4"
+    
+    // Comprehensive NFS mount options
+    options = new Listing {
+        "defaults"
+        "rsize=32768"      // Read buffer size
+        "wsize=32768"      // Write buffer size
+        "hard"             // Hard mount (retry indefinitely)
+        "intr"             // Allow interruption
+        "timeo=30"         // Timeout in deciseconds
+        "retrans=3"        // Number of retries
+        "proto=tcp"        // Use TCP protocol
+        "sec=krb5p"        // Kerberos security
+        "fsc"              // Enable local caching
+        "noatime"          // Don't update access times
+        "user_xattr"       // Enable extended attributes
+        "_netdev"          // Network device (wait for network)
+    }.join(",")
+    
+    // Mount behavior options
+    sloppyOptions = true    // Ignore unrecognized mount options
+    lazyUnmount = true      // Lazy unmount if busy
+    forceUnmount = false    // Don't force unmount
+    readWriteOnly = false   // Allow read-only fallback
+    
+    // Directory permissions
+    directoryMode = "0755"
+    
+    // Timeout for mount/unmount operations
+    timeoutSec = 60.s
+}
+
+install = new {
+    wantedBy = "remote-fs.target"
+    
+    // Also enable related services
+    also = new Listing {
+        "nfs-client.target"
+        "shared-data-monitor.service"
+    }
+    
+    // Required by services that need this mount
+    requiredBy = new Listing {
+        "application-server.service"
+        "backup.service"
+    }
+}

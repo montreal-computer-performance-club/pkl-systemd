@@ -8,19 +8,31 @@ timer: TimerSection
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html
 class TimerSection {
-    accuracySec: (String|Number)?
-    fixedRandomDelay: String?
-    onActiveSec: (String|Number)?
-    onBootSec: (String|Number)?
+    // Monotonic timers (relative to events)
+    onActiveSec: Duration?
+    onBootSec: Duration?
+    onStartupSec: Duration?
+    onUnitActiveSec: Duration?
+    onUnitInactiveSec: Duration?
+    
+    // Realtime timer (calendar events)
     onCalendar: String?
-    onClockChange: String?
-    onStartupSec: (String|Number)?
-    onTimezoneChange: String?
-    onUnitActiveSec: (String|Number)?
-    onUnitInactiveSec: (String|Number)?
-    persistent: String?
-    randomizedDelaySec: (String|Number)?
-    remainAfterElapse: String?
+    
+    // Timer accuracy and randomization
+    accuracySec: Duration?
+    randomizedDelaySec: Duration?
+    fixedRandomDelay: Boolean?
+    
+    // Clock and timezone change triggers
+    onClockChange: Boolean?
+    onTimezoneChange: Boolean?
+    
+    // Timer behavior
     unit: String?
-    wakeSystem: String?
+    persistent: Boolean?
+    wakeSystem: Boolean?
+    remainAfterElapse: Boolean?
+    
+    // Advanced options
+    deferReactivation: Boolean?
 }

@@ -1,52 +1,368 @@
 # Pkl Systemd
 
-Pkl templates for configuring [Systemd](https://systemd.io/).
+Type-safe [Pkl](https://pkl-lang.org/) configuration for [systemd](https://systemd.io/) unit files.
 
-## Usage
+This package provides comprehensive Pkl modules for generating systemd unit files with full type safety, validation, and IDE support. All systemd unit types and their properties are supported with proper type constraints based on the official systemd documentation.
+
+## Features
+
+- **Complete systemd support**: Service, Timer, Socket, Mount, and Unit configurations
+- **Type safety**: All properties use proper types (String, Boolean, enums) with validation
+- **Union types**: Properties that accept single values or lists are properly typed as `(String|Listing<String>)?`
+- **Documentation**: Comprehensive examples and inline documentation
+- **IDE support**: Full IntelliSense and autocomplete with Pkl IDE extensions
+
+## Supported Unit Types
+
+| Module | Description | Documentation |
+|--------|-------------|---------------|
+| `Service.pkl` | Service units for running processes | [systemd.service(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html) |
+| `Timer.pkl` | Timer units for scheduled execution | [systemd.timer(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html) |
+| `Socket.pkl` | Socket units for socket-based activation | [systemd.socket(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.socket.html) |
+| `Mount.pkl` | Mount units for filesystem mounting | [systemd.mount(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.mount.html) |
+| `Unit.pkl` | Base unit with common properties | [systemd.unit(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html) |
+
+## Quick Start
+
+### Simple Service
 
 Create `hello.pkl`:
 
 ```pkl
 amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Service.pkl"
 
-service = new {
-    execStart = "bash -c 'echo hello'"
-}
-
 unit = new {
-    description = "hello service"
+    description = "Hello World Service"
     wants = "network-online.target"
     after = "network-online.target"
 }
 
+service = new {
+    type = "simple"
+    execStart = "/usr/bin/echo 'Hello World'"
+    restart = "on-failure"
+    restartSec = "5"
+}
+
 install = new { 
-    wantedBy = "default.target" 
+    wantedBy = "multi-user.target" 
 }
 ```
 
-```text
-$ pkl eval hello.pkl
-[Unit]
-After=network-online.target
-Description=hello service
-Wants=network-online.target
+Generate the systemd unit file:
 
-[Install]
-WantedBy=default.target
-
-[Service]
-ExecStart=bash -c 'echo hello'
+```bash
+pkl eval hello.pkl
 ```
 
-## TODO
+Output:
+```ini
+[Unit]
+After=network-online.target
+Description=Hello World Service
+Wants=network-online.target
 
-- [ ] device
-- [ ] automount
-- [ ] swap
-- [ ] target
-- [ ] path
-- [ ] slice
-- [ ] scope
-- [ ] pkldoc
-- [ ] durations
-- [ ] byte sizes
+[Service]
+ExecStart=/usr/bin/echo 'Hello World'
+Restart=on-failure
+RestartSec=5
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Advanced Service Example
+
+```pkl
+amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Service.pkl"
+
+unit = new {
+    description = "Advanced Web Service"
+    documentation = new Listing {
+        "man:web-service(8)"
+        "https://example.com/docs"
+    }
+    
+    // Dependencies with both single and multiple values
+    requires = "network.target"
+    wants = new Listing {
+        "network-online.target"
+        "time-sync.target"
+    }
+    after = new Listing {
+        "network-online.target"
+        "systemd-resolved.service"
+    }
+    
+    // Failure handling
+    onFailure = "notify-admin@%n.service"
+    startLimitBurst = 5
+    startLimitIntervalSec = "300"
+}
+
+service = new {
+    type = "notify"
+    remainAfterExit = false
+    
+    // Multiple pre-start commands
+    execStartPre = new Listing {
+        "/usr/bin/mkdir -p /run/web-service"
+        "/usr/bin/web-service --validate-config"
+    }
+    execStart = "/usr/bin/web-service --daemon"
+    execReload = "/bin/kill -HUP $MAINPID"
+    
+    // Restart configuration
+    restart = "on-failure"
+    restartSec = "10"
+    restartMaxDelaySec = "60"
+    
+    // Environment variables
+    environment = new {
+        ["LOG_LEVEL"] = "info"
+        ["CONFIG_FILE"] = "/etc/web-service/config.yaml"
+    }
+    environmentFile = "/etc/web-service/environment"
+    
+    // Timeouts and limits
+    timeoutStartSec = "60"
+    timeoutStopSec = "30"
+    runtimeMaxSec = "24h"
+    
+    // Process management
+    killMode = "mixed"
+    sendSIGHUP = true
+}
+
+install = new {
+    wantedBy = "multi-user.target"
+    also = "web-service-monitor.timer"
+}
+```
+
+### Timer Example
+
+```pkl
+amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Timer.pkl"
+
+unit = new {
+    description = "Daily backup timer"
+    requires = "backup.service"
+}
+
+timer = new {
+    // Run daily at 2 AM with randomization
+    onCalendar = "daily"
+    randomizedDelaySec = "30min"
+    
+    // Persistence and behavior
+    persistent = true
+    wakeSystem = false
+    
+    // Clock change handling
+    onClockChange = true
+    onTimezoneChange = true
+}
+
+install = new {
+    wantedBy = "timers.target"
+}
+```
+
+### Socket Example
+
+```pkl
+amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Socket.pkl"
+
+unit = new {
+    description = "Web application socket"
+    requires = "network.target"
+}
+
+socket = new {
+    // Multiple listen addresses
+    listenStream = new Listing {
+        "127.0.0.1:8080"
+        "/run/webapp.sock"
+    }
+    
+    // Socket permissions
+    socketUser = "webapp"
+    socketGroup = "webapp"
+    socketMode = "0660"
+    
+    // Connection handling
+    accept = true
+    maxConnections = 1000
+    
+    // Advanced options
+    keepAlive = true
+    noDelay = true
+    removeOnStop = true
+}
+
+install = new {
+    wantedBy = "sockets.target"
+}
+```
+
+### Mount Example
+
+```pkl
+amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Mount.pkl"
+
+unit = new {
+    description = "Application data mount"
+    requires = "network-online.target"
+    conflicts = "umount.target"
+}
+
+mount = new {
+    what = "/dev/disk/by-uuid/12345678-1234-1234-1234-123456789abc"
+    where = "/mnt/app-data"
+    type = "ext4"
+    options = "defaults,noatime,user_xattr"
+    
+    // Mount behavior
+    timeoutSec = "30"
+    directoryMode = "0755"
+    forceUnmount = true
+}
+
+install = new {
+    wantedBy = "local-fs.target"
+}
+```
+
+## Type System
+
+### Boolean Properties
+
+All boolean properties are properly typed and render as `yes`/`no` in the output:
+
+```pkl
+service = new {
+    remainAfterExit = true     // → RemainAfterExit=yes
+    guessMainPID = false       // → GuessMainPID=no
+}
+```
+
+### Union Types
+
+Properties that can accept either a single string or multiple strings use union types:
+
+```pkl
+unit = new {
+    // Single string
+    after = "network.target"
+    
+    // Multiple strings
+    wants = new Listing {
+        "network-online.target"
+        "time-sync.target"
+    }
+    
+    // Both render correctly:
+    // After=network.target
+    // Wants=network-online.target
+    // Wants=time-sync.target
+}
+```
+
+### Type Aliases
+
+Enum-like values use type aliases for validation:
+
+```pkl
+service = new {
+    type = "notify"                    // ServiceType
+    restart = "on-failure"             // RestartPolicy  
+    killMode = "mixed"                 // KillMode
+    notifyAccess = "main"              // NotifyAccess
+}
+```
+
+### Environment Variables
+
+Environment variables are handled as mappings:
+
+```pkl
+service = new {
+    environment = new {
+        ["LOG_LEVEL"] = "debug"
+        ["CONFIG_PATH"] = "/etc/app/config.yaml"
+        ["DATA_DIR"] = "/var/lib/app"
+    }
+    // Renders as:
+    // Environment=LOG_LEVEL=debug
+    // Environment=CONFIG_PATH=/etc/app/config.yaml
+    // Environment=DATA_DIR=/var/lib/app
+}
+```
+
+## Testing
+
+The package includes comprehensive tests to ensure type safety and correct rendering:
+
+```bash
+# Run type validation tests
+pkl test tests/comprehensive_types.pkl
+
+# Run example rendering tests  
+pkl test tests/examples.pkl
+
+# Run validation tests
+pkl test tests/validation.pkl
+```
+
+## Examples
+
+See the `examples/` directory for comprehensive examples:
+
+- `service.pkl` - Basic service configuration
+- `enhanced_service.pkl` - Service with advanced features
+- `advanced_service.pkl` - Production-ready service with full configuration
+- `timer.pkl` - Basic timer
+- `backup_timer.pkl` - Comprehensive timer with all options
+- `socket.pkl` - Basic socket
+- `web_socket.pkl` - Advanced socket with multiple listeners
+- `mount.pkl` - Basic filesystem mount
+- `network_mount.pkl` - NFS mount with full configuration
+
+## Installation
+
+Add to your `PklProject` dependencies:
+
+```
+dependencies {
+    ["systemd"] = "package://pkl.declix.org/pkl-systemd@0.0.8"
+}
+```
+
+## Contributing
+
+This package closely follows the official systemd documentation. When adding new properties or unit types:
+
+1. Reference the official systemd man pages
+2. Use proper type constraints (Boolean, String, type aliases)
+3. Support union types for properties accepting single/multiple values
+4. Add comprehensive tests and examples
+5. Update documentation
+
+## Future Work
+
+Additional systemd unit types that could be added:
+
+- [ ] Device units (`systemd.device`)
+- [ ] Automount units (`systemd.automount`) 
+- [ ] Swap units (`systemd.swap`)
+- [ ] Target units (`systemd.target`)
+- [ ] Path units (`systemd.path`)
+- [ ] Slice units (`systemd.slice`)
+- [ ] Scope units (`systemd.scope`)
+
+Additional features:
+- [ ] Duration type constraints (e.g., `"5min"`, `"1h"`)
+- [ ] Byte size constraints (e.g., `"1M"`, `"512K"`)
+- [ ] pkldoc documentation generation

@@ -1,10 +1,18 @@
 amends "../Timer.pkl"
 
 unit = new {
-    description = "cleanup podman resources"
+    description = "Cleanup podman resources timer"
+    after = "podman.service"
 }
 timer = new {
-    onUnitInactiveSec = 60 * 60
+    // Run every hour after the unit becomes inactive
+    onUnitInactiveSec = 1.h
+    
+    // Randomize delay to prevent thundering herd
+    randomizedDelaySec = 10.min
+    
+    // Keep persistent across reboots
+    persistent = true
 }
 install = new {
     wantedBy = "multi-user.target"

@@ -8,67 +8,102 @@ socket: SocketSection
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.socket.html
 class SocketSection {
-    listenStream: String?
-    listenDatagram: String?
-    listenSequentialPacket: String?
+    // Listen addresses and types
+    listenStream: (String|Listing<String>)?
+    listenDatagram: (String|Listing<String>)?
+    listenSequentialPacket: (String|Listing<String>)?
     listenFIFO: String?
     listenSpecial: String?
     listenNetlink: String?
     listenMessageQueue: String?
     listenUSBFunction: String?
+    
+    // Socket protocol and binding
     socketProtocol: String?
-    bindIPv6Only: String?
+    bindIPv6Only: BindIPv6Mode?
     backlog: UInt?
     bindToDevice: String?
+    
+    // Socket permissions and ownership
     socketUser: String?
     socketGroup: String?
     socketMode: String?
     directoryMode: String?
+    
+    // Connection handling
     accept: Boolean?
     writable: Boolean?
     flushPending: Boolean?
     maxConnections: UInt?
     maxConnectionsPerSource: UInt?
+    
+    // TCP options
     keepAlive: Boolean?
-    keepAliveTimeSec: UInt?
-    keepAliveIntervalSec: UInt?
+    keepAliveTimeSec: Duration?
+    keepAliveIntervalSec: Duration?
     keepAliveProbes: UInt?
     noDelay: Boolean?
     priority: UInt?
-    deferAcceptSec: UInt?
+    deferAcceptSec: Duration?
+    
+    // Buffer sizes
     receiveBuffer: UInt?
     sendBuffer: UInt?
+    pipeSize: UInt?
+    
+    // IP options
     iPTOS: UInt?
     iPTTL: UInt?
     mark: UInt?
     reusePort: Boolean?
+    
+    // Security contexts
     smackLabel: String?
     smackLabelIPIn: String?
     smackLabelIPOut: String?
     sELinuxContextFromNet: Boolean?
-    pipeSize: UInt?
+    
+    // Message queue options
     messageQueueMaxMessages: UInt?
     messageQueueMessageSize: UInt?
+    
+    // Network options
     freeBind: Boolean?
     transparent: Boolean?
     broadcast: Boolean?
+    
+    // Credential passing
     passCredentials: Boolean?
     passSecurity: Boolean?
     passPacketInfo: Boolean?
-    timestamping: String?
+    
+    // Advanced options
+    timestamping: TimestampingMode?
     tCPCongestion: String?
-    execStartPre: String?
-    execStartPost: String?
-    execStopPre: String?
-    execStopPost: String?
-    timeoutSec: UInt?
+    
+    // Execution hooks
+    execStartPre: (String|Listing<String>)?
+    execStartPost: (String|Listing<String>)?
+    execStopPre: (String|Listing<String>)?
+    execStopPost: (String|Listing<String>)?
+    
+    // Service integration
+    timeoutSec: Duration?
     service: String?
+    
+    // File descriptor handling
     removeOnStop: Boolean?
     symlinks: String?
     fileDescriptorName: String?
-    triggerLimitIntervalSec: UInt?
-    triggerLimitBurst: UInt?
-    pollLimitIntervalSec: UInt?
-    pollLimitBurst: UInt?
     passFileDescriptorsToExec: Boolean?
+    
+    // Rate limiting
+    triggerLimitIntervalSec: Duration?
+    triggerLimitBurst: UInt?
+    pollLimitIntervalSec: Duration?
+    pollLimitBurst: UInt?
 }
+
+// Type aliases for socket configuration
+local typealias BindIPv6Mode = "default" | "both" | "ipv6-only"
+local typealias TimestampingMode = "off" | "software" | "hardware"

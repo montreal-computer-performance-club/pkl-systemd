@@ -1,12 +1,33 @@
 amends "../Mount.pkl"
 
 unit = new {
-    description = "test mount"
+    description = "Example filesystem mount"
+    requires = "systemd-fsck@dev-disk-by\\x2duuid\\x2d12345.service"
+    after = "systemd-fsck@dev-disk-by\\x2duuid\\x2d12345.service"
+    conflicts = "umount.target"
+    before = "umount.target"
 }
 mount = new {
-    what = "/foo"
-    where = "/bar"
-    timeoutSec = 60 * 60
+    // What to mount (device or remote location)
+    what = "/dev/disk/by-uuid/12345678-1234-1234-1234-123456789abc"
+    
+    // Where to mount it
+    where = "/mnt/data"
+    
+    // Filesystem type
+    type = "ext4"
+    
+    // Mount options
+    options = "defaults,noatime,user_xattr"
+    
+    // Timeout for mount operation
+    timeoutSec = 30.s
+    
+    // Directory permissions
+    directoryMode = "0755"
+    
+    // Force unmount on stop
+    forceUnmount = true
 }
 install = new {
     wantedBy = "multi-user.target"

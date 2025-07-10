@@ -1,0 +1,111 @@
+amends "../Socket.pkl"
+
+// Comprehensive socket example for web service communication
+unit = new {
+    description = "Web service socket with multiple listeners"
+    documentation = new Listing {
+        "man:web-service(8)"
+        "https://example.com/docs/web-service-socket"
+    }
+    
+    // Network dependencies
+    requires = "network.target"
+    after = new Listing {
+        "network.target"
+        "systemd-resolved.service"
+    }
+    
+    // Conflicts and ordering
+    conflicts = "shutdown.target"
+    before = "shutdown.target"
+    
+    // Don't create default dependencies
+    defaultDependencies = false
+}
+
+socket = new {
+    // Multiple listen addresses
+    listenStream = new Listing {
+        "127.0.0.1:8080"      // Local IPv4
+        "[::1]:8080"          // Local IPv6
+        "/run/web-service.sock" // Unix domain socket
+    }
+    
+    // Network socket configuration
+    socketProtocol = "tcp"
+    bindIPv6Only = "ipv6-only"
+    backlog = 128
+    
+    // Connection limits and behavior
+    accept = true
+    maxConnections = 1000
+    maxConnectionsPerSource = 10
+    
+    // Socket permissions for Unix domain socket
+    socketUser = "www-data"
+    socketGroup = "www-data"
+    socketMode = "0660"
+    directoryMode = "0755"
+    
+    // TCP socket options
+    keepAlive = true
+    keepAliveTimeSec = 2.h
+    keepAliveIntervalSec = 75.s
+    keepAliveProbes = 9
+    noDelay = true
+    reusePort = true
+    
+    // Buffer sizes
+    receiveBuffer = 65536
+    sendBuffer = 65536
+    
+    // Network QoS
+    priority = 6
+    iPTOS = 0x10  // IPTOS_LOWDELAY
+    mark = 1
+    
+    // Security options
+    freeBind = false
+    transparent = false
+    broadcast = false
+    
+    // Credential passing
+    passCredentials = true
+    passSecurity = false
+    passPacketInfo = false
+    
+    // Advanced networking
+    tCPCongestion = "cubic"
+    timestamping = "off"
+    
+    // Service integration
+    service = "web-service.service"
+    
+    // Socket lifecycle
+    removeOnStop = true
+    fileDescriptorName = "web-socket"
+    
+    // Rate limiting
+    triggerLimitIntervalSec = 2.s
+    triggerLimitBurst = 20
+    pollLimitIntervalSec = 1.s
+    pollLimitBurst = 10
+    
+    // Execution hooks
+    execStartPre = "/usr/bin/mkdir -p /run/web-service"
+    execStartPost = "/usr/bin/chown www-data:www-data /run/web-service.sock"
+    execStopPost = "/usr/bin/rm -f /run/web-service.sock"
+    
+    // Pass file descriptors to exec
+    passFileDescriptorsToExec = true
+}
+
+install = new {
+    wantedBy = "sockets.target"
+    
+    // Also manage the associated service
+    also = "web-service.service"
+    
+    // Required by other web services
+    requiredBy = "web-stack.target"
+}

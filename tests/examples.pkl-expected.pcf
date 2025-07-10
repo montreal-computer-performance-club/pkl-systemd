@@ -2,64 +2,349 @@ examples {
   ["examples/service"] {
     """
     [Unit]
-    After=network-online.target
     Description=testService
-    RequiresMountsFor=/run/containers/storage
     Wants=network-online.target
+    After=network-online.target
+    RequiresMountsFor=/run/containers/storage
     
     [Install]
     WantedBy=default.target
     
     [Service]
     Type=forking
-    Environment=PODMAN_SYSTEMD_UNIT=%n
-    ExecReload=podman restart testService
+    PidFile=%t/%n.pid
     ExecStartPre=/usr/bin/rm -f %t/%n.pid %t/%n.cid
+    ExecReload=podman restart testService
     ExecStop=/usr/bin/sh -c "podman rm -f `cat %t/%n.cid`"
-    PIDFile=%t/%n.pid
     Restart=always
     TimeoutStopSec=70
     KillMode=control-group
+    Environment=PODMAN_SYSTEMD_UNIT=%n
+    
+    """
+  }
+  ["examples/enhanced_service"] {
+    """
+    [Unit]
+    Description=Enhanced Service Example
+    Documentation=man:enhanced-service(8)
+    Documentation=https://example.com/docs/enhanced-service
+    Wants=network-online.target
+    Wants=time-sync.target
+    Wants=systemd-resolved.service
+    Requires=basic.target
+    Requires=sysinit.target
+    Conflicts=shutdown.target
+    After=network.target
+    AllowIsolate=yes
+    DefaultDependencies=no
+    
+    [Install]
+    Also=enhanced-service-helper.service
+    Also=enhanced-service-monitor.timer
+    WantedBy=multi-user.target
+    
+    [Service]
+    Type=notify
+    RemainAfterExit=no
+    GuessMainPID=yes
+    ExecStart=/usr/bin/enhanced-service --daemon
+    Restart=on-failure
+    RestartSec=10
+    TimeoutStartSec=60
+    SendSIGHUP=yes
+    SendSIGKILL=no
+    NonBlocking=no
+    RootDirectoryStartOnly=yes
+    
+    """
+  }
+  ["examples/advanced_service"] {
+    """
+    [Unit]
+    Description=Advanced microservice with comprehensive configuration
+    Documentation=man:advanced-service(8)
+    Documentation=https://example.com/docs/advanced-service
+    Documentation=file:///usr/share/doc/advanced-service/README.md
+    Wants=network-online.target
+    Wants=time-sync.target
+    Wants=systemd-resolved.service
+    Requires=basic.target
+    Conflicts=shutdown.target
+    Before=multi-user.target
+    After=network-online.target
+    After=systemd-resolved.service
+    OnFailure=notify-failure@%n.service
+    RequiresMountsFor=/var/lib/advanced-service
+    RequiresMountsFor=/run/advanced-service
+    StartLimitAction=reboot
+    StartLimitBurst=5
+    StartLimitIntervalSec=300
+    AllowIsolate=no
+    DefaultDependencies=yes
+    
+    [Install]
+    Alias=microservice.service
+    Also=advanced-service-monitor.timer
+    Also=advanced-service-backup.service
+    RequiredBy=application.target
+    WantedBy=multi-user.target
+    
+    [Service]
+    Type=notify
+    ExitType=main
+    RemainAfterExit=no
+    GuessMainPID=no
+    PidFile=/run/advanced-service/service.pid
+    BusName=com.example.AdvancedService
+    ExecStart=/usr/bin/advanced-service --daemon --config=/etc/advanced-service/config.yaml
+    ExecStartPre=/usr/bin/mkdir -p /run/advanced-service
+    ExecStartPre=/usr/bin/chown advanced-service:advanced-service /run/advanced-service
+    ExecStartPre=/usr/bin/advanced-service --validate-config
+    ExecStartPost=/usr/bin/advanced-service --post-start-hook
+    ExecReload=/bin/kill -HUP $MAINPID
+    ExecStop=/usr/bin/advanced-service --graceful-shutdown
+    ExecStopPost=/usr/bin/rm -rf /run/advanced-service
+    Restart=on-failure
+    RestartSec=10
+    RestartSteps=3
+    RestartMaxDelaySec=60
+    RestartMode=normal
+    RestartForceExitStatus=SIGKILL
+    RestartForceExitStatus=SIGABRT
+    RestartPreventExitStatus=SIGUSR1
+    TimeoutStartSec=60
+    TimeoutStopSec=30
+    TimeoutAbortSec=10
+    TimeoutStartFailureMode=terminate
+    TimeoutStopFailureMode=kill
+    RuntimeMaxSec=86400
+    RuntimeRandomizedExtraSec=3600
+    WatchdogSec=30
+    WatchdogSignal=SIGTERM
+    KillMode=mixed
+    KillSignal=SIGTERM
+    FinalKillSignal=SIGKILL
+    SendSIGHUP=yes
+    SendSIGKILL=yes
+    Environment=SERVICE_ENV=production
+    Environment=LOG_LEVEL=info
+    Environment=CONFIG_FILE=/etc/advanced-service/config.yaml
+    Environment=DATA_DIR=/var/lib/advanced-service
+    EnvironmentFile=/etc/advanced-service/environment
+    EnvironmentFile=/etc/advanced-service/secrets.env
+    SuccessExitStatus=0
+    SuccessExitStatus=SIGUSR1
+    NonBlocking=no
+    NotifyAccess=main
+    FileDescriptorStoreMax=10
+    FileDescriptorStorePreserve=restart
+    RootDirectoryStartOnly=no
+    OomPolicy=stop
     
     """
   }
   ["examples/timer"] {
     """
     [Unit]
-    Description=cleanup podman resources
+    Description=Cleanup podman resources timer
+    After=podman.service
     
     [Install]
     WantedBy=multi-user.target
     
     [Timer]
     OnUnitInactiveSec=3600
+    RandomizedDelaySec=600
+    Persistent=yes
+    
+    """
+  }
+  ["examples/backup_timer"] {
+    """
+    [Unit]
+    Description=Daily backup timer with flexible scheduling
+    Documentation=man:backup-service(8)
+    Requires=network.target
+    Requires=local-fs.target
+    Conflicts=shutdown.target
+    Before=shutdown.target
+    After=network-online.target
+    After=backup.service
+    RequiresMountsFor=/backup/storage
+    
+    [Install]
+    Also=backup.service
+    WantedBy=timers.target
+    
+    [Timer]
+    OnBootSec=900
+    OnUnitActiveSec=86400
+    OnCalendar=daily
+    AccuracySec=60
+    RandomizedDelaySec=1800
+    FixedRandomDelay=no
+    OnClockChange=yes
+    OnTimezoneChange=yes
+    Unit=backup.service
+    Persistent=yes
+    WakeSystem=no
+    RemainAfterElapse=no
+    DeferReactivation=yes
     
     """
   }
   ["examples/mount"] {
-    """
+    #"""
     [Unit]
-    Description=test mount
+    Description=Example filesystem mount
+    Requires=systemd-fsck@dev-disk-by\x2duuid\x2d12345.service
+    Conflicts=umount.target
+    Before=umount.target
+    After=systemd-fsck@dev-disk-by\x2duuid\x2d12345.service
     
     [Install]
     WantedBy=multi-user.target
     
     [Mount]
-    What=/foo
-    Where=/bar
-    TimeoutSec=3600
+    What=/dev/disk/by-uuid/12345678-1234-1234-1234-123456789abc
+    Where=/mnt/data
+    Type=ext4
+    Options=defaults,noatime,user_xattr
+    ForceUnmount=yes
+    DirectoryMode=0755
+    TimeoutSec=30
+    
+    """#
+  }
+  ["examples/network_mount"] {
+    """
+    [Unit]
+    Description=NFS mount for shared application data
+    Documentation=man:mount.nfs(8)
+    Documentation=man:systemd.mount(5)
+    Requires=network-online.target
+    Requires=rpcbind.service
+    Requires=nfs-client.target
+    Conflicts=umount.target
+    Conflicts=shutdown.target
+    Before=remote-fs.target
+    Before=umount.target
+    Before=shutdown.target
+    After=network-online.target
+    After=rpcbind.service
+    After=nfs-client.target
+    After=remote-fs-pre.target
+    OnFailure=mount-failure-notify@%n.service
+    WantsMountsFor=/mnt
+    StartLimitAction=none
+    StartLimitBurst=3
+    StartLimitIntervalSec=60
+    
+    [Install]
+    Also=nfs-client.target
+    Also=shared-data-monitor.service
+    RequiredBy=application-server.service
+    RequiredBy=backup.service
+    WantedBy=remote-fs.target
+    
+    [Mount]
+    What=nfs-server.example.com:/export/shared-data
+    Where=/mnt/shared-data
+    Type=nfs4
+    Options=defaults,rsize=32768,wsize=32768,hard,intr,timeo=30,retrans=3,proto=tcp,sec=krb5p,fsc,noatime,user_xattr,_netdev
+    SloppyOptions=yes
+    LazyUnmount=yes
+    ReadWriteOnly=no
+    ForceUnmount=no
+    DirectoryMode=0755
+    TimeoutSec=60
     
     """
   }
   ["examples/socket"] {
     """
     [Unit]
-    Description=test socket
+    Description=Example socket for service communication
+    Requires=network.target
+    After=network.target
     
     [Install]
+    WantedBy=sockets.target
     
     [Socket]
-    ListenDatagram=/var/run/foo.socket
+    ListenStream=/var/run/example.socket
+    SocketUser=www-data
+    SocketGroup=www-data
+    SocketMode=0660
+    Accept=yes
+    MaxConnections=100
+    RemoveOnStop=yes
+    
+    """
+  }
+  ["examples/web_socket"] {
+    """
+    [Unit]
+    Description=Web service socket with multiple listeners
+    Documentation=man:web-service(8)
+    Documentation=https://example.com/docs/web-service-socket
+    Requires=network.target
+    Conflicts=shutdown.target
+    Before=shutdown.target
+    After=network.target
+    After=systemd-resolved.service
+    DefaultDependencies=no
+    
+    [Install]
+    Also=web-service.service
+    RequiredBy=web-stack.target
+    WantedBy=sockets.target
+    
+    [Socket]
+    ListenStream=127.0.0.1:8080
+    ListenStream=[::1]:8080
+    ListenStream=/run/web-service.sock
+    SocketProtocol=tcp
+    BindIPv6Only=ipv6-only
+    Backlog=128
+    SocketUser=www-data
+    SocketGroup=www-data
+    SocketMode=0660
+    DirectoryMode=0755
+    Accept=yes
+    MaxConnections=1000
+    MaxConnectionsPerSource=10
+    KeepAlive=yes
+    KeepAliveTimeSec=7200
+    KeepAliveIntervalSec=75
+    KeepAliveProbes=9
+    NoDelay=yes
+    Priority=6
+    ReceiveBuffer=65536
+    SendBuffer=65536
+    IPTOS=16
+    Mark=1
+    ReusePort=yes
+    FreeBind=no
+    Transparent=no
+    Broadcast=no
+    PassCredentials=yes
+    PassSecurity=no
+    PassPacketInfo=no
+    Timestamping=off
+    TCPCongestion=cubic
+    ExecStartPre=/usr/bin/mkdir -p /run/web-service
+    ExecStartPost=/usr/bin/chown www-data:www-data /run/web-service.sock
+    ExecStopPost=/usr/bin/rm -f /run/web-service.sock
+    Service=web-service.service
+    RemoveOnStop=yes
+    FileDescriptorName=web-socket
+    PassFileDescriptorsToExec=yes
+    TriggerLimitIntervalSec=2
+    TriggerLimitBurst=20
+    PollLimitIntervalSec=1
+    PollLimitBurst=10
     
     """
   }

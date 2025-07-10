@@ -45,8 +45,8 @@ service = new {
     
     execStart = "/usr/bin/enhanced-service --daemon"
     restart = "on-failure"
-    restartSec = "10"
-    timeoutStartSec = 60
+    restartSec = 10.s
+    timeoutStartSec = 60.s
 }
 
 install = new {

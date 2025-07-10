@@ -42,7 +42,7 @@ local testService = new Service {
         sendSIGKILL = false
         execStart = "/usr/bin/test-service"
         restart = "on-failure"
-        restartSec = "5"
+        restartSec = 5.s
     }
     
     install = new {

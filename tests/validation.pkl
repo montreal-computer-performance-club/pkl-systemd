@@ -1,0 +1,183 @@
+amends "pkl:test"
+
+import "../Service.pkl"
+import "../Timer.pkl"
+import "../Socket.pkl"
+import "../Mount.pkl"
+
+// Validation tests to ensure proper constraints and error handling
+
+facts {
+    ["Mount requires what and where properties"] {
+        local mount = new Mount {
+            unit = new { description = "Test mount" }
+            mount = new {
+                what = "/dev/test"
+                where = "/mnt/test"
+            }
+            install = new { wantedBy = "local-fs.target" }
+        }
+        mount.output.text.contains("What=/dev/test")
+        mount.output.text.contains("Where=/mnt/test")
+    }
+    
+    ["Service type values are constrained"] {
+        local service = new Service {
+            unit = new { description = "Test" }
+            service = new { 
+                type = "notify"
+                execStart = "/bin/true"
+            }
+            install = new { wantedBy = "multi-user.target" }
+        }
+        service.output.text.contains("Type=notify")
+    }
+    
+    ["Boolean values render consistently"] {
+        local service = new Service {
+            unit = new { 
+                description = "Boolean test"
+                defaultDependencies = true
+                allowIsolate = false
+            }
+            service = new { 
+                remainAfterExit = true
+                guessMainPID = false
+                execStart = "/bin/true"
+            }
+            install = new { wantedBy = "multi-user.target" }
+        }
+        service.output.text.contains("DefaultDependencies=yes")
+        service.output.text.contains("AllowIsolate=no")
+        service.output.text.contains("RemainAfterExit=yes")
+        service.output.text.contains("GuessMainPID=no")
+    }
+    
+    ["Empty Listing properties are omitted"] {
+        local service = new Service {
+            unit = new { 
+                description = "Empty listing test"
+                wants = new Listing {}  // Empty listing should be omitted
+                after = "network.target"  // Non-empty should be included
+            }
+            service = new { 
+                execStart = "/bin/true"
+                execStartPre = new Listing {}  // Empty listing should be omitted
+            }
+            install = new { wantedBy = "multi-user.target" }
+        }
+        !service.output.text.contains("Wants=")
+        service.output.text.contains("After=network.target")
+        !service.output.text.contains("ExecStartPre=")
+    }
+    
+    ["Environment variables with special characters are handled"] {
+        local service = new Service {
+            unit = new { description = "Environment test" }
+            service = new {
+                environment = new {
+                    ["SIMPLE_VAR"] = "value"
+                    ["VAR_WITH_SPACES"] = "value with spaces"
+                    ["VAR_WITH_EQUALS"] = "key=value"
+                    ["VAR_WITH_QUOTES"] = "\"quoted value\""
+                }
+                execStart = "/bin/true"
+            }
+            install = new { wantedBy = "multi-user.target" }
+        }
+        service.output.text.contains("Environment=SIMPLE_VAR=value")
+        service.output.text.contains("Environment=VAR_WITH_SPACES=value with spaces")
+        service.output.text.contains("Environment=VAR_WITH_EQUALS=key=value")
+        service.output.text.contains("Environment=VAR_WITH_QUOTES=\"quoted value\"")
+    }
+    
+    ["Timer calendar expressions are preserved"] {
+        local timer = new Timer {
+            unit = new { description = "Calendar test" }
+            timer = new {
+                onCalendar = "Mon..Fri 09:00:00"
+                persistent = true
+            }
+            install = new { wantedBy = "timers.target" }
+        }
+        timer.output.text.contains("OnCalendar=Mon..Fri 09:00:00")
+    }
+    
+    ["Socket listen addresses handle IPv6"] {
+        local socket = new Socket {
+            unit = new { description = "IPv6 test" }
+            socket = new {
+                listenStream = new Listing {
+                    "[::1]:8080"
+                    "127.0.0.1:8080"
+                    "/run/test.sock"
+                }
+                accept = true
+            }
+            install = new { wantedBy = "sockets.target" }
+        }
+        socket.output.text.contains("ListenStream=[::1]:8080")
+        socket.output.text.contains("ListenStream=127.0.0.1:8080")
+        socket.output.text.contains("ListenStream=/run/test.sock")
+    }
+    
+    ["Timeout values accept various formats"] {
+        local service = new Service {
+            unit = new { description = "Timeout test" }
+            service = new {
+                timeoutStartSec = 30.s
+                timeoutStopSec = 1.min
+                runtimeMaxSec = 24.h
+                watchdogSec = 0.s  // 0 means infinity in systemd
+                execStart = "/bin/true"
+            }
+            install = new { wantedBy = "multi-user.target" }
+        }
+        service.output.text.contains("TimeoutStartSec=30")
+        service.output.text.contains("TimeoutStopSec=60")
+        service.output.text.contains("RuntimeMaxSec=86400")
+        service.output.text.contains("WatchdogSec=0")
+    }
+    
+    ["Unit file sections are properly ordered"] {
+        local service = new Service {
+            unit = new { description = "Section order test" }
+            service = new { 
+                type = "simple"
+                execStart = "/bin/true"
+            }
+            install = new { wantedBy = "multi-user.target" }
+        }
+        local text = service.output.text
+        local unitIndex = text.indexOf("[Unit]")
+        local serviceIndex = text.indexOf("[Service]")
+        local installIndex = text.indexOf("[Install]")
+        
+        unitIndex < installIndex
+        installIndex < serviceIndex
+    }
+    
+    ["Property names are properly capitalized"] {
+        local service = new Service {
+            unit = new { 
+                description = "Capitalization test"
+                requiresMountsFor = "/var/lib/app"
+                wantsMountsFor = "/tmp"
+            }
+            service = new { 
+                execStartPre = "/bin/setup"
+                execStart = "/bin/app"
+                fileDescriptorStoreMax = 10
+            }
+            install = new { 
+                wantedBy = "multi-user.target"
+                requiredBy = "app.target"
+            }
+        }
+        service.output.text.contains("RequiresMountsFor=/var/lib/app")
+        service.output.text.contains("WantsMountsFor=/tmp")
+        service.output.text.contains("ExecStartPre=/bin/setup")
+        service.output.text.contains("FileDescriptorStoreMax=10")
+        service.output.text.contains("RequiredBy=app.target")
+    }
+}

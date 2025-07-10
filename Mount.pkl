@@ -8,14 +8,21 @@ mount: MountSection
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.mount.html
 class MountSection {
+    // Mandatory properties
     what: String
     where: String
+    
+    // Optional mount configuration
     type: String?
     options: String?
+    
+    // Mount behavior options
     sloppyOptions: Boolean?
     lazyUnmount: Boolean?
     readWriteOnly: Boolean?
     forceUnmount: Boolean?
+    
+    // Directory and timeout settings
     directoryMode: String?
-    timeoutSec: UInt?    
+    timeoutSec: Duration?
 }
