@@ -12,6 +12,10 @@ This package provides comprehensive Pkl modules for generating systemd unit file
 - **Documentation**: Comprehensive examples and inline documentation
 - **IDE support**: Full IntelliSense and autocomplete with Pkl IDE extensions
 
+## Installation
+
+For installation instructions and usage examples, see the **[latest release notes](https://github.com/declix/pkl-systemd/releases/latest)**.
+
 ## Supported Unit Types
 
 | Module | Description | Documentation |
