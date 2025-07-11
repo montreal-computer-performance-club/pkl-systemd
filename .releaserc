@@ -1,7 +1,15 @@
 {
     "plugins": [
         "@semantic-release/commit-analyzer",
-        "@semantic-release/release-notes-generator",
+        [
+            "@semantic-release/release-notes-generator",
+            {
+                "preset": "conventionalcommits",
+                "writerOpts": {
+                    "headerPartial": "## {{#if isPatch~}} <small>\n  {{~/if~}} {{version}}\n  {{~#if title}} \"{{title}}\"\n  {{~/if~}}\n  {{~#if date}} ({{date}})\n  {{~/if~}}\n  {{~#if isPatch~}} </small>\n  {{~/if}}\n\n## Usage\n\n### Import Examples\n\n```pkl\n// Service unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Service.pkl\"\n\n// Timer unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Timer.pkl\"\n\n// Socket unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Socket.pkl\"\n\n// Mount unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Mount.pkl\"\n\n// Target unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Target.pkl\"\n\n// Path unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Path.pkl\"\n\n// Swap unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Swap.pkl\"\n\n// Automount unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Automount.pkl\"\n\n// Slice unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Slice.pkl\"\n\n// Scope unit\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Scope.pkl\"\n```\n\n### Installation\n\nAdd to your `PklProject` dependencies:\n\n```\ndependencies {\n    [\"systemd\"] = \"package://pkl.declix.org/pkl-systemd@{{version}}\"\n}\n```\n\n### Quick Start\n\n```pkl\namends \"package://pkl.declix.org/pkl-systemd@{{version}}#/Service.pkl\"\n\nunit = new {\n    description = \"My Service\"\n    after = \"network.target\"\n}\n\nservice = new {\n    type = \"simple\"\n    execStart = \"/usr/bin/my-app\"\n    restart = \"on-failure\"\n}\n\ninstall = new {\n    wantedBy = \"multi-user.target\"\n}\n```\n\n"
+                }
+            }
+        ],
         [
             "@semantic-release/exec",
             {
