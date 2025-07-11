@@ -1,0 +1,30 @@
+/// Re-exports all systemd unit types for convenient access
+module systemd
+
+// Import all unit types
+import "Service.pkl" as ServiceModule
+import "Timer.pkl" as TimerModule
+import "Socket.pkl" as SocketModule
+import "Mount.pkl" as MountModule
+import "Target.pkl" as TargetModule
+import "Path.pkl" as PathModule
+import "Swap.pkl" as SwapModule
+import "Automount.pkl" as AutomountModule
+import "Slice.pkl" as SliceModule
+import "Scope.pkl" as ScopeModule
+import "Device.pkl" as DeviceModule
+import "Unit.pkl" as UnitModule
+
+// Re-export all types
+typealias Service = ServiceModule
+typealias Timer = TimerModule
+typealias Socket = SocketModule
+typealias Mount = MountModule
+typealias Target = TargetModule
+typealias Path = PathModule
+typealias Swap = SwapModule
+typealias Automount = AutomountModule
+typealias Slice = SliceModule
+typealias Scope = ScopeModule
+typealias Device = DeviceModule
+typealias Unit = UnitModule

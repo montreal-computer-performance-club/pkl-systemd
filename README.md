@@ -16,6 +16,60 @@ This package provides comprehensive Pkl modules for generating systemd unit file
 
 For installation instructions and usage examples, see the **[latest release notes](https://github.com/declix/pkl-systemd/releases/latest)**.
 
+## Usage
+
+There are two ways to use pkl-systemd:
+
+### Option 1: Direct Amends (Simple)
+
+Directly amend specific unit types:
+
+```pkl
+amends "package://pkl.declix.org/pkl-systemd@1.2.3#/Service.pkl"
+
+unit = new {
+    description = "My Service"
+    after = "network.target"
+}
+
+service = new {
+    type = "simple"
+    execStart = "/usr/bin/my-app"
+    restart = "on-failure"
+}
+
+install = new {
+    wantedBy = "multi-user.target"
+}
+```
+
+### Option 2: Import and Instantiate (Flexible)
+
+Import the systemd module and create unit instances:
+
+```pkl
+import "package://pkl.declix.org/pkl-systemd@1.2.3#/systemd.pkl" as systemd
+
+output {
+    text = (new systemd.Service {
+        unit = new {
+            description = "My Service"
+            after = "network.target"
+        }
+        service = new {
+            type = "simple"
+            execStart = "/usr/bin/my-app"
+            restart = "on-failure"
+        }
+        install = new {
+            wantedBy = "multi-user.target"
+        }
+    }).output.text
+}
+```
+
+The import approach is useful when you need to generate multiple units or combine with other Pkl logic.
+
 ## Supported Unit Types
 
 | Module | Description | Documentation |
