@@ -1,49 +1,10 @@
+/// Tests that import and render all examples using glob
 amends "pkl:test"
 
 examples {
-    ["examples/service"] {
-        import("../examples/service.pkl").output.text
-    }
-    ["examples/enhanced_service"] {
-        import("../examples/enhanced_service.pkl").output.text
-    }
-    ["examples/advanced_service"] {
-        import("../examples/advanced_service.pkl").output.text
-    }
-    ["examples/timer"] {
-        import("../examples/timer.pkl").output.text
-    }
-    ["examples/backup_timer"] {
-        import("../examples/backup_timer.pkl").output.text
-    }
-    ["examples/mount"] {
-        import("../examples/mount.pkl").output.text
-    }
-    ["examples/network_mount"] {
-        import("../examples/network_mount.pkl").output.text
-    }
-    ["examples/socket"] {
-        import("../examples/socket.pkl").output.text
-    }
-    ["examples/web_socket"] {
-        import("../examples/web_socket.pkl").output.text
-    }
-    ["examples/target"] {
-        import("../examples/target.pkl").output.text
-    }
-    ["examples/path"] {
-        import("../examples/path.pkl").output.text
-    }
-    ["examples/swap"] {
-        import("../examples/swap.pkl").output.text
-    }
-    ["examples/automount"] {
-        import("../examples/automount.pkl").output.text
-    }
-    ["examples/slice"] {
-        import("../examples/slice.pkl").output.text
-    }
-    ["examples/scope"] {
-        import("../examples/scope.pkl").output.text
+    for (path, `module` in import*("../examples/*.pkl")) {
+        [path] {
+            `module`.output.text
+        }
     }
 }

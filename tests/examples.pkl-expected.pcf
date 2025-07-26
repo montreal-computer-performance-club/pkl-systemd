@@ -1,65 +1,5 @@
 examples {
-  ["examples/service"] {
-    """
-    [Unit]
-    Description=testService
-    Wants=network-online.target
-    After=network-online.target
-    RequiresMountsFor=/run/containers/storage
-    
-    [Install]
-    WantedBy=default.target
-    
-    [Service]
-    Type=forking
-    PidFile=%t/%n.pid
-    ExecStartPre=/usr/bin/rm -f %t/%n.pid %t/%n.cid
-    ExecReload=podman restart testService
-    ExecStop=/usr/bin/sh -c "podman rm -f `cat %t/%n.cid`"
-    Restart=always
-    TimeoutStopSec=70s
-    KillMode=control-group
-    Environment=PODMAN_SYSTEMD_UNIT=%n
-    
-    """
-  }
-  ["examples/enhanced_service"] {
-    """
-    [Unit]
-    Description=Enhanced Service Example
-    Documentation=man:enhanced-service(8)
-    Documentation=https://example.com/docs/enhanced-service
-    Wants=network-online.target
-    Wants=time-sync.target
-    Wants=systemd-resolved.service
-    Requires=basic.target
-    Requires=sysinit.target
-    Conflicts=shutdown.target
-    After=network.target
-    AllowIsolate=yes
-    DefaultDependencies=no
-    
-    [Install]
-    Also=enhanced-service-helper.service
-    Also=enhanced-service-monitor.timer
-    WantedBy=multi-user.target
-    
-    [Service]
-    Type=notify
-    RemainAfterExit=no
-    GuessMainPID=yes
-    ExecStart=/usr/bin/enhanced-service --daemon
-    Restart=on-failure
-    RestartSec=10s
-    TimeoutStartSec=60s
-    SendSIGHUP=yes
-    SendSIGKILL=no
-    NonBlocking=no
-    RootDirectoryStartOnly=yes
-    
-    """
-  }
-  ["examples/advanced_service"] {
+  ["../examples/advanced_service.pkl"] {
     """
     [Unit]
     Description=Advanced microservice with comprehensive configuration
@@ -144,23 +84,31 @@ examples {
     
     """
   }
-  ["examples/timer"] {
+  ["../examples/automount.pkl"] {
     """
     [Unit]
-    Description=Cleanup podman resources timer
-    After=podman.service
+    Description=Automount for user home directories
+    Documentation=man:systemd.automount(5)
+    Documentation=man:autofs(8)
+    Requires=network.target
+    Requires=nfs-client.target
+    Conflicts=umount.target
+    Before=umount.target
+    After=network.target
+    After=nfs-client.target
     
     [Install]
-    WantedBy=multi-user.target
+    WantedBy=remote-fs.target
     
-    [Timer]
-    OnUnitInactiveSec=3600s
-    RandomizedDelaySec=600s
-    Persistent=yes
+    [Automount]
+    Where=/home/users
+    ExtraOptions=timeout=60,retry=1
+    DirectoryMode=0755
+    TimeoutIdleSec=300s
     
     """
   }
-  ["examples/backup_timer"] {
+  ["../examples/backup_timer.pkl"] {
     """
     [Unit]
     Description=Daily backup timer with flexible scheduling
@@ -194,7 +142,43 @@ examples {
     
     """
   }
-  ["examples/mount"] {
+  ["../examples/enhanced_service.pkl"] {
+    """
+    [Unit]
+    Description=Enhanced Service Example
+    Documentation=man:enhanced-service(8)
+    Documentation=https://example.com/docs/enhanced-service
+    Wants=network-online.target
+    Wants=time-sync.target
+    Wants=systemd-resolved.service
+    Requires=basic.target
+    Requires=sysinit.target
+    Conflicts=shutdown.target
+    After=network.target
+    AllowIsolate=yes
+    DefaultDependencies=no
+    
+    [Install]
+    Also=enhanced-service-helper.service
+    Also=enhanced-service-monitor.timer
+    WantedBy=multi-user.target
+    
+    [Service]
+    Type=notify
+    RemainAfterExit=no
+    GuessMainPID=yes
+    ExecStart=/usr/bin/enhanced-service --daemon
+    Restart=on-failure
+    RestartSec=10s
+    TimeoutStartSec=60s
+    SendSIGHUP=yes
+    SendSIGKILL=no
+    NonBlocking=no
+    RootDirectoryStartOnly=yes
+    
+    """
+  }
+  ["../examples/mount.pkl"] {
     #"""
     [Unit]
     Description=Example filesystem mount
@@ -217,7 +201,7 @@ examples {
     
     """#
   }
-  ["examples/network_mount"] {
+  ["../examples/network_mount.pkl"] {
     """
     [Unit]
     Description=NFS mount for shared application data
@@ -262,7 +246,117 @@ examples {
     
     """
   }
-  ["examples/socket"] {
+  ["../examples/path.pkl"] {
+    """
+    [Unit]
+    Description=Watch for configuration file changes
+    Documentation=man:app-config-watcher(8)
+    Requires=app-reload.service
+    After=app-reload.service
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Path]
+    PathExistsGlob=/etc/myapp/*.conf
+    PathChanged=/etc/myapp
+    Unit=app-reload.service
+    MakeDirectory=yes
+    DirectoryMode=0755
+    TriggerLimitIntervalSec=5s
+    TriggerLimitBurst=3
+    
+    """
+  }
+  ["../examples/scope.pkl"] {
+    """
+    [Unit]
+    Description=User session scope for external processes
+    Documentation=man:systemd.scope(5)
+    
+    [Install]
+    
+    [Scope]
+    OOMPolicy=kill
+    RuntimeMaxSec=86400s
+    RuntimeRandomizedExtraSec=3600s
+    CPUAccounting=yes
+    CPUWeight=100
+    CPUQuota=25%
+    MemoryAccounting=yes
+    MemoryHigh=1G
+    MemoryMax=2G
+    TasksAccounting=yes
+    TasksMax=500
+    IOAccounting=yes
+    IOWeight=100
+    KillMode=control-group
+    KillSignal=SIGTERM
+    FinalKillSignal=SIGKILL
+    SendSIGHUP=no
+    SendSIGKILL=yes
+    
+    """
+  }
+  ["../examples/service.pkl"] {
+    """
+    [Unit]
+    Description=testService
+    Wants=network-online.target
+    After=network-online.target
+    RequiresMountsFor=/run/containers/storage
+    
+    [Install]
+    WantedBy=default.target
+    
+    [Service]
+    Type=forking
+    PidFile=%t/%n.pid
+    ExecStartPre=/usr/bin/rm -f %t/%n.pid %t/%n.cid
+    ExecReload=podman restart testService
+    ExecStop=/usr/bin/sh -c "podman rm -f `cat %t/%n.cid`"
+    Restart=always
+    TimeoutStopSec=70s
+    KillMode=control-group
+    Environment=PODMAN_SYSTEMD_UNIT=%n
+    
+    """
+  }
+  ["../examples/slice.pkl"] {
+    """
+    [Unit]
+    Description=Application slice for web services
+    Documentation=https://example.com/docs/resource-management
+    Requires=-.slice
+    After=-.slice
+    
+    [Install]
+    WantedBy=slices.target
+    
+    [Slice]
+    CPUAccounting=yes
+    CPUWeight=200
+    CPUQuota=50%
+    MemoryAccounting=yes
+    MemoryHigh=2G
+    MemoryMax=4G
+    MemorySwapMax=1G
+    ManagedOOMSwap=kill
+    ManagedOOMMemoryPressure=kill
+    ManagedOOMMemoryPressureLimit=80%
+    TasksAccounting=yes
+    TasksMax=1000
+    IOAccounting=yes
+    IOWeight=100
+    DeviceAllow=/dev/null rw
+    DeviceAllow=/dev/zero rw
+    DeviceAllow=/dev/random r
+    DeviceAllow=/dev/urandom r
+    DevicePolicy=strict
+    
+    """
+  }
+  ["../examples/socket.pkl"] {
     """
     [Unit]
     Description=Example socket for service communication
@@ -283,7 +377,69 @@ examples {
     
     """
   }
-  ["examples/web_socket"] {
+  ["../examples/swap.pkl"] {
+    """
+    [Unit]
+    Description=Swap file /swapfile
+    Documentation=man:swapon(8)
+    Documentation=man:systemd.swap(5)
+    Requires=local-fs.target
+    Conflicts=umount.target
+    Before=umount.target
+    After=local-fs.target
+    
+    [Install]
+    WantedBy=swap.target
+    
+    [Swap]
+    What=/swapfile
+    Priority=10
+    Options=defaults
+    TimeoutSec=30s
+    
+    """
+  }
+  ["../examples/target.pkl"] {
+    """
+    [Unit]
+    Description=Web Stack Target
+    Documentation=https://example.com/docs/web-stack
+    Wants=nginx.service
+    Wants=postgresql.service
+    Wants=redis.service
+    Requires=network.target
+    Requires=multi-user.target
+    Conflicts=shutdown.target
+    Before=shutdown.target
+    After=network.target
+    After=multi-user.target
+    AllowIsolate=yes
+    
+    [Install]
+    Also=nginx.service
+    Also=postgresql.service
+    Also=redis.service
+    WantedBy=multi-user.target
+    
+    """
+  }
+  ["../examples/timer.pkl"] {
+    """
+    [Unit]
+    Description=Cleanup podman resources timer
+    After=podman.service
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Timer]
+    OnUnitInactiveSec=3600s
+    RandomizedDelaySec=600s
+    Persistent=yes
+    
+    """
+  }
+  ["../examples/web_socket.pkl"] {
     """
     [Unit]
     Description=Web service socket with multiple listeners
@@ -345,162 +501,6 @@ examples {
     TriggerLimitBurst=20
     PollLimitIntervalSec=1s
     PollLimitBurst=10
-    
-    """
-  }
-  ["examples/target"] {
-    """
-    [Unit]
-    Description=Web Stack Target
-    Documentation=https://example.com/docs/web-stack
-    Wants=nginx.service
-    Wants=postgresql.service
-    Wants=redis.service
-    Requires=network.target
-    Requires=multi-user.target
-    Conflicts=shutdown.target
-    Before=shutdown.target
-    After=network.target
-    After=multi-user.target
-    AllowIsolate=yes
-    
-    [Install]
-    Also=nginx.service
-    Also=postgresql.service
-    Also=redis.service
-    WantedBy=multi-user.target
-    
-    """
-  }
-  ["examples/path"] {
-    """
-    [Unit]
-    Description=Watch for configuration file changes
-    Documentation=man:app-config-watcher(8)
-    Requires=app-reload.service
-    After=app-reload.service
-    
-    [Install]
-    WantedBy=multi-user.target
-    
-    [Path]
-    PathExistsGlob=/etc/myapp/*.conf
-    PathChanged=/etc/myapp
-    Unit=app-reload.service
-    MakeDirectory=yes
-    DirectoryMode=0755
-    TriggerLimitIntervalSec=5s
-    TriggerLimitBurst=3
-    
-    """
-  }
-  ["examples/swap"] {
-    """
-    [Unit]
-    Description=Swap file /swapfile
-    Documentation=man:swapon(8)
-    Documentation=man:systemd.swap(5)
-    Requires=local-fs.target
-    Conflicts=umount.target
-    Before=umount.target
-    After=local-fs.target
-    
-    [Install]
-    WantedBy=swap.target
-    
-    [Swap]
-    What=/swapfile
-    Priority=10
-    Options=defaults
-    TimeoutSec=30s
-    
-    """
-  }
-  ["examples/automount"] {
-    """
-    [Unit]
-    Description=Automount for user home directories
-    Documentation=man:systemd.automount(5)
-    Documentation=man:autofs(8)
-    Requires=network.target
-    Requires=nfs-client.target
-    Conflicts=umount.target
-    Before=umount.target
-    After=network.target
-    After=nfs-client.target
-    
-    [Install]
-    WantedBy=remote-fs.target
-    
-    [Automount]
-    Where=/home/users
-    ExtraOptions=timeout=60,retry=1
-    DirectoryMode=0755
-    TimeoutIdleSec=300s
-    
-    """
-  }
-  ["examples/slice"] {
-    """
-    [Unit]
-    Description=Application slice for web services
-    Documentation=https://example.com/docs/resource-management
-    Requires=-.slice
-    After=-.slice
-    
-    [Install]
-    WantedBy=slices.target
-    
-    [Slice]
-    CPUAccounting=yes
-    CPUWeight=200
-    CPUQuota=50%
-    MemoryAccounting=yes
-    MemoryHigh=2G
-    MemoryMax=4G
-    MemorySwapMax=1G
-    ManagedOOMSwap=kill
-    ManagedOOMMemoryPressure=kill
-    ManagedOOMMemoryPressureLimit=80%
-    TasksAccounting=yes
-    TasksMax=1000
-    IOAccounting=yes
-    IOWeight=100
-    DeviceAllow=/dev/null rw
-    DeviceAllow=/dev/zero rw
-    DeviceAllow=/dev/random r
-    DeviceAllow=/dev/urandom r
-    DevicePolicy=strict
-    
-    """
-  }
-  ["examples/scope"] {
-    """
-    [Unit]
-    Description=User session scope for external processes
-    Documentation=man:systemd.scope(5)
-    
-    [Install]
-    
-    [Scope]
-    OOMPolicy=kill
-    RuntimeMaxSec=86400s
-    RuntimeRandomizedExtraSec=3600s
-    CPUAccounting=yes
-    CPUWeight=100
-    CPUQuota=25%
-    MemoryAccounting=yes
-    MemoryHigh=1G
-    MemoryMax=2G
-    TasksAccounting=yes
-    TasksMax=500
-    IOAccounting=yes
-    IOWeight=100
-    KillMode=control-group
-    KillSignal=SIGTERM
-    FinalKillSignal=SIGKILL
-    SendSIGHUP=no
-    SendSIGKILL=yes
     
     """
   }
