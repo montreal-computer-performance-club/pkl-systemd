@@ -25,7 +25,7 @@ There are two ways to use pkl-systemd:
 Directly amend specific unit types:
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@1.2.3#/Service.pkl"
+amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Service.pkl"
 
 unit = new {
     description = "My Service"
@@ -48,7 +48,7 @@ install = new {
 Import the systemd module and create unit instances:
 
 ```pkl
-import "package://pkl.declix.org/pkl-systemd@1.2.3#/systemd.pkl" as systemd
+import "package://pkl.declix.org/pkl-systemd@X.Y.Z#/systemd.pkl" as systemd
 
 output {
     text = (new systemd.Service {
@@ -94,7 +94,7 @@ The import approach is useful when you need to generate multiple units or combin
 Create `hello.pkl`:
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Service.pkl"
+amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Service.pkl"
 
 unit = new {
     description = "Hello World Service"
@@ -140,7 +140,7 @@ WantedBy=multi-user.target
 ### Advanced Service Example
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Service.pkl"
+amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Service.pkl"
 
 unit = new {
     description = "Advanced Web Service"
@@ -209,7 +209,7 @@ install = new {
 ### Timer Example
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Timer.pkl"
+amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Timer.pkl"
 
 unit = new {
     description = "Daily backup timer"
@@ -238,7 +238,7 @@ install = new {
 ### Socket Example
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Socket.pkl"
+amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Socket.pkl"
 
 unit = new {
     description = "Web application socket"
@@ -275,7 +275,7 @@ install = new {
 ### Mount Example
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Mount.pkl"
+amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Mount.pkl"
 
 unit = new {
     description = "Application data mount"
@@ -303,7 +303,7 @@ install = new {
 ### Target Example
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Target.pkl"
+amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Target.pkl"
 
 unit = new {
     description = "Web Stack Target"
@@ -324,7 +324,7 @@ install = new {
 ### Path Example
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Path.pkl"
+amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Path.pkl"
 
 unit = new {
     description = "Watch for configuration changes"
@@ -346,7 +346,7 @@ install = new {
 ### Slice Example
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@0.0.8#/Slice.pkl"
+amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Slice.pkl"
 
 unit = new {
     description = "Application resource slice"
@@ -488,7 +488,7 @@ Add to your `PklProject` dependencies:
 
 ```
 dependencies {
-    ["systemd"] = "package://pkl.declix.org/pkl-systemd@0.0.8"
+    ["systemd"] = "package://pkl.declix.org/pkl-systemd@X.Y.Z"
 }
 ```
 
