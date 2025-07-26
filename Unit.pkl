@@ -138,7 +138,7 @@ local class UnitFileRenderer extends ValueRenderer {
         if (value is String) value
         else if (value is Number) "\(value)"
         else if (value is Boolean) if (value) "yes" else "no"
-        else if (value is Duration) "\(value.toUnit("s").value)"
+        else if (value is Duration) "\(value.toUnit("s").value)s"
         else throw("unexpected value \(value.getClass())")
 }
 

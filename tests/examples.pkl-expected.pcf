@@ -17,7 +17,7 @@ examples {
     ExecReload=podman restart testService
     ExecStop=/usr/bin/sh -c "podman rm -f `cat %t/%n.cid`"
     Restart=always
-    TimeoutStopSec=70
+    TimeoutStopSec=70s
     KillMode=control-group
     Environment=PODMAN_SYSTEMD_UNIT=%n
     
@@ -50,8 +50,8 @@ examples {
     GuessMainPID=yes
     ExecStart=/usr/bin/enhanced-service --daemon
     Restart=on-failure
-    RestartSec=10
-    TimeoutStartSec=60
+    RestartSec=10s
+    TimeoutStartSec=60s
     SendSIGHUP=yes
     SendSIGKILL=no
     NonBlocking=no
@@ -79,7 +79,7 @@ examples {
     RequiresMountsFor=/run/advanced-service
     StartLimitAction=reboot
     StartLimitBurst=5
-    StartLimitIntervalSec=300
+    StartLimitIntervalSec=300s
     AllowIsolate=no
     DefaultDependencies=yes
     
@@ -106,21 +106,21 @@ examples {
     ExecStop=/usr/bin/advanced-service --graceful-shutdown
     ExecStopPost=/usr/bin/rm -rf /run/advanced-service
     Restart=on-failure
-    RestartSec=10
+    RestartSec=10s
     RestartSteps=3
-    RestartMaxDelaySec=60
+    RestartMaxDelaySec=60s
     RestartMode=normal
     RestartForceExitStatus=SIGKILL
     RestartForceExitStatus=SIGABRT
     RestartPreventExitStatus=SIGUSR1
-    TimeoutStartSec=60
-    TimeoutStopSec=30
-    TimeoutAbortSec=10
+    TimeoutStartSec=60s
+    TimeoutStopSec=30s
+    TimeoutAbortSec=10s
     TimeoutStartFailureMode=terminate
     TimeoutStopFailureMode=kill
-    RuntimeMaxSec=86400
-    RuntimeRandomizedExtraSec=3600
-    WatchdogSec=30
+    RuntimeMaxSec=86400s
+    RuntimeRandomizedExtraSec=3600s
+    WatchdogSec=30s
     WatchdogSignal=SIGTERM
     KillMode=mixed
     KillSignal=SIGTERM
@@ -154,8 +154,8 @@ examples {
     WantedBy=multi-user.target
     
     [Timer]
-    OnUnitInactiveSec=3600
-    RandomizedDelaySec=600
+    OnUnitInactiveSec=3600s
+    RandomizedDelaySec=600s
     Persistent=yes
     
     """
@@ -178,11 +178,11 @@ examples {
     WantedBy=timers.target
     
     [Timer]
-    OnBootSec=900
-    OnUnitActiveSec=86400
+    OnBootSec=900s
+    OnUnitActiveSec=86400s
     OnCalendar=daily
-    AccuracySec=60
-    RandomizedDelaySec=1800
+    AccuracySec=60s
+    RandomizedDelaySec=1800s
     FixedRandomDelay=no
     OnClockChange=yes
     OnTimezoneChange=yes
@@ -213,7 +213,7 @@ examples {
     Options=defaults,noatime,user_xattr
     ForceUnmount=yes
     DirectoryMode=0755
-    TimeoutSec=30
+    TimeoutSec=30s
     
     """#
   }
@@ -239,7 +239,7 @@ examples {
     WantsMountsFor=/mnt
     StartLimitAction=none
     StartLimitBurst=3
-    StartLimitIntervalSec=60
+    StartLimitIntervalSec=60s
     
     [Install]
     Also=nfs-client.target
@@ -258,7 +258,7 @@ examples {
     ReadWriteOnly=no
     ForceUnmount=no
     DirectoryMode=0755
-    TimeoutSec=60
+    TimeoutSec=60s
     
     """
   }
@@ -316,8 +316,8 @@ examples {
     MaxConnections=1000
     MaxConnectionsPerSource=10
     KeepAlive=yes
-    KeepAliveTimeSec=7200
-    KeepAliveIntervalSec=75
+    KeepAliveTimeSec=7200s
+    KeepAliveIntervalSec=75s
     KeepAliveProbes=9
     NoDelay=yes
     Priority=6
@@ -341,9 +341,9 @@ examples {
     RemoveOnStop=yes
     FileDescriptorName=web-socket
     PassFileDescriptorsToExec=yes
-    TriggerLimitIntervalSec=2
+    TriggerLimitIntervalSec=2s
     TriggerLimitBurst=20
-    PollLimitIntervalSec=1
+    PollLimitIntervalSec=1s
     PollLimitBurst=10
     
     """
@@ -389,7 +389,7 @@ examples {
     Unit=app-reload.service
     MakeDirectory=yes
     DirectoryMode=0755
-    TriggerLimitIntervalSec=5
+    TriggerLimitIntervalSec=5s
     TriggerLimitBurst=3
     
     """
@@ -412,7 +412,7 @@ examples {
     What=/swapfile
     Priority=10
     Options=defaults
-    TimeoutSec=30
+    TimeoutSec=30s
     
     """
   }
@@ -436,7 +436,7 @@ examples {
     Where=/home/users
     ExtraOptions=timeout=60,retry=1
     DirectoryMode=0755
-    TimeoutIdleSec=300
+    TimeoutIdleSec=300s
     
     """
   }
@@ -484,8 +484,8 @@ examples {
     
     [Scope]
     OOMPolicy=kill
-    RuntimeMaxSec=86400
-    RuntimeRandomizedExtraSec=3600
+    RuntimeMaxSec=86400s
+    RuntimeRandomizedExtraSec=3600s
     CPUAccounting=yes
     CPUWeight=100
     CPUQuota=25%
