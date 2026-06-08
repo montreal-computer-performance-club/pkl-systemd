@@ -25,10 +25,10 @@ examples {
     
     [Install]
     Alias=microservice.service
-    Also=advanced-service-monitor.timer
-    Also=advanced-service-backup.service
     RequiredBy=application.target
     WantedBy=multi-user.target
+    Also=advanced-service-monitor.timer
+    Also=advanced-service-backup.service
     
     [Service]
     Type=notify
@@ -122,8 +122,8 @@ examples {
     RequiresMountsFor=/backup/storage
     
     [Install]
-    Also=backup.service
     WantedBy=timers.target
+    Also=backup.service
     
     [Timer]
     OnBootSec=900s
@@ -159,9 +159,9 @@ examples {
     DefaultDependencies=no
     
     [Install]
+    WantedBy=multi-user.target
     Also=enhanced-service-helper.service
     Also=enhanced-service-monitor.timer
-    WantedBy=multi-user.target
     
     [Service]
     Type=notify
@@ -226,11 +226,11 @@ examples {
     StartLimitIntervalSec=60s
     
     [Install]
-    Also=nfs-client.target
-    Also=shared-data-monitor.service
     RequiredBy=application-server.service
     RequiredBy=backup.service
     WantedBy=remote-fs.target
+    Also=nfs-client.target
+    Also=shared-data-monitor.service
     
     [Mount]
     What=nfs-server.example.com:/export/shared-data
@@ -416,10 +416,10 @@ examples {
     AllowIsolate=yes
     
     [Install]
+    WantedBy=multi-user.target
     Also=nginx.service
     Also=postgresql.service
     Also=redis.service
-    WantedBy=multi-user.target
     
     """
   }
@@ -453,9 +453,9 @@ examples {
     DefaultDependencies=no
     
     [Install]
-    Also=web-service.service
     RequiredBy=web-stack.target
     WantedBy=sockets.target
+    Also=web-service.service
     
     [Socket]
     ListenStream=127.0.0.1:8080

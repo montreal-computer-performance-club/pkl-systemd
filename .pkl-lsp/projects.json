@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "pklProjects": [
+    {
+      "projectFile": "PklProject",
+      "packageUri": "package://pkl.declix.org/pkl-systemd@0.0.8",
+      "declaredDependencies": {},
+      "resolvedDependencies": {},
+      "evaluatorSettings": {}
+    }
+  ]
+}
