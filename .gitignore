@@ -1,2 +1,5 @@
+# Pkl language server
+.pkl-lsp
+
 # Test output files
 *.pkl-actual.pcf
