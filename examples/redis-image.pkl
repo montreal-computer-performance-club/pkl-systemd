@@ -12,13 +12,13 @@ redis: Image = new {
         description = "Redis container image"
         after = "network-online.target"
     }
-    
+
     image = new {
         image = "docker.io/library/redis:7-alpine"
         imageTag = "redis-7-alpine"
         tlsVerify = true
     }
-    
+
     install = new {
         wantedBy = "multi-user.target"
     }

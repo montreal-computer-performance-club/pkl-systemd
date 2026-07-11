@@ -3,13 +3,13 @@ examples {
     """
     [Unit]
     Description=Test Container
-    
+
     [Install]
     WantedBy=default.target
-    
+
     [Container]
     Image=alpine:latest
-    
+
     """
   }
   ["full container quadlet"] {
@@ -18,10 +18,10 @@ examples {
     Description=Full Test Container
     Wants=network-online.target
     After=network-online.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Container]
     Image=alpine:latest
     ContainerName=test
@@ -83,7 +83,7 @@ examples {
     AutoUpdate=registry
     Notify=yes
     RunInit=yes
-    
+
     [Service]
     Type=notify
     RemainAfterExit=yes
@@ -97,7 +97,7 @@ examples {
     MemoryHigh=256M
     Requires=network.target
     Wants=time-sync.target
-    
+
     """
   }
 }

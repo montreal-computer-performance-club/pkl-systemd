@@ -5,10 +5,10 @@ examples {
     Description=Database Pod with Security
     Requires=network.target
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Pod]
     PodName=database-cluster
     Network=db-network
@@ -39,7 +39,7 @@ examples {
     PodmanArgs=--share=net
     PodmanArgs=--share=uts
     PodmanArgs=--infra-image=registry.redhat.io/ubi8/pause:latest
-    
+
     """
   }
 }

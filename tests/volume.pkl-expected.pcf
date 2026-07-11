@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Test Volume
     After=local-fs.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Volume]
     VolumeName=test-volume
     Driver=local
@@ -18,14 +18,14 @@ examples {
     Label=env=development
     Options=type=bind
     Options=bind-propagation=shared
-    
+
     """
   }
   ["simple volume quadlet"] {
     """
     [Volume]
     VolumeName=simple-volume
-    
+
     """
   }
 }

@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Web Application Kubernetes Deployment
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Kube]
     Yaml=/etc/kubernetes/webapp/deployment.yaml
     AutoUpdate=registry
@@ -21,7 +21,7 @@ examples {
     LogDriver=journald
     PodmanArgs=--volume=/var/log/webapp:/var/log:Z
     PodmanArgs=--volume=/etc/ssl/certs:/etc/ssl/certs:ro
-    
+
     """
   }
 }

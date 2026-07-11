@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Isolated Internal Network
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Network]
     NetworkName=isolated-net
     Driver=bridge
@@ -21,7 +21,7 @@ examples {
     Label=security=high
     Options=com.docker.network.bridge.name=isolated0
     Options=com.docker.network.driver.mtu=1450
-    
+
     """
   }
 }

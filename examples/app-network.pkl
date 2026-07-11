@@ -10,7 +10,7 @@ network = new {
     driver = "bridge"
     subnet = "10.88.0.0/16"
     gateway = "10.88.0.1"
-    
+
     label {
         ["app"] = "myapp"
         ["environment"] = "production"

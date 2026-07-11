@@ -9,21 +9,21 @@ unit = new {
 pod = new {
     podName = "database-cluster"
     network = "db-network"
-    
+
     publishPort = new Listing {
         "5432:5432"
         "6379:6379"
     }
-    
+
     // Security configuration and other removed fields moved to podmanArgs
-    
+
     // Custom DNS configuration
     dns = "10.0.0.1"
     dnsSearch = new Listing {
         "internal.example.com"
         "db.example.com"
     }
-    
+
     // User namespace mapping for security
     userNS = "keep-id"
     uidMap = new Listing {
@@ -32,21 +32,21 @@ pod = new {
     gidMap = new Listing {
         "0:100000:65536"
     }
-    
+
     // Persistent volumes
     volume = new Listing {
         "postgres-data:/var/lib/postgresql/data:Z"
         "redis-data:/data:Z"
         "/etc/database/config:/etc/config:ro"
     }
-    
+
     // Network aliases for service discovery
     networkAlias = new Listing {
         "postgres.db"
         "redis.db"
         "primary.db"
     }
-    
+
     podmanArgs {
         "--hostname=db-cluster.internal"
         "--exit-policy=continue"
@@ -62,7 +62,7 @@ pod = new {
         "--share=uts"
         "--infra-image=registry.redhat.io/ubi8/pause:latest"
     }
-    
+
 }
 
 install = new {

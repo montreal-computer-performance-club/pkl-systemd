@@ -7,38 +7,38 @@ local fullKube = new Kube {
         description = "Test Kubernetes Deployment"
         after = "network.target"
     }
-    
+
     kube = new {
         yaml = "/app/k8s/test.yaml"
         autoUpdate = "registry"
-        
+
         configMap = new Listing {
             "/app/k8s/config.yaml"
             "/app/k8s/secrets.yaml"
         }
-        
+
         network = "test-net"
-        
+
         publishPort = new Listing {
             "8080:80"
             "9090:9090"
         }
-        
+
         exitCodePropagation = "any"
         workingDirectory = "/app/k8s"
         setWorkingDirectory = "/app"
-        
+
         userNS = "auto"
-        
+
         logDriver = "journald"
-        
-        // New official Quadlet fields        
+
+        // New official Quadlet fields
         globalArgs = new Listing {
             "--log-level=debug"
         }
-        
+
         kubeDownForce = true
-        
+
         // Unsupported fields moved to podmanArgs
         podmanArgs {
             "--uidmap=0:100000:65536"
@@ -54,7 +54,7 @@ local fullKube = new Kube {
             "--containers-conf-module=/etc/containers/test.conf"
         }
     }
-    
+
     install = new {
         wantedBy = "multi-user.target"
     }
@@ -70,7 +70,7 @@ examples {
     ["full kube quadlet"] {
         fullKube.output.text
     }
-    
+
     ["simple kube quadlet"] {
         simpleKube.output.text
     }

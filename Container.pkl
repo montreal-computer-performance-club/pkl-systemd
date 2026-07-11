@@ -11,132 +11,132 @@ service: ServiceSection?
 local class ContainerSection {
     // Container image to run
     image: String?
-    
+
     // Container name
     containerName: String?
-    
+
     // Environment variables
     environment: Mapping<String, String>?
-    
+
     // Environment file
     environmentFile: String?
-    
+
     // Use host environment in container
     environmentHost: Boolean?
-    
+
     // Expose ports
     publishPort: (String|Listing<String>)?
-    
+
     // Volume mounts
     volume: (String|Listing<String>)?
-    
+
     // Network mode
     network: String?
-    
+
     // Pull policy
     pull: PullPolicy?
-    
+
     // User to run as
     user: String?
-    
+
     // Working directory
     workingDir: String?
-    
+
     // Labels
     label: Mapping<String, String>?
-    
+
     // Annotations
     annotation: Mapping<String, String>?
-    
+
     // Command to run
     exec: String?
-    
+
     // Entry point
     entrypoint: String?
-    
+
     // Security options
     securityLabelDisable: Boolean?
     readOnly: Boolean?
     noNewPrivileges: Boolean?
-    
+
     // Additional podman run flags
     podmanArgs: Listing<String>?
-    
+
     // Health check
     healthCmd: String?
     healthInterval: Duration?
     healthTimeout: Duration?
     healthRetries: UInt?
     healthStartPeriod: Duration?
-    
+
     // Logging
     logDriver: String?
-    
+
     // Timezone
     timezone: String?
-    
+
     // Logging options
     logOpt: (String|Listing<String>)?
-    
+
     // Secrets
     secret: (String|Listing<String>)?
-    
+
     // Devices
     device: (String|Listing<String>)?
-    
+
     // DNS settings
     dns: (String|Listing<String>)?
     dnsOption: (String|Listing<String>)?
     dnsSearch: (String|Listing<String>)?
-    
+
     // Hostname
     hostname: String?
-    
+
     // Add host entries
     addHost: (String|Listing<String>)?
-    
+
     // Capabilities
     addCapability: (String|Listing<String>)?
     dropCapability: (String|Listing<String>)?
-    
+
     // Ulimits
     ulimit: (String|Listing<String>)?
-    
+
     // Tmpfs mounts
     tmpfs: (String|Listing<String>)?
-    
+
     // Sysctl settings
     sysctl: Mapping<String, String>?
-    
+
     // Group add
     groupAdd: (String|Listing<String>)?
-    
+
     // Userns
     userNS: String?
-    
+
     // Network aliases
     networkAlias: (String|Listing<String>)?
-    
+
     // Additional missing fields from podman-systemd.unit(5)
-    
+
     // AutoUpdate policy
     autoUpdate: AutoUpdatePolicy?
-    
+
     // CGroups mode
     cgroupsMode: String?
-    
+
     // Expose host ports
     exposeHostPort: (String|Listing<String>)?
-    
+
     // GID mapping
     gidMap: (String|Listing<String>)?
-    
+
     // Global args
     globalArgs: (String|Listing<String>)?
-    
+
     // Group ID
     group: String?
-    
+
     // Additional health check options
     healthLogDestination: String?
     healthMaxLogCount: UInt?
@@ -147,63 +147,63 @@ local class ContainerSection {
     healthStartupRetries: UInt?
     healthStartupSuccess: UInt?
     healthStartupTimeout: Duration?
-    
+
     // IP addresses
     ip: String?
     ip6: String?
-    
+
     // Security options
     mask: (String|Listing<String>)?
-    
+
     // Mount options
     mount: (String|Listing<String>)?
-    
+
     // Notify
     notify: Boolean?
-    
+
     // PID limits
     pidsLimit: UInt?
-    
+
     // Pod reference
     pod: String?
-    
+
     // Read-only tmpfs
     readOnlyTmpfs: Boolean?
-    
+
     // Rootfs
     rootfs: String?
-    
+
     // Run init
     runInit: Boolean?
-    
+
     // Seccomp profile
     seccompProfile: String?
-    
+
     // Security label options
     securityLabelFileType: String?
     securityLabelLevel: String?
     securityLabelNested: Boolean?
     securityLabelType: String?
-    
+
     // Shared memory size
     shmSize: String?
-    
+
     // Start with pod
     startWithPod: Boolean?
-    
+
     // Stop signal
     stopSignal: String?
-    
+
     // Stop timeout
     stopTimeout: UInt?
-    
+
     // Sub GID/UID mapping
     subGIDMap: String?
     subUIDMap: String?
-    
+
     // UID mapping
     uidMap: (String|Listing<String>)?
-    
+
     // Unmask
     unmask: (String|Listing<String>)?
 }
@@ -217,13 +217,13 @@ local class ServiceSection {
     restartSec: Duration?
     timeoutStartSec: Duration?
     timeoutStopSec: Duration?
-    
+
     // Resource control
     cpuWeight: UInt?
     cpuQuota: String?
     memoryMax: String?
     memoryHigh: String?
-    
+
     // Dependencies
     requires: String?
     wants: String?

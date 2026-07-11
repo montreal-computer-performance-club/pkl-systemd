@@ -6,11 +6,11 @@ local minimal = new Container {
     unit = new {
         description = "Test Container"
     }
-    
+
     container = new {
         image = "alpine:latest"
     }
-    
+
     install = new {
         wantedBy = "default.target"
     }
@@ -22,58 +22,58 @@ local full = new Container {
         after = "network-online.target"
         wants = "network-online.target"
     }
-    
+
     container = new {
         image = "alpine:latest"
         containerName = "test"
-        
+
         environment {
             ["FOO"] = "bar"
             ["BAZ"] = "qux"
         }
-        
+
         publishPort = new Listing {
             "8080:80"
             "8443:443"
         }
-        
+
         volume = new Listing {
             "/host/path:/container/path"
             "named-volume:/data"
         }
-        
+
         network = "bridge"
         pull = "always"
         user = "1000:1000"
         workingDir = "/app"
-        
+
         label {
             ["app"] = "test"
             ["version"] = "1.0"
         }
-        
+
         annotation {
             ["org.example.key"] = "value"
         }
-        
+
         exec = "/bin/sh -c 'echo hello'"
         entrypoint = "/bin/sh"
-        
+
         securityLabelDisable = true
         readOnly = true
         noNewPrivileges = true
-        
+
         podmanArgs { "--rm"; "--privileged"; "--cap-add=SYS_ADMIN"; "--cpus=1.5"; "--memory=256M"; "--pid=host" }
-        
+
         healthCmd = "echo ok"
         healthInterval = 30.s
         healthTimeout = 3.s
         healthRetries = 3
         healthStartPeriod = 10.s
-        
+
         logDriver = "journald"
         timezone = "America/New_York"
-        
+
         // New fields from comprehensive Container section
         autoUpdate = "registry"
         environmentHost = true
@@ -83,70 +83,70 @@ local full = new Container {
         }
         runInit = true
         notify = true
-        
+
         secret = new Listing {
             "my-secret"
             "other-secret,target=/run/secrets/custom"
         }
-        
+
         device = new Listing {
             "/dev/fuse"
         }
-        
+
         dns = new Listing {
             "8.8.8.8"
             "8.8.4.4"
         }
-        
+
         dnsOption = new Listing {
             "ndots:2"
         }
-        
+
         dnsSearch = new Listing {
             "example.com"
         }
-        
+
         hostname = "test-host"
-        
+
         addHost = new Listing {
             "host1:192.168.1.1"
             "host2:192.168.1.2"
         }
-        
+
         addCapability = new Listing {
             "NET_ADMIN"
             "SYS_TIME"
         }
-        
+
         dropCapability = new Listing {
             "MKNOD"
         }
-        
+
         ulimit = new Listing {
             "nofile=1024:2048"
         }
-        
+
         tmpfs = new Listing {
             "/tmp:size=100M"
         }
-        
+
         sysctl {
             ["net.ipv4.ip_forward"] = "1"
         }
-        
+
         groupAdd = new Listing {
             "audio"
             "video"
         }
-        
+
         userNS = "keep-id"
-        
+
         networkAlias = new Listing {
             "test-alias"
             "another-alias"
         }
     }
-    
+
     service = new {
         type = "notify"
         remainAfterExit = true
@@ -154,16 +154,16 @@ local full = new Container {
         restartSec = 10.s
         timeoutStartSec = 300.s
         timeoutStopSec = 90.s
-        
+
         cpuWeight = 200
         cpuQuota = "50%"
         memoryMax = "512M"
         memoryHigh = "256M"
-        
+
         requires = "network.target"
         wants = "time-sync.target"
     }
-    
+
     install = new {
         wantedBy = "multi-user.target"
     }
@@ -173,7 +173,7 @@ examples {
     ["minimal container quadlet"] {
         minimal.output.text
     }
-    
+
     ["full container quadlet"] {
         full.output.text
     }
@@ -188,14 +188,14 @@ facts {
         minimal.output.text.contains("[Install]")
         minimal.output.text.contains("WantedBy=default.target")
     }
-    
+
     ["full container renders all sections"] {
         full.output.text.contains("[Unit]")
         full.output.text.contains("[Container]")
         full.output.text.contains("[Service]")
         full.output.text.contains("[Install]")
     }
-    
+
     ["renders all container options"] {
         full.output.text.contains("ContainerName=test")
         full.output.text.contains("Network=bridge")
@@ -216,7 +216,7 @@ facts {
         full.output.text.contains("UserNS=keep-id")
         full.output.text.contains("PodmanArgs=--pid=host")
     }
-    
+
     ["renders service options"] {
         full.output.text.contains("Type=notify")
         full.output.text.contains("RemainAfterExit=yes")

@@ -8,30 +8,30 @@ unit = new {
 container = new {
     image = "docker.io/library/redis:7-alpine"
     containerName = "redis"
-    
+
     publishPort = new Listing {
         "6379:6379"
     }
-    
+
     volume = new Listing {
         "redis-data:/data"
         "/etc/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro"
     }
-    
+
     exec = "redis-server /usr/local/etc/redis/redis.conf"
-    
+
     pull = "newer"
-    
+
     healthCmd = "redis-cli ping"
     healthInterval = 10.s
     healthTimeout = 3.s
     healthRetries = 3
-    
+
     podmanArgs {
         "--memory=512M"
         "--cpus=1.0"
     }
-    
+
     user = "999:999"
     readOnly = true
     noNewPrivileges = true

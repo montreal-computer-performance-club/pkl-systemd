@@ -13,7 +13,7 @@ privateApp: Image = new {
         after = "network-online.target"
         wants = "network-online.target"
     }
-    
+
     image = new {
         image = "private.company.com/apps/webapp:v2.1.0"
         imageTag = "webapp-v2.1.0"
@@ -22,13 +22,13 @@ privateApp: Image = new {
         tlsVerify = true
         arch = "amd64"
         os = "linux"
-        
+
         globalArgs = new Listing {
             "--log-level=info"
             "--pull-policy=missing"
         }
     }
-    
+
     install = new {
         wantedBy = "multi-user.target"
     }

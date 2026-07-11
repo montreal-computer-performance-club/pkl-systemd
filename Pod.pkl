@@ -10,62 +10,62 @@ pod: PodSection
 local class PodSection {
     // Pod name
     podName: String?
-    
+
     // Network configuration
     network: String?
-    
+
     // Expose ports from the pod
     publishPort: (String|Listing<String>)?
-    
+
     // DNS servers
     dns: (String|Listing<String>)?
-    
+
     // DNS options
     dnsOption: (String|Listing<String>)?
-    
+
     // DNS search domains
     dnsSearch: (String|Listing<String>)?
-    
+
     // Volume mounts for the pod
     volume: (String|Listing<String>)?
-    
+
     // User namespace mapping
     userNS: String?
-    
+
     // Group ID mapping
     gidMap: (String|Listing<String>)?
-    
+
     // User ID mapping
     uidMap: (String|Listing<String>)?
-    
+
     // Network aliases
     networkAlias: (String|Listing<String>)?
-    
+
     // Add host entries
     addHost: (String|Listing<String>)?
-    
+
     // IP addresses
     ip: String?
     ip6: String?
-    
+
     // Shared memory size
     shmSize: String?
-    
+
     // Sub GID mapping
     subGIDMap: String?
-    
-    // Sub UID mapping  
+
+    // Sub UID mapping
     subUIDMap: String?
-    
+
     // Service name override
     serviceName: String?
-    
+
     // Containers.conf module
     containersConfModule: (String|Listing<String>)?
-    
+
     // Global args
     globalArgs: (String|Listing<String>)?
-    
+
     // Pod-specific options
     podmanArgs: Listing<String>?
 }

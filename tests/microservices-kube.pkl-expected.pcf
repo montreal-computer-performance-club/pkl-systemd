@@ -6,10 +6,10 @@ examples {
     Requires=webapp-network.service
     After=network.target
     After=webapp-network.service
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Kube]
     Yaml=/app/k8s/microservices.yaml
     AutoUpdate=local
@@ -31,7 +31,7 @@ examples {
     PodmanArgs=--volume=redis-data:/data:Z
     PodmanArgs=--volume=/app/logs:/var/log/app:Z
     PodmanArgs=--volume=/app/uploads:/uploads:Z
-    
+
     """
   }
 }

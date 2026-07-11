@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Test Network
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Network]
     NetworkName=test-net
     Driver=bridge
@@ -22,7 +22,7 @@ examples {
     Options=com.docker.network.bridge.name=testbr0
     Options=com.docker.network.driver.mtu=1500
     DisableDNS=no
-    
+
     """
   }
   ["simple network quadlet"] {
@@ -30,7 +30,7 @@ examples {
     [Network]
     NetworkName=simple-net
     Driver=bridge
-    
+
     """
   }
 }

@@ -8,22 +8,22 @@ unit = new {
 pod = new {
     podName = "webapp"
     network = "bridge"
-    
+
     publishPort = new Listing {
         "8080:80"
         "8443:443"
     }
-    
+
     dns = new Listing {
         "8.8.8.8"
         "8.8.4.4"
     }
-    
+
     volume = new Listing {
         "/var/log/webapp:/var/log:Z"
         "/etc/ssl/certs:/etc/ssl/certs:ro"
     }
-    
+
     podmanArgs {
         "--hostname=webapp.local"
         "--exit-policy=stop"

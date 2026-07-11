@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Web Application Pod
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Pod]
     PodName=webapp
     Network=bridge
@@ -24,7 +24,7 @@ examples {
     PodmanArgs=--label=environment=production
     PodmanArgs=--share=net
     PodmanArgs=--share=ipc
-    
+
     """
   }
 }

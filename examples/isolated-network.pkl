@@ -10,25 +10,25 @@ network = new {
     driver = "bridge"
     subnet = "172.20.0.0/24"
     gateway = "172.20.0.1"
-    
+
     // Restrict external access
     internal = true
-    
+
     // Enable IPv6
     ipv6 = true
-    
+
     // Custom DNS servers
     dns = new Listing {
         "172.20.0.1"
         "8.8.8.8"
     }
-    
+
     // Driver options
     options = new Listing {
         "com.docker.network.bridge.name=isolated0"
         "com.docker.network.driver.mtu=1450"
     }
-    
+
     label {
         ["tier"] = "isolated"
         ["security"] = "high"

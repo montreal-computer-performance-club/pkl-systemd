@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Application Network
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Network]
     NetworkName=app-net
     Driver=bridge
@@ -15,7 +15,7 @@ examples {
     Gateway=10.88.0.1
     Label=app=myapp
     Label=environment=production
-    
+
     """
   }
   ["../examples/database-pod.pkl"] {
@@ -24,10 +24,10 @@ examples {
     Description=Database Pod with Security
     Requires=network.target
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Pod]
     PodName=database-cluster
     Network=db-network
@@ -58,7 +58,7 @@ examples {
     PodmanArgs=--share=net
     PodmanArgs=--share=uts
     PodmanArgs=--infra-image=registry.redhat.io/ubi8/pause:latest
-    
+
     """
   }
   ["../examples/isolated-network.pkl"] {
@@ -66,10 +66,10 @@ examples {
     [Unit]
     Description=Isolated Internal Network
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Network]
     NetworkName=isolated-net
     Driver=bridge
@@ -83,7 +83,7 @@ examples {
     Label=security=high
     Options=com.docker.network.bridge.name=isolated0
     Options=com.docker.network.driver.mtu=1450
-    
+
     """
   }
   ["../examples/microservices-kube.pkl"] {
@@ -93,10 +93,10 @@ examples {
     Requires=webapp-network.service
     After=network.target
     After=webapp-network.service
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Kube]
     Yaml=/app/k8s/microservices.yaml
     AutoUpdate=local
@@ -118,7 +118,7 @@ examples {
     PodmanArgs=--volume=redis-data:/data:Z
     PodmanArgs=--volume=/app/logs:/var/log/app:Z
     PodmanArgs=--volume=/app/uploads:/uploads:Z
-    
+
     """
   }
   ["../examples/multistage-build.pkl"] {
@@ -126,10 +126,10 @@ examples {
     [Unit]
     Description=Multi-stage Application Build
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Build]
     ImageTag=localhost/myapp:production
     File=./docker/Containerfile.prod
@@ -152,7 +152,7 @@ examples {
     Target=production
     PodmanArgs=--squash
     PodmanArgs=--rm
-    
+
     """
   }
   ["../examples/nginx.pkl"] {
@@ -160,10 +160,10 @@ examples {
     [Unit]
     Description=Nginx Web Server Container
     After=network-online.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Container]
     Image=docker.io/library/nginx:latest
     ContainerName=nginx
@@ -178,11 +178,11 @@ examples {
     HealthInterval=30s
     HealthTimeout=3s
     HealthRetries=3
-    
+
     [Service]
     Restart=always
     RestartSec=5s
-    
+
     """
   }
   ["../examples/postgres-volume.pkl"] {
@@ -190,16 +190,16 @@ examples {
     [Unit]
     Description=PostgreSQL Data Volume
     After=local-fs.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Volume]
     VolumeName=postgres-data
     Driver=local
     Label=app=postgres
     Label=purpose=database-storage
-    
+
     """
   }
   ["../examples/postgres.pkl"] {
@@ -208,10 +208,10 @@ examples {
     Description=PostgreSQL Database Container
     Requires=network-online.target
     After=network-online.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Container]
     Image=docker.io/library/postgres:15
     ContainerName=postgres
@@ -230,12 +230,12 @@ examples {
     HealthTimeout=5s
     HealthRetries=5
     HealthStartPeriod=30s
-    
+
     [Service]
     Restart=on-failure
     RestartSec=10s
     TimeoutStartSec=90s
-    
+
     """
   }
   ["../examples/private-registry-image.pkl"] {
@@ -258,7 +258,7 @@ examples {
         - --pull-policy=missing
         os: linux
         tlsVerify: true
-    
+
     """
   }
   ["../examples/redis-image.pkl"] {
@@ -273,7 +273,7 @@ examples {
         image: docker.io/library/redis:7-alpine
         imageTag: redis-7-alpine
         tlsVerify: true
-    
+
     """
   }
   ["../examples/redis.pkl"] {
@@ -281,10 +281,10 @@ examples {
     [Unit]
     Description=Redis In-Memory Data Store
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Container]
     Image=docker.io/library/redis:7-alpine
     ContainerName=redis
@@ -302,11 +302,11 @@ examples {
     HealthInterval=10s
     HealthTimeout=3s
     HealthRetries=3
-    
+
     [Service]
     Restart=on-failure
     RestartSec=5s
-    
+
     """
   }
   ["../examples/shared-volume.pkl"] {
@@ -314,10 +314,10 @@ examples {
     [Unit]
     Description=Shared Application Volume
     After=local-fs.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Volume]
     VolumeName=app-shared
     Driver=local
@@ -327,7 +327,7 @@ examples {
     Label=tier=storage
     Options=type=tmpfs
     Options=tmpfs-size=1G
-    
+
     """
   }
   ["../examples/web-pod.pkl"] {
@@ -335,10 +335,10 @@ examples {
     [Unit]
     Description=Web Application Pod
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Pod]
     PodName=webapp
     Network=bridge
@@ -355,7 +355,7 @@ examples {
     PodmanArgs=--label=environment=production
     PodmanArgs=--share=net
     PodmanArgs=--share=ipc
-    
+
     """
   }
   ["../examples/webapp-build.pkl"] {
@@ -363,10 +363,10 @@ examples {
     [Unit]
     Description=Web Application Build
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Build]
     ImageTag=localhost/webapp:latest
     File=/app/Containerfile
@@ -381,7 +381,7 @@ examples {
     BuildArg=BUILD_ENV=production
     ForceRm=yes
     PodmanArgs=--rm
-    
+
     """
   }
   ["../examples/webapp-kube.pkl"] {
@@ -389,10 +389,10 @@ examples {
     [Unit]
     Description=Web Application Kubernetes Deployment
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Kube]
     Yaml=/etc/kubernetes/webapp/deployment.yaml
     AutoUpdate=registry
@@ -406,7 +406,7 @@ examples {
     LogDriver=journald
     PodmanArgs=--volume=/var/log/webapp:/var/log:Z
     PodmanArgs=--volume=/etc/ssl/certs:/etc/ssl/certs:ro
-    
+
     """
   }
 }

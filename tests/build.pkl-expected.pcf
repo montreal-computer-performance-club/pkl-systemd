@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Test Build
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Build]
     ImageTag=localhost/test:latest
     File=/app/Containerfile
@@ -36,7 +36,7 @@ examples {
     PodmanArgs=--retry-delay=5s
     PodmanArgs=--rm
     PodmanArgs=--squash=false
-    
+
     """
   }
   ["simple build quadlet"] {
@@ -44,7 +44,7 @@ examples {
     [Build]
     ImageTag=localhost/simple:latest
     File=./Containerfile
-    
+
     """
   }
 }

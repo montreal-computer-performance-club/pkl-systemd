@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Web Application Build
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Build]
     ImageTag=localhost/webapp:latest
     File=/app/Containerfile
@@ -22,7 +22,7 @@ examples {
     BuildArg=BUILD_ENV=production
     ForceRm=yes
     PodmanArgs=--rm
-    
+
     """
   }
 }

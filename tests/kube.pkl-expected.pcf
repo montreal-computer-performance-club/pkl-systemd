@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Test Kubernetes Deployment
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Kube]
     Yaml=/app/k8s/test.yaml
     AutoUpdate=registry
@@ -34,14 +34,14 @@ examples {
     PodmanArgs=--replace
     PodmanArgs=--start
     PodmanArgs=--containers-conf-module=/etc/containers/test.conf
-    
+
     """
   }
   ["simple kube quadlet"] {
     """
     [Kube]
     Yaml=/simple/app.yaml
-    
+
     """
   }
 }

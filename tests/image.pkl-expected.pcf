@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Redis Image
     After=network-online.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Image]
     Image=quay.io/redis/redis:latest
     ImageTag=redis-latest
@@ -15,21 +15,21 @@ examples {
     GlobalArgs=--log-level=info
     Os=linux
     TlsVerify=yes
-    
+
     """
   }
   ["simple image quadlet"] {
     """
     [Image]
     Image=docker.io/library/alpine:latest
-    
+
     """
   }
   ["authenticated image quadlet"] {
     """
     [Unit]
     Description=Private Registry Image
-    
+
     [Image]
     Image=private.registry.com/myapp:v1.0.0
     AuthFile=/etc/containers/auth.json
@@ -37,7 +37,7 @@ examples {
     ContainersConfModule=/etc/containers/custom.conf
     Creds=myuser:mypassword
     TlsVerify=no
-    
+
     """
   }
   ["all tags image quadlet"] {
@@ -46,7 +46,7 @@ examples {
     Image=docker.io/library/nginx
     AllTags=yes
     Variant=arm64/v8
-    
+
     """
   }
   ["string args image quadlet"] {
@@ -54,7 +54,7 @@ examples {
     [Image]
     Image=quay.io/alpine/alpine:latest
     PodmanArgs=--quiet
-    
+
     """
   }
 }

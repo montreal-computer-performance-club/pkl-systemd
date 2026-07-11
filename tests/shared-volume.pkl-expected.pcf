@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Shared Application Volume
     After=local-fs.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Volume]
     VolumeName=app-shared
     Driver=local
@@ -17,7 +17,7 @@ examples {
     Label=tier=storage
     Options=type=tmpfs
     Options=tmpfs-size=1G
-    
+
     """
   }
 }

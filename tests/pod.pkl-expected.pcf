@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Test Pod
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Pod]
     PodName=test-pod
     Network=bridge
@@ -35,14 +35,14 @@ examples {
     PodmanArgs=--share=net
     PodmanArgs=--share=ipc
     PodmanArgs=--infra-image=registry.redhat.io/ubi8/pause:latest
-    
+
     """
   }
   ["simple pod quadlet"] {
     """
     [Pod]
     PodName=simple-pod
-    
+
     """
   }
 }

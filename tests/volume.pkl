@@ -7,25 +7,25 @@ local postgresVolume = new Volume {
         description = "Test Volume"
         after = "local-fs.target"
     }
-    
+
     volume = new {
         volumeName = "test-volume"
         driver = "local"
         user = "1000"
         group = "1000"
         copy = true
-        
+
         label {
             ["app"] = "test"
             ["env"] = "development"
         }
-        
+
         options = new Listing {
             "type=bind"
             "bind-propagation=shared"
         }
     }
-    
+
     install = new {
         wantedBy = "multi-user.target"
     }
@@ -41,7 +41,7 @@ examples {
     ["full volume quadlet"] {
         postgresVolume.output.text
     }
-    
+
     ["simple volume quadlet"] {
         simpleVolume.output.text
     }

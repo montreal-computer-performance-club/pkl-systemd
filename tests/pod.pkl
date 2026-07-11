@@ -7,41 +7,41 @@ local fullPod = new Pod {
         description = "Test Pod"
         after = "network.target"
     }
-    
+
     pod = new {
         podName = "test-pod"
         network = "bridge"
-        
+
         publishPort = new Listing {
             "8080:80"
             "8443:443"
         }
-        
+
         dns = new Listing {
             "8.8.8.8"
             "8.8.4.4"
         }
-        
+
         dnsOption = new Listing {
             "ndots:2"
         }
-        
+
         dnsSearch = new Listing {
             "example.com"
         }
-        
+
         volume = new Listing {
             "/var/log/test:/var/log:Z"
         }
-        
+
         networkAlias = new Listing {
             "test-alias"
         }
-        
+
         addHost = new Listing {
             "host1:192.168.1.1"
         }
-        
+
         userNS = "keep-id"
         uidMap = new Listing {
             "0:100000:65536"
@@ -49,9 +49,9 @@ local fullPod = new Pod {
         gidMap = new Listing {
             "0:100000:65536"
         }
-        
-        podmanArgs { 
-            "--log-level=debug" 
+
+        podmanArgs {
+            "--log-level=debug"
             "--cgroup-manager=systemd"
             "--hostname=test.local"
             "--exit-policy=stop"
@@ -65,7 +65,7 @@ local fullPod = new Pod {
             "--infra-image=registry.redhat.io/ubi8/pause:latest"
         }
     }
-    
+
     install = new {
         wantedBy = "multi-user.target"
     }
@@ -81,7 +81,7 @@ examples {
     ["full pod quadlet"] {
         fullPod.output.text
     }
-    
+
     ["simple pod quadlet"] {
         simplePod.output.text
     }

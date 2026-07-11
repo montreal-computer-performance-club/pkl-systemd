@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Redis In-Memory Data Store
     After=network.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Container]
     Image=docker.io/library/redis:7-alpine
     ContainerName=redis
@@ -25,11 +25,11 @@ examples {
     HealthInterval=10s
     HealthTimeout=3s
     HealthRetries=3
-    
+
     [Service]
     Restart=on-failure
     RestartSec=5s
-    
+
     """
   }
 }

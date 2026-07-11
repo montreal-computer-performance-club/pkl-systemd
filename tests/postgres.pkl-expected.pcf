@@ -5,10 +5,10 @@ examples {
     Description=PostgreSQL Database Container
     Requires=network-online.target
     After=network-online.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Container]
     Image=docker.io/library/postgres:15
     ContainerName=postgres
@@ -27,12 +27,12 @@ examples {
     HealthTimeout=5s
     HealthRetries=5
     HealthStartPeriod=30s
-    
+
     [Service]
     Restart=on-failure
     RestartSec=10s
     TimeoutStartSec=90s
-    
+
     """
   }
 }

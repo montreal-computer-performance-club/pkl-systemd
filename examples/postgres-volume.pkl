@@ -8,7 +8,7 @@ unit = new {
 volume = new {
     volumeName = "postgres-data"
     driver = "local"
-    
+
     label {
         ["app"] = "postgres"
         ["purpose"] = "database-storage"

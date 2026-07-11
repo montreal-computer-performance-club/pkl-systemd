@@ -4,10 +4,10 @@ examples {
     [Unit]
     Description=Nginx Web Server Container
     After=network-online.target
-    
+
     [Install]
     WantedBy=multi-user.target
-    
+
     [Container]
     Image=docker.io/library/nginx:latest
     ContainerName=nginx
@@ -22,11 +22,11 @@ examples {
     HealthInterval=30s
     HealthTimeout=3s
     HealthRetries=3
-    
+
     [Service]
     Restart=always
     RestartSec=5s
-    
+
     """
   }
 }

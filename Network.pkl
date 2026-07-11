@@ -10,46 +10,46 @@ network: NetworkSection
 local class NetworkSection {
     // Network name
     networkName: String?
-    
+
     // Network driver
     driver: String?
-    
+
     // Network subnet in CIDR notation
     subnet: String?
-    
+
     // DNS servers
     dns: (String|Listing<String>)?
-    
+
     // Restrict external network access
     internal: Boolean?
-    
+
     // Enable IPv6 networking
     ipv6: Boolean?
-    
+
     // Gateway address
     gateway: String?
-    
+
     // IP range for allocation
     ipRange: String?
-    
+
     // IPAM driver
     ipamDriver: String?
-    
+
     // Labels
     label: Mapping<String, String>?
-    
-    // Driver options  
+
+    // Driver options
     options: (String|Listing<String>)?
-    
+
     // Disable DNS resolution
     disableDNS: Boolean?
-    
+
     // Containers.conf module
     containersConfModule: (String|Listing<String>)?
-    
+
     // Global args
     globalArgs: (String|Listing<String>)?
-    
+
     // Additional podman network create flags
     podmanArgs: Listing<String>?
 }
