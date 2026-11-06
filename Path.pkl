@@ -1,6 +1,6 @@
-module declix.systemd.Path;
+module declix.systemd.Path
 
-extends "./Unit.pkl";
+extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
@@ -8,21 +8,21 @@ path: PathSection
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.path.html
 class PathSection {
-    // Path monitoring types
-    pathExists: String?
-    pathExistsGlob: String?
-    pathChanged: String?
-    pathModified: String?
-    directoryNotEmpty: String?
-    
-    // Target unit
-    unit: String?
-    
-    // Directory creation
-    makeDirectory: Boolean?
-    directoryMode: String?
-    
-    // Rate limiting
-    triggerLimitIntervalSec: Duration?
-    triggerLimitBurst: UInt?
+  // Path monitoring types
+  pathExists: String?
+  pathExistsGlob: String?
+  pathChanged: String?
+  pathModified: String?
+  directoryNotEmpty: String?
+
+  // Target unit
+  unit: String?
+
+  // Directory creation
+  makeDirectory: Boolean?
+  directoryMode: String?
+
+  // Rate limiting
+  triggerLimitIntervalSec: Duration?
+  triggerLimitBurst: UInt?
 }

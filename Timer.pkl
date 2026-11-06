@@ -1,6 +1,6 @@
-module declix.systemd.Timer;
+module declix.systemd.Timer
 
-extends "./Unit.pkl";
+extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
@@ -8,31 +8,31 @@ timer: TimerSection
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html
 class TimerSection {
-    // Monotonic timers (relative to events)
-    onActiveSec: Duration?
-    onBootSec: Duration?
-    onStartupSec: Duration?
-    onUnitActiveSec: Duration?
-    onUnitInactiveSec: Duration?
-    
-    // Realtime timer (calendar events)
-    onCalendar: String?
-    
-    // Timer accuracy and randomization
-    accuracySec: Duration?
-    randomizedDelaySec: Duration?
-    fixedRandomDelay: Boolean?
-    
-    // Clock and timezone change triggers
-    onClockChange: Boolean?
-    onTimezoneChange: Boolean?
-    
-    // Timer behavior
-    unit: String?
-    persistent: Boolean?
-    wakeSystem: Boolean?
-    remainAfterElapse: Boolean?
-    
-    // Advanced options
-    deferReactivation: Boolean?
+  // Monotonic timers (relative to events)
+  onActiveSec: Duration?
+  onBootSec: Duration?
+  onStartupSec: Duration?
+  onUnitActiveSec: Duration?
+  onUnitInactiveSec: Duration?
+
+  // Realtime timer (calendar events)
+  onCalendar: String?
+
+  // Timer accuracy and randomization
+  accuracySec: Duration?
+  randomizedDelaySec: Duration?
+  fixedRandomDelay: Boolean?
+
+  // Clock and timezone change triggers
+  onClockChange: Boolean?
+  onTimezoneChange: Boolean?
+
+  // Timer behavior
+  unit: String?
+  persistent: Boolean?
+  wakeSystem: Boolean?
+  remainAfterElapse: Boolean?
+
+  // Advanced options
+  deferReactivation: Boolean?
 }

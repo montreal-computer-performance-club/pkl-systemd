@@ -1,6 +1,6 @@
-module declix.systemd.Service;
+module declix.systemd.Service
 
-extends "./Unit.pkl";
+extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
@@ -8,83 +8,85 @@ service: ServiceSection
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html
 local class ServiceSection {
-    // Service type and behavior
-    type: ServiceType?
-    exitType: ServiceExitType?
-    remainAfterExit: Boolean?
-    guessMainPID: Boolean?
-    pidFile: String?
-    busName: String?
-    
-    // Execution commands
-    execStart: (String|Listing<String>)?
-    execStartPre: (String|Listing<String>)?
-    execStartPost: (String|Listing<String>)?
-    execCondition: (String|Listing<String>)?
-    execReload: (String|Listing<String>)?
-    execStop: (String|Listing<String>)?
-    execStopPost: (String|Listing<String>)?
-    
-    // Restart configuration
-    restart: RestartPolicy?
-    restartSec: Duration?
-    restartSteps: UInt?
-    restartMaxDelaySec: Duration?
-    restartMode: RestartMode?
-    restartForceExitStatus: (String|Listing<String>)?
-    restartPreventExitStatus: (String|Listing<String>)?
-    restartKillSignal: String?
-    
-    // Timeout configuration
-    timeoutStartSec: Duration?
-    timeoutStopSec: Duration?
-    timeoutAbortSec: Duration?
-    timeoutSec: Duration?
-    timeoutStartFailureMode: TimeoutFailureMode?
-    timeoutStopFailureMode: TimeoutFailureMode?
-    
-    // Runtime limits
-    runtimeMaxSec: Duration?
-    runtimeRandomizedExtraSec: Duration?
-    
-    // Watchdog
-    watchdogSec: Duration?
-    watchdogSignal: String?
-    
-    // Kill settings
-    killMode: KillMode?
-    killSignal: String?
-    finalKillSignal: String?
-    sendSIGHUP: Boolean?
-    sendSIGKILL: Boolean?
-    
-    // Environment
-    environment: Mapping<String, String>?
-    environmentFile: (String|Listing<String>)?
-    
-    // Status and exit handling
-    successExitStatus: (String|Listing<String>)?
-    nonBlocking: Boolean?
-    notifyAccess: NotifyAccess?
-    
-    // File descriptors
-    sockets: (String|Listing<String>)?
-    fileDescriptorStoreMax: UInt?
-    fileDescriptorStorePreserve: String?
-    
-    // USB function (for USB gadget mode)
-    usbFunctionDescriptors: String?
-    usbFunctionStrings: String?
-    
-    // Advanced options
-    rootDirectoryStartOnly: Boolean?
-    oomPolicy: OOMPolicy?
-    openFile: (String|Listing<String>)?
+  // Service type and behavior
+  type: ServiceType?
+  exitType: ServiceExitType?
+  remainAfterExit: Boolean?
+  guessMainPID: Boolean?
+  pidFile: String?
+  busName: String?
+
+  // Execution commands
+  execStart: (String | Listing<String>)?
+  execStartPre: (String | Listing<String>)?
+  execStartPost: (String | Listing<String>)?
+  execCondition: (String | Listing<String>)?
+  execReload: (String | Listing<String>)?
+  execStop: (String | Listing<String>)?
+  execStopPost: (String | Listing<String>)?
+
+  // Restart configuration
+  restart: RestartPolicy?
+  restartSec: Duration?
+  restartSteps: UInt?
+  restartMaxDelaySec: Duration?
+  restartMode: RestartMode?
+  restartForceExitStatus: (String | Listing<String>)?
+  restartPreventExitStatus: (String | Listing<String>)?
+  restartKillSignal: String?
+
+  // Timeout configuration
+  timeoutStartSec: Duration?
+  timeoutStopSec: Duration?
+  timeoutAbortSec: Duration?
+  timeoutSec: Duration?
+  timeoutStartFailureMode: TimeoutFailureMode?
+  timeoutStopFailureMode: TimeoutFailureMode?
+
+  // Runtime limits
+  runtimeMaxSec: Duration?
+  runtimeRandomizedExtraSec: Duration?
+
+  // Watchdog
+  watchdogSec: Duration?
+  watchdogSignal: String?
+
+  // Kill settings
+  killMode: KillMode?
+  killSignal: String?
+  finalKillSignal: String?
+  sendSIGHUP: Boolean?
+  sendSIGKILL: Boolean?
+
+  // Environment
+  environment: Mapping<String, String>?
+  environmentFile: (String | Listing<String>)?
+
+  // Status and exit handling
+  successExitStatus: (String | Listing<String>)?
+  nonBlocking: Boolean?
+  notifyAccess: NotifyAccess?
+
+  // File descriptors
+  sockets: (String | Listing<String>)?
+  fileDescriptorStoreMax: UInt?
+  fileDescriptorStorePreserve: String?
+
+  // USB function (for USB gadget mode)
+  usbFunctionDescriptors: String?
+  usbFunctionStrings: String?
+
+  // Advanced options
+  rootDirectoryStartOnly: Boolean?
+  oomPolicy: OOMPolicy?
+  openFile: (String | Listing<String>)?
 }
 
-local typealias ServiceType = "simple" | "exec" | "forking" | "oneshot" | "dbus" | "notify" | "notify-reload" | "idle"
+local typealias ServiceType =
+  "simple" | "exec" | "forking" | "oneshot" | "dbus" | "notify" | "notify-reload" | "idle"
 local typealias ServiceExitType = "main" | "cgroup"
-local typealias RestartPolicy = "no" | "on-success" | "on-failure" | "on-abnormal" | "on-watchdog" | "on-abort" | "always"
+local typealias RestartPolicy =
+  "no" | "on-success" | "on-failure" | "on-abnormal" | "on-watchdog" | "on-abort" | "always"
 local typealias RestartMode = "normal" | "direct"
 local typealias TimeoutFailureMode = "terminate" | "abort" | "kill"
 local typealias KillMode = "control-group" | "mixed" | "process" | "none"

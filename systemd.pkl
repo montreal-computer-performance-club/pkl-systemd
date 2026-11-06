@@ -2,17 +2,17 @@
 module systemd
 
 // Import all unit types
-import "Service.pkl" as ServiceModule
-import "Timer.pkl" as TimerModule
-import "Socket.pkl" as SocketModule
-import "Mount.pkl" as MountModule
-import "Target.pkl" as TargetModule
-import "Path.pkl" as PathModule
-import "Swap.pkl" as SwapModule
 import "Automount.pkl" as AutomountModule
-import "Slice.pkl" as SliceModule
-import "Scope.pkl" as ScopeModule
 import "Device.pkl" as DeviceModule
+import "Mount.pkl" as MountModule
+import "Path.pkl" as PathModule
+import "Scope.pkl" as ScopeModule
+import "Service.pkl" as ServiceModule
+import "Slice.pkl" as SliceModule
+import "Socket.pkl" as SocketModule
+import "Swap.pkl" as SwapModule
+import "Target.pkl" as TargetModule
+import "Timer.pkl" as TimerModule
 import "Unit.pkl" as UnitModule
 
 // Re-export all types

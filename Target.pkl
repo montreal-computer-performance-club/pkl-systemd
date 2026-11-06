@@ -1,6 +1,6 @@
-module declix.systemd.Target;
+module declix.systemd.Target
 
-extends "./Unit.pkl";
+extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection

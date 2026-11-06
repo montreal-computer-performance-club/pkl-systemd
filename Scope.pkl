@@ -1,6 +1,6 @@
-module declix.systemd.Scope;
+module declix.systemd.Scope
 
-extends "./Unit.pkl";
+extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
@@ -8,42 +8,42 @@ scope: ScopeSection
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.scope.html
 class ScopeSection {
-    // Scope-specific configuration
-    oOMPolicy: OOMPolicy?
-    runtimeMaxSec: Duration?
-    runtimeRandomizedExtraSec: Duration?
-    
-    // Resource control settings (from systemd.resource-control)
-    // CPU accounting and limits
-    cPUAccounting: Boolean?
-    cPUWeight: UInt?
-    startupCPUWeight: UInt?
-    cPUQuota: String?
-    
-    // Memory accounting and limits
-    memoryAccounting: Boolean?
-    memoryMin: String?
-    memoryLow: String?
-    memoryHigh: String?
-    memoryMax: String?
-    memorySwapMax: String?
-    
-    // Tasks accounting and limits
-    tasksAccounting: Boolean?
-    tasksMax: String?
-    
-    // IO accounting and limits
-    iOAccounting: Boolean?
-    iOWeight: UInt?
-    startupIOWeight: UInt?
-    
-    // Kill settings (from systemd.kill)
-    killMode: KillMode?
-    killSignal: String?
-    finalKillSignal: String?
-    sendSIGHUP: Boolean?
-    sendSIGKILL: Boolean?
-    watchdogSignal: String?
+  // Scope-specific configuration
+  oOMPolicy: OOMPolicy?
+  runtimeMaxSec: Duration?
+  runtimeRandomizedExtraSec: Duration?
+
+  // Resource control settings (from systemd.resource-control)
+  // CPU accounting and limits
+  cPUAccounting: Boolean?
+  cPUWeight: UInt?
+  startupCPUWeight: UInt?
+  cPUQuota: String?
+
+  // Memory accounting and limits
+  memoryAccounting: Boolean?
+  memoryMin: String?
+  memoryLow: String?
+  memoryHigh: String?
+  memoryMax: String?
+  memorySwapMax: String?
+
+  // Tasks accounting and limits
+  tasksAccounting: Boolean?
+  tasksMax: String?
+
+  // IO accounting and limits
+  iOAccounting: Boolean?
+  iOWeight: UInt?
+  startupIOWeight: UInt?
+
+  // Kill settings (from systemd.kill)
+  killMode: KillMode?
+  killSignal: String?
+  finalKillSignal: String?
+  sendSIGHUP: Boolean?
+  sendSIGKILL: Boolean?
+  watchdogSignal: String?
 }
 
 // Type aliases

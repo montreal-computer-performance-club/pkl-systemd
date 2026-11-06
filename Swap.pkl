@@ -1,6 +1,6 @@
-module declix.systemd.Swap;
+module declix.systemd.Swap
 
-extends "./Unit.pkl";
+extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
@@ -8,13 +8,13 @@ swap: SwapSection
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.swap.html
 class SwapSection {
-    // Mandatory - swap device or file path
-    what: String
-    
-    // Optional swap configuration
-    priority: UInt?
-    options: String?
-    
-    // Timeout configuration
-    timeoutSec: Duration?
+  // Mandatory - swap device or file path
+  what: String
+
+  // Optional swap configuration
+  priority: UInt?
+  options: String?
+
+  // Timeout configuration
+  timeoutSec: Duration?
 }

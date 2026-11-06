@@ -1,6 +1,6 @@
-module declix.systemd.Device;
+module declix.systemd.Device
 
-extends "./Unit.pkl";
+extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
