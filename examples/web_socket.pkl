@@ -3,21 +3,21 @@ amends "../Socket.pkl"
 // Comprehensive socket example for web service communication
 unit = new {
   description = "Web service socket with multiple listeners"
-  documentation = new Listing {
+  documentation {
     "man:web-service(8)"
     "https://example.com/docs/web-service-socket"
   }
 
   // Network dependencies
-  requires = "network.target"
-  after = new Listing {
+  requires { "network.target" }
+  after {
     "network.target"
     "systemd-resolved.service"
   }
 
   // Conflicts and ordering
-  conflicts = "shutdown.target"
-  before = "shutdown.target"
+  conflicts { "shutdown.target" }
+  before { "shutdown.target" }
 
   // Don't create default dependencies
   defaultDependencies = false
@@ -25,7 +25,7 @@ unit = new {
 
 socket = new {
   // Multiple listen addresses
-  listenStream = new Listing {
+  listenStream {
     "127.0.0.1:8080" // Local IPv4
     "[::1]:8080" // Local IPv6
     "/run/web-service.sock" // Unix domain socket
@@ -92,20 +92,20 @@ socket = new {
   pollLimitBurst = 10
 
   // Execution hooks
-  execStartPre = "/usr/bin/mkdir -p /run/web-service"
-  execStartPost = "/usr/bin/chown www-data:www-data /run/web-service.sock"
-  execStopPost = "/usr/bin/rm -f /run/web-service.sock"
+  execStartPre { "/usr/bin/mkdir -p /run/web-service" }
+  execStartPost { "/usr/bin/chown www-data:www-data /run/web-service.sock" }
+  execStopPost { "/usr/bin/rm -f /run/web-service.sock" }
 
   // Pass file descriptors to exec
   passFileDescriptorsToExec = true
 }
 
 install = new {
-  wantedBy = "sockets.target"
+  wantedBy { "sockets.target" }
 
   // Also manage the associated service
-  also = "web-service.service"
+  also { "web-service.service" }
 
   // Required by other web services
-  requiredBy = "web-stack.target"
+  requiredBy { "web-stack.target" }
 }

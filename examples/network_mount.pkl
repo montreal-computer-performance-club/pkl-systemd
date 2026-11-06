@@ -3,34 +3,34 @@ amends "../Mount.pkl"
 // Comprehensive mount example for network filesystem
 unit = new {
   description = "NFS mount for shared application data"
-  documentation = new Listing {
+  documentation {
     "man:mount.nfs(8)"
     "man:systemd.mount(5)"
   }
 
   // Network and filesystem dependencies
-  requires = new Listing {
+  requires {
     "network-online.target"
     "rpcbind.service"
     "nfs-client.target"
   }
-  after = new Listing {
+  after {
     "network-online.target"
     "rpcbind.service"
     "nfs-client.target"
     "remote-fs-pre.target"
   }
-  before = new Listing {
+  before {
     "remote-fs.target"
     "umount.target"
     "shutdown.target"
   }
 
   // Mount dependencies
-  wantsMountsFor = "/mnt"
+  wantsMountsFor { "/mnt" }
 
   // Conflict with shutdown and unmount
-  conflicts = new Listing {
+  conflicts {
     "umount.target"
     "shutdown.target"
   }
@@ -41,7 +41,7 @@ unit = new {
   startLimitAction = "none"
 
   // Failure handling
-  onFailure = "mount-failure-notify@%n.service"
+  onFailure { "mount-failure-notify@%n.service" }
 }
 
 mount = new {
@@ -86,16 +86,16 @@ mount = new {
 }
 
 install = new {
-  wantedBy = "remote-fs.target"
+  wantedBy { "remote-fs.target" }
 
   // Also enable related services
-  also = new Listing {
+  also {
     "nfs-client.target"
     "shared-data-monitor.service"
   }
 
   // Required by services that need this mount
-  requiredBy = new Listing {
+  requiredBy {
     "application-server.service"
     "backup.service"
   }

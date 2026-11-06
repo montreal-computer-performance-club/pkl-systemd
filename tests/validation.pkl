@@ -15,7 +15,7 @@ facts {
         what = "/dev/test"
         where = "/mnt/test"
       }
-      install = new { wantedBy = "local-fs.target" }
+      install = new { wantedBy { "local-fs.target" } }
     }
     mount.output.text.contains("What=/dev/test")
     mount.output.text.contains("Where=/mnt/test")
@@ -26,9 +26,9 @@ facts {
       unit = new { description = "Test" }
       service = new {
         type = "notify"
-        execStart = "/bin/true"
+        execStart { "/bin/true" }
       }
-      install = new { wantedBy = "multi-user.target" }
+      install = new { wantedBy { "multi-user.target" } }
     }
     service.output.text.contains("Type=notify")
   }
@@ -43,9 +43,9 @@ facts {
       service = new {
         remainAfterExit = true
         guessMainPID = false
-        execStart = "/bin/true"
+        execStart { "/bin/true" }
       }
-      install = new { wantedBy = "multi-user.target" }
+      install = new { wantedBy { "multi-user.target" } }
     }
     service.output.text.contains("DefaultDependencies=yes")
     service.output.text.contains("AllowIsolate=no")
@@ -58,13 +58,13 @@ facts {
       unit = new {
         description = "Empty listing test"
         wants = new Listing {} // Empty listing should be omitted
-        after = "network.target" // Non-empty should be included
+        after { "network.target" } // Non-empty should be included
       }
       service = new {
-        execStart = "/bin/true"
-        execStartPre = new Listing {} // Empty listing should be omitted
+        execStart { "/bin/true" }
+        execStartPre = new Listing {}
       }
-      install = new { wantedBy = "multi-user.target" }
+      install = new { wantedBy { "multi-user.target" } }
     }
     !service.output.text.contains("Wants=")
     service.output.text.contains("After=network.target")
@@ -81,9 +81,9 @@ facts {
           ["VAR_WITH_EQUALS"] = "key=value"
           ["VAR_WITH_QUOTES"] = "\"quoted value\""
         }
-        execStart = "/bin/true"
+        execStart { "/bin/true" }
       }
-      install = new { wantedBy = "multi-user.target" }
+      install = new { wantedBy { "multi-user.target" } }
     }
     service.output.text.contains("Environment=SIMPLE_VAR=value")
     service.output.text.contains("Environment=VAR_WITH_SPACES=value with spaces")
@@ -98,7 +98,7 @@ facts {
         onCalendar = "Mon..Fri 09:00:00"
         persistent = true
       }
-      install = new { wantedBy = "timers.target" }
+      install = new { wantedBy { "timers.target" } }
     }
     timer.output.text.contains("OnCalendar=Mon..Fri 09:00:00")
   }
@@ -114,7 +114,7 @@ facts {
         }
         accept = true
       }
-      install = new { wantedBy = "sockets.target" }
+      install = new { wantedBy { "sockets.target" } }
     }
     socket.output.text.contains("ListenStream=[::1]:8080")
     socket.output.text.contains("ListenStream=127.0.0.1:8080")
@@ -129,9 +129,9 @@ facts {
         timeoutStopSec = 1.min
         runtimeMaxSec = 24.h
         watchdogSec = 0.s // 0 means infinity in systemd
-        execStart = "/bin/true"
+        execStart { "/bin/true" }
       }
-      install = new { wantedBy = "multi-user.target" }
+      install = new { wantedBy { "multi-user.target" } }
     }
     service.output.text.contains("TimeoutStartSec=30")
     service.output.text.contains("TimeoutStopSec=60")
@@ -144,9 +144,9 @@ facts {
       unit = new { description = "Section order test" }
       service = new {
         type = "simple"
-        execStart = "/bin/true"
+        execStart { "/bin/true" }
       }
-      install = new { wantedBy = "multi-user.target" }
+      install = new { wantedBy { "multi-user.target" } }
     }
     local text = service.output.text
     local unitIndex = text.indexOf("[Unit]")
@@ -161,17 +161,19 @@ facts {
     local service = new Service {
       unit = new {
         description = "Capitalization test"
-        requiresMountsFor = "/var/lib/app"
-        wantsMountsFor = "/tmp"
+        requiresMountsFor { "/var/lib/app" }
+        wantsMountsFor { "/tmp" }
       }
       service = new {
-        execStartPre = "/bin/setup"
-        execStart = "/bin/app"
+        execStartPre { "/bin/setup" }
+        execStart { "/bin/app" }
         fileDescriptorStoreMax = 10
       }
       install = new {
-        wantedBy = "multi-user.target"
-        requiredBy = "app.target"
+        wantedBy {
+          "multi-user.target"
+        }
+        requiredBy { "app.target" }
       }
     }
     service.output.text.contains("RequiresMountsFor=/var/lib/app")

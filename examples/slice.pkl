@@ -3,11 +3,11 @@ amends "../Slice.pkl"
 // Example slice unit for resource management
 unit = new {
   description = "Application slice for web services"
-  documentation = "https://example.com/docs/resource-management"
+  documentation { "https://example.com/docs/resource-management" }
 
   // Slice hierarchy
-  requires = "-.slice"
-  after = "-.slice"
+  requires { "-.slice" }
+  after { "-.slice" }
 }
 
 slice = new {
@@ -37,7 +37,7 @@ slice = new {
 
   // Device access policy
   devicePolicy = "strict"
-  deviceAllow = new Listing {
+  deviceAllow {
     "/dev/null rw"
     "/dev/zero rw"
     "/dev/random r"
@@ -46,5 +46,5 @@ slice = new {
 }
 
 install = new {
-  wantedBy = "slices.target"
+  wantedBy { "slices.target" }
 }

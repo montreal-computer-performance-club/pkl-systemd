@@ -2,13 +2,13 @@ amends "../Socket.pkl"
 
 unit = new {
   description = "Example socket for service communication"
-  requires = "network.target"
-  after = "network.target"
+  requires { "network.target" }
+  after { "network.target" }
 }
 
 socket = new {
   // Listen on a Unix domain socket
-  listenStream = "/var/run/example.socket"
+  listenStream { "/var/run/example.socket" }
 
   // Socket permissions
   socketMode = "0660"
@@ -24,5 +24,5 @@ socket = new {
 }
 
 install = new {
-  wantedBy = "sockets.target"
+  wantedBy { "sockets.target" }
 }

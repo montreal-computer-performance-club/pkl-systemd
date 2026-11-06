@@ -2,7 +2,7 @@ amends "../Timer.pkl"
 
 unit = new {
   description = "Cleanup podman resources timer"
-  after = "podman.service"
+  after { "podman.service" }
 }
 timer = new {
   // Run every hour after the unit becomes inactive
@@ -15,5 +15,5 @@ timer = new {
   persistent = true
 }
 install = new {
-  wantedBy = "multi-user.target"
+  wantedBy { "multi-user.target" }
 }

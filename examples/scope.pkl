@@ -3,7 +3,7 @@ amends "../Scope.pkl"
 // Example scope unit for managing external processes
 unit = new {
   description = "User session scope for external processes"
-  documentation = "man:systemd.scope(5)"
+  documentation { "man:systemd.scope(5)" }
 
   // Scope units are typically created programmatically
   // This example shows configuration options that can be set

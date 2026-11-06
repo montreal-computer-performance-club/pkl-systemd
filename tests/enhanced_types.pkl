@@ -11,8 +11,8 @@ local testService = new Service {
     refuseManualStart = false
 
     // Test single String for union types
-    after = "network.target"
-    requires = "basic.target"
+    after { "network.target" }
+    requires { "basic.target" }
 
     // Test Listing for union types
     wants = new Listing {
@@ -25,7 +25,7 @@ local testService = new Service {
     }
 
     // Test mixed usage
-    onFailure = "emergency.target"
+    onFailure { "emergency.target" }
     documentation = new Listing {
       "man:test(8)"
       "https://example.com/docs"
@@ -40,14 +40,14 @@ local testService = new Service {
     rootDirectoryStartOnly = false
     sendSIGHUP = true
     sendSIGKILL = false
-    execStart = "/usr/bin/test-service"
+    execStart { "/usr/bin/test-service" }
     restart = "on-failure"
     restartSec = 5.s
   }
 
   install = new {
     // Test single value
-    wantedBy = "multi-user.target"
+    wantedBy { "multi-user.target" }
 
     // Test multiple values
     also = new Listing {

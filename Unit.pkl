@@ -38,7 +38,7 @@ class UnitSection {
   /// list is reset and all prior assignments will have no effect.
   ///
   /// Added in version 201.
-  documentation: (String | Listing<String>)?
+  documentation: Listing<String>?
 
   /// Configures (weak) requirement dependencies on other units. This option may
   /// be specified more than once or multiple space-separated units may be
@@ -61,7 +61,7 @@ class UnitSection {
   /// and without any delay between them if `foo.service` is activated.
   ///
   /// Added in version 201.
-  wants: (String | Listing<String>)?
+  wants: Listing<String>?
 
   /// Similar to `Wants=`, but declares a stronger requirement dependency.
   /// Dependencies of this type may also be configured by adding a symlink to a
@@ -90,7 +90,7 @@ class UnitSection {
   /// state (see below).
   ///
   /// Added in version 201.
-  requires: (String | Listing<String>)?
+  requires: Listing<String>?
 
   /// Similar to `Requires=`. However, if the units listed here are not started
   /// already, they will not be started and the starting of this unit will fail
@@ -104,7 +104,7 @@ class UnitSection {
   /// `RequisiteOf=` dependency cannot be specified directly.
   ///
   /// Added in version 201.
-  requisite: (String | Listing<String>)?
+  requisite: Listing<String>?
 
   /// Configures requirement dependencies, very similar in style to `Requires=`.
   /// However, this dependency type is stronger: in addition to the effects of
@@ -131,7 +131,7 @@ class UnitSection {
   /// dependency cannot be specified directly.
   ///
   /// Added in version 201.
-  bindsTo: (String | Listing<String>)?
+  bindsTo: Listing<String>?
 
   /// Configures dependencies similar to `Requires=`, but limited to stopping
   /// and restarting of units. When systemd stops or restarts the units listed
@@ -143,7 +143,7 @@ class UnitSection {
   /// `ConsistsOf=` dependency cannot be specified directly.
   ///
   /// Added in version 201.
-  partOf: (String | Listing<String>)?
+  partOf: Listing<String>?
 
   /// Configures dependencies similar to `Wants=`, but as long as this unit is
   /// up, all units listed in `Upholds=` are started whenever found to be
@@ -159,7 +159,7 @@ class UnitSection {
   /// as `UpheldBy=a.service` in the property listing of b.service.
   ///
   /// Added in version 249.
-  upholds: (String | Listing<String>)?
+  upholds: Listing<String>?
 
   /// A space-separated list of unit names. Configures negative requirement
   /// dependencies. If a unit has a `Conflicts=` requirement on a set of other
@@ -183,7 +183,7 @@ class UnitSection {
   /// conflicted is stopped.
   ///
   /// Added in version 201.
-  conflicts: (String | Listing<String>)?
+  conflicts: Listing<String>?
 
   /// Configure ordering dependencies between units. If unit `foo.service`
   /// contains the setting `Before=bar.service` and both units are being
@@ -220,7 +220,7 @@ class UnitSection {
   /// without delay.
   ///
   /// Added in version 201.
-  before: (String | Listing<String>)?
+  before: Listing<String>?
 
   /// Configure ordering dependencies between units. If unit foo.service
   /// contains the setting `After=bar.service` and both units are being started,
@@ -257,19 +257,19 @@ class UnitSection {
   /// without delay.
   ///
   /// Added in version 201.
-  after: (String | Listing<String>)?
+  after: Listing<String>?
 
   /// A space-separated list of one or more units that are activated when this
   /// unit enters the `failed` state.
   ///
   /// Added in version 201.
-  onFailure: (String | Listing<String>)?
+  onFailure: Listing<String>?
 
   /// A space-separated list of one or more units that are activated when this
   /// unit enters the `inactive` state.
   ///
   /// Added in version 249.
-  onSuccess: (String | Listing<String>)?
+  onSuccess: Listing<String>?
 
   /// `OnFailureJobMode=` defaults to `replace`. Specifies how the units listed in
   /// `OnFailure=` will be enqueued. See systemctl(1)'s `--job-mode=` option for
@@ -293,7 +293,7 @@ class UnitSection {
   /// it using this setting.
   ///
   /// Added in version 201.
-  propagatesReloadTo: (String | Listing<String>)?
+  propagatesReloadTo: Listing<String>?
 
   /// A space-separated list of one or more units from which reload requests shall
   /// be propagated to this unit. Issuing a reload request on a unit will
@@ -301,7 +301,7 @@ class UnitSection {
   /// it using this setting.
   ///
   /// Added in version 201.
-  reloadPropagatedFrom: (String | Listing<String>)?
+  reloadPropagatedFrom: Listing<String>?
 
   /// A space-separated list of one or more units to which stop requests from this
   /// unit shall be propagated to. Issuing a stop request on a unit will
@@ -309,7 +309,7 @@ class UnitSection {
   /// using this setting.
   ///
   /// Added in version 249.
-  propagatesStopTo: (String | Listing<String>)?
+  propagatesStopTo: Listing<String>?
 
   /// A space-separated list of one or more units from which stop requests shall
   /// be propagated to this unit. Issuing a stop request on a unit will
@@ -317,7 +317,7 @@ class UnitSection {
   /// using this setting.
   ///
   /// Added in version 249.
-  stopPropagatedFrom: (String | Listing<String>)?
+  stopPropagatedFrom: Listing<String>?
 
   /// For units that start processes (such as service units), lists one or more
   /// other units whose network and/or temporary file namespace to join. If this
@@ -336,7 +336,7 @@ class UnitSection {
   /// and the unit whose namespace is joined.
   ///
   /// Added in version 209.
-  joinsNamespaceOf: (String | Listing<String>)?
+  joinsNamespaceOf: Listing<String>?
 
   /// Takes a space-separated list of absolute paths. Automatically adds
   /// dependencies of type `Requires=` and `After=` for all mount units required
@@ -347,13 +347,13 @@ class UnitSection {
   /// i.e. they will be pulled in by this unit.
   ///
   /// Added in version 201.
-  requiresMountsFor: (String | Listing<String>)?
+  requiresMountsFor: Listing<String>?
 
   /// Same as `RequiresMountsFor=`, but adds dependencies of type `Wants=`
   /// instead of `Requires=`.
   ///
   /// Added in version 256.
-  wantsMountsFor: (String | Listing<String>)?
+  wantsMountsFor: Listing<String>?
 
   /// `JobTimeoutSec=` specifies a timeout for the whole job that starts running
   /// when the job is queued. If the limit is reached, the job will be cancelled,
@@ -722,7 +722,7 @@ class InstallSection {
   /// aliasing.
   ///
   /// Added in version 201.
-  alias: (String | Listing<String>)?
+  alias: Listing<String>?
 
   /// A symbolic link is created in the `.requires` directory of each of the
   /// listed units when this unit is installed by **systemctl enable**. This has
@@ -731,7 +731,7 @@ class InstallSection {
   /// for details.
   ///
   /// Added in version 201.
-  requiredBy: (String | Listing<String>)?
+  requiredBy: Listing<String>?
 
   /// A symbolic link is created in the `.upholds/` directory of each of the
   /// listed units when this unit is installed by **systemctl enable**. This has
@@ -740,7 +740,7 @@ class InstallSection {
   /// details.
   ///
   /// Added in version 201.
-  upheldBy: (String | Listing<String>)?
+  upheldBy: Listing<String>?
 
   /// A symbolic link is created in the `.wants/` directory of each of the
   /// listed units when this unit is installed by **systemctl enable**. This has
@@ -749,7 +749,7 @@ class InstallSection {
   /// details.
   ///
   /// Added in version 201.
-  wantedBy: (String | Listing<String>)?
+  wantedBy: Listing<String>?
 
   /// Additional units to install/deinstall when this unit is
   /// installed/deinstalled. If the user requests installation/deinstallation of
@@ -760,7 +760,7 @@ class InstallSection {
   /// names may be given.
   ///
   /// Added in version 201.
-  also: (String | Listing<String>)?
+  also: Listing<String>?
 
   /// In template unit files, this specifies for which instance the unit shall
   /// be enabled if the template is enabled without any explicitly set instance.

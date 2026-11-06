@@ -3,24 +3,24 @@ amends "../Timer.pkl"
 // Comprehensive timer example for daily backup operations
 unit = new {
   description = "Daily backup timer with flexible scheduling"
-  documentation = "man:backup-service(8)"
+  documentation { "man:backup-service(8)" }
 
   // Ensure we have network and storage available
-  requires = new Listing {
+  requires {
     "network.target"
     "local-fs.target"
   }
-  after = new Listing {
+  after {
     "network-online.target"
     "backup.service"
   }
 
   // Don't run during shutdown
-  conflicts = "shutdown.target"
-  before = "shutdown.target"
+  conflicts { "shutdown.target" }
+  before { "shutdown.target" }
 
   // Mount requirements for backup storage
-  requiresMountsFor = "/backup/storage"
+  requiresMountsFor { "/backup/storage" }
 }
 
 timer = new {
@@ -51,8 +51,8 @@ timer = new {
 }
 
 install = new {
-  wantedBy = "timers.target"
+  wantedBy { "timers.target" }
 
   // Also enable the backup service when this timer is enabled
-  also = "backup.service"
+  also { "backup.service" }
 }

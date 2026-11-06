@@ -9,9 +9,9 @@ socket: SocketSection
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.socket.html
 class SocketSection {
   // Listen addresses and types
-  listenStream: (String | Listing<String>)?
-  listenDatagram: (String | Listing<String>)?
-  listenSequentialPacket: (String | Listing<String>)?
+  listenStream: Listing<String>?
+  listenDatagram: Listing<String>?
+  listenSequentialPacket: Listing<String>?
   listenFIFO: String?
   listenSpecial: String?
   listenNetlink: String?
@@ -82,10 +82,10 @@ class SocketSection {
   tCPCongestion: String?
 
   // Execution hooks
-  execStartPre: (String | Listing<String>)?
-  execStartPost: (String | Listing<String>)?
-  execStopPre: (String | Listing<String>)?
-  execStopPost: (String | Listing<String>)?
+  execStartPre: Listing<String>?
+  execStartPost: Listing<String>?
+  execStopPre: Listing<String>?
+  execStopPost: Listing<String>?
 
   // Service integration
   timeoutSec: Duration?

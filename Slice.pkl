@@ -60,19 +60,19 @@ class SliceSection {
   blockIOWriteBandwidth: String?
 
   // Device access control
-  deviceAllow: (String | Listing<String>)?
+  deviceAllow: Listing<String>?
   devicePolicy: DevicePolicy?
 
   // IP accounting and filtering
   iPAccounting: Boolean?
-  iPAddressAllow: (String | Listing<String>)?
-  iPAddressDeny: (String | Listing<String>)?
-  iPIngressFilterPath: (String | Listing<String>)?
-  iPEgressFilterPath: (String | Listing<String>)?
+  iPAddressAllow: Listing<String>?
+  iPAddressDeny: Listing<String>?
+  iPIngressFilterPath: Listing<String>?
+  iPEgressFilterPath: Listing<String>?
 
   // Control group delegation
   delegate: Boolean?
-  disableControllers: (String | Listing<String>)?
+  disableControllers: Listing<String>?
   managedOOMRoot: Boolean?
 }
 

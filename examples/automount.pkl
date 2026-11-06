@@ -3,24 +3,24 @@ amends "../Automount.pkl"
 // Example automount unit for on-demand mounting
 unit = new {
   description = "Automount for user home directories"
-  documentation = new Listing {
+  documentation {
     "man:systemd.automount(5)"
     "man:autofs(8)"
   }
 
   // Dependencies
-  requires = new Listing {
+  requires {
     "network.target"
     "nfs-client.target"
   }
-  after = new Listing {
+  after {
     "network.target"
     "nfs-client.target"
   }
 
   // Conflicts with shutdown
-  conflicts = "umount.target"
-  before = "umount.target"
+  conflicts { "umount.target" }
+  before { "umount.target" }
 }
 
 automount = new {
@@ -38,5 +38,5 @@ automount = new {
 }
 
 install = new {
-  wantedBy = "remote-fs.target"
+  wantedBy { "remote-fs.target" }
 }

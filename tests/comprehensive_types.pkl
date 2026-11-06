@@ -18,8 +18,8 @@ local testService = new Service {
       "file:///usr/share/doc/test/README"
     }
 
-    // Dependencies - test mixed single and multiple values
-    wants = "basic.target"
+    // Dependencies - test amending and assigning
+    wants { "basic.target" }
     requires = new Listing {
       "network.target"
       "time-sync.target"
@@ -28,7 +28,7 @@ local testService = new Service {
       "network.target"
       "systemd-resolved.service"
     }
-    before = "multi-user.target"
+    before { "multi-user.target" }
 
     // Test all boolean properties
     defaultDependencies = false
@@ -66,7 +66,7 @@ local testService = new Service {
       "/usr/bin/pre-start-1"
       "/usr/bin/pre-start-2"
     }
-    execStart = "/usr/bin/main-service"
+    execStart { "/usr/bin/main-service" }
     execStop = new Listing {
       "/usr/bin/graceful-stop"
       "/usr/bin/cleanup"
@@ -110,8 +110,8 @@ local testService = new Service {
       "multi-user.target"
       "graphical.target"
     }
-    requiredBy = "application.target"
-    also = "test-helper.service"
+    requiredBy { "application.target" }
+    also { "test-helper.service" }
     alias = new Listing {
       "test.service"
       "legacy-test.service"
@@ -122,8 +122,8 @@ local testService = new Service {
 local testTimer = new Timer {
   unit = new {
     description = "Comprehensive Timer Type Test"
-    requires = "time-sync.target"
-    after = "time-sync.target"
+    requires { "time-sync.target" }
+    after { "time-sync.target" }
   }
 
   timer = new {
@@ -151,15 +151,15 @@ local testTimer = new Timer {
   }
 
   install = new {
-    wantedBy = "timers.target"
+    wantedBy { "timers.target" }
   }
 }
 
 local testSocket = new Socket {
   unit = new {
     description = "Comprehensive Socket Type Test"
-    requires = "network.target"
-    conflicts = "shutdown.target"
+    requires { "network.target" }
+    conflicts { "shutdown.target" }
   }
 
   socket = new {
@@ -168,7 +168,7 @@ local testSocket = new Socket {
       "127.0.0.1:8080"
       "/run/test.sock"
     }
-    listenDatagram = "0.0.0.0:9090"
+    listenDatagram { "0.0.0.0:9090" }
 
     // Test all boolean socket properties
     accept = true
@@ -206,17 +206,17 @@ local testSocket = new Socket {
   }
 
   install = new {
-    wantedBy = "sockets.target"
-    requiredBy = "test.service"
+    wantedBy { "sockets.target" }
+    requiredBy { "test.service" }
   }
 }
 
 local testMount = new Mount {
   unit = new {
     description = "Comprehensive Mount Type Test"
-    requires = "network-online.target"
-    conflicts = "umount.target"
-    requiresMountsFor = "/mnt"
+    requires { "network-online.target" }
+    conflicts { "umount.target" }
+    requiresMountsFor { "/mnt" }
   }
 
   mount = new {
@@ -236,8 +236,8 @@ local testMount = new Mount {
   }
 
   install = new {
-    wantedBy = "local-fs.target"
-    requiredBy = "test-data.service"
+    wantedBy { "local-fs.target" }
+    requiredBy { "test-data.service" }
   }
 }
 

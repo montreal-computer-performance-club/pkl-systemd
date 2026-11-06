@@ -17,13 +17,13 @@ local class ServiceSection {
   busName: String?
 
   // Execution commands
-  execStart: (String | Listing<String>)?
-  execStartPre: (String | Listing<String>)?
-  execStartPost: (String | Listing<String>)?
-  execCondition: (String | Listing<String>)?
-  execReload: (String | Listing<String>)?
-  execStop: (String | Listing<String>)?
-  execStopPost: (String | Listing<String>)?
+  execStart: Listing<String>?
+  execStartPre: Listing<String>?
+  execStartPost: Listing<String>?
+  execCondition: Listing<String>?
+  execReload: Listing<String>?
+  execStop: Listing<String>?
+  execStopPost: Listing<String>?
 
   // Restart configuration
   restart: RestartPolicy?
@@ -31,8 +31,8 @@ local class ServiceSection {
   restartSteps: UInt?
   restartMaxDelaySec: Duration?
   restartMode: RestartMode?
-  restartForceExitStatus: (String | Listing<String>)?
-  restartPreventExitStatus: (String | Listing<String>)?
+  restartForceExitStatus: Listing<String>?
+  restartPreventExitStatus: Listing<String>?
   restartKillSignal: String?
 
   // Timeout configuration
@@ -60,15 +60,15 @@ local class ServiceSection {
 
   // Environment
   environment: Mapping<String, String>?
-  environmentFile: (String | Listing<String>)?
+  environmentFile: Listing<String>?
 
   // Status and exit handling
-  successExitStatus: (String | Listing<String>)?
+  successExitStatus: Listing<String>?
   nonBlocking: Boolean?
   notifyAccess: NotifyAccess?
 
   // File descriptors
-  sockets: (String | Listing<String>)?
+  sockets: Listing<String>?
   fileDescriptorStoreMax: UInt?
   fileDescriptorStorePreserve: String?
 
@@ -79,7 +79,7 @@ local class ServiceSection {
   // Advanced options
   rootDirectoryStartOnly: Boolean?
   oomPolicy: OOMPolicy?
-  openFile: (String | Listing<String>)?
+  openFile: Listing<String>?
 }
 
 local typealias ServiceType =

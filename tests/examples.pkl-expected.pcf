@@ -1,5 +1,5 @@
 examples {
-  ["../examples/advanced_service.pkl"] {
+  ["advanced_service.pkl"] {
     """
     [Unit]
     Description=Advanced microservice with comprehensive configuration
@@ -84,7 +84,7 @@ examples {
     
     """
   }
-  ["../examples/automount.pkl"] {
+  ["automount.pkl"] {
     """
     [Unit]
     Description=Automount for user home directories
@@ -108,7 +108,7 @@ examples {
     
     """
   }
-  ["../examples/backup_timer.pkl"] {
+  ["backup_timer.pkl"] {
     """
     [Unit]
     Description=Daily backup timer with flexible scheduling
@@ -142,7 +142,7 @@ examples {
     
     """
   }
-  ["../examples/enhanced_service.pkl"] {
+  ["enhanced_service.pkl"] {
     """
     [Unit]
     Description=Enhanced Service Example
@@ -178,7 +178,25 @@ examples {
     
     """
   }
-  ["../examples/mount.pkl"] {
+  ["hello.pkl"] {
+    """
+    [Unit]
+    Description=Hello World Service
+    Wants=network-online.target
+    After=network-online.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Service]
+    Type=simple
+    ExecStart=/usr/bin/echo 'Hello World'
+    Restart=on-failure
+    RestartSec=5s
+    
+    """
+  }
+  ["mount.pkl"] {
     #"""
     [Unit]
     Description=Example filesystem mount
@@ -201,7 +219,7 @@ examples {
     
     """#
   }
-  ["../examples/network_mount.pkl"] {
+  ["network_mount.pkl"] {
     """
     [Unit]
     Description=NFS mount for shared application data
@@ -246,7 +264,7 @@ examples {
     
     """
   }
-  ["../examples/path.pkl"] {
+  ["path.pkl"] {
     """
     [Unit]
     Description=Watch for configuration file changes
@@ -268,7 +286,7 @@ examples {
     
     """
   }
-  ["../examples/scope.pkl"] {
+  ["scope.pkl"] {
     """
     [Unit]
     Description=User session scope for external processes
@@ -298,7 +316,7 @@ examples {
     
     """
   }
-  ["../examples/service.pkl"] {
+  ["service.pkl"] {
     """
     [Unit]
     Description=testService
@@ -322,7 +340,7 @@ examples {
     
     """
   }
-  ["../examples/slice.pkl"] {
+  ["slice.pkl"] {
     """
     [Unit]
     Description=Application slice for web services
@@ -356,7 +374,7 @@ examples {
     
     """
   }
-  ["../examples/socket.pkl"] {
+  ["socket.pkl"] {
     """
     [Unit]
     Description=Example socket for service communication
@@ -377,7 +395,7 @@ examples {
     
     """
   }
-  ["../examples/swap.pkl"] {
+  ["swap.pkl"] {
     """
     [Unit]
     Description=Swap file /swapfile
@@ -399,7 +417,7 @@ examples {
     
     """
   }
-  ["../examples/target.pkl"] {
+  ["target.pkl"] {
     """
     [Unit]
     Description=Web Stack Target
@@ -423,7 +441,7 @@ examples {
     
     """
   }
-  ["../examples/timer.pkl"] {
+  ["timer.pkl"] {
     """
     [Unit]
     Description=Cleanup podman resources timer
@@ -439,7 +457,7 @@ examples {
     
     """
   }
-  ["../examples/web_socket.pkl"] {
+  ["web_socket.pkl"] {
     """
     [Unit]
     Description=Web service socket with multiple listeners

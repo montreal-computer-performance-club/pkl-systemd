@@ -2,10 +2,10 @@ amends "../Mount.pkl"
 
 unit = new {
   description = "Example filesystem mount"
-  requires = "systemd-fsck@dev-disk-by\\x2duuid\\x2d12345.service"
-  after = "systemd-fsck@dev-disk-by\\x2duuid\\x2d12345.service"
-  conflicts = "umount.target"
-  before = "umount.target"
+  requires { "systemd-fsck@dev-disk-by\\x2duuid\\x2d12345.service" }
+  after { "systemd-fsck@dev-disk-by\\x2duuid\\x2d12345.service" }
+  conflicts { "umount.target" }
+  before { "umount.target" }
 }
 mount = new {
   // What to mount (device or remote location)
@@ -30,5 +30,5 @@ mount = new {
   forceUnmount = true
 }
 install = new {
-  wantedBy = "multi-user.target"
+  wantedBy { "multi-user.target" }
 }

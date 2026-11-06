@@ -3,11 +3,11 @@ amends "../Path.pkl"
 // Example path unit for watching configuration changes
 unit = new {
   description = "Watch for configuration file changes"
-  documentation = "man:app-config-watcher(8)"
+  documentation { "man:app-config-watcher(8)" }
 
   // Ensure the target service exists
-  requires = "app-reload.service"
-  after = "app-reload.service"
+  requires { "app-reload.service" }
+  after { "app-reload.service" }
 }
 
 path = new {
@@ -30,5 +30,5 @@ path = new {
 }
 
 install = new {
-  wantedBy = "multi-user.target"
+  wantedBy { "multi-user.target" }
 }

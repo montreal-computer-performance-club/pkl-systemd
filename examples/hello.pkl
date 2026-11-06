@@ -1,0 +1,18 @@
+amends "../Service.pkl"
+
+unit = new {
+  description = "Hello World Service"
+  wants { "network-online.target" }
+  after { "network-online.target" }
+}
+
+service = new {
+  type = "simple"
+  execStart { "/usr/bin/echo 'Hello World'" }
+  restart = "on-failure"
+  restartSec = 5.s
+}
+
+install = new {
+  wantedBy { "multi-user.target" }
+}

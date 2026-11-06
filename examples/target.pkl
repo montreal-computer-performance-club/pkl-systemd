@@ -3,36 +3,36 @@ amends "../Target.pkl"
 // Example target unit for grouping related services
 unit = new {
   description = "Web Stack Target"
-  documentation = "https://example.com/docs/web-stack"
+  documentation { "https://example.com/docs/web-stack" }
 
   // Dependencies on required services
-  wants = new Listing {
+  wants {
     "nginx.service"
     "postgresql.service"
     "redis.service"
   }
-  requires = new Listing {
+  requires {
     "network.target"
     "multi-user.target"
   }
-  after = new Listing {
+  after {
     "network.target"
     "multi-user.target"
   }
 
   // Conflicts with shutdown
-  conflicts = "shutdown.target"
-  before = "shutdown.target"
+  conflicts { "shutdown.target" }
+  before { "shutdown.target" }
 
   // Allow manual isolation
   allowIsolate = true
 }
 
 install = new {
-  wantedBy = "multi-user.target"
+  wantedBy { "multi-user.target" }
 
   // Also enable dependent services
-  also = new Listing {
+  also {
     "nginx.service"
     "postgresql.service"
     "redis.service"
