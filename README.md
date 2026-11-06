@@ -17,18 +17,18 @@ Add the package to your `PklProject` dependencies:
 
 ```
 dependencies {
-    ["systemd"] = "package://pkl.declix.org/pkl-systemd@X.Y.Z"
+    ["systemd"] = "package://github.com/montreal-computer-performance-club/pkl-systemd/releases/download/X.Y.Z/pkl-systemd@X.Y.Z"
 }
 ```
 
-For the current version and release-specific notes, see the **[latest release notes](https://github.com/declix/pkl-systemd/releases/latest)**.
+For the current version and release-specific notes, see the **[latest release notes](https://github.com/montreal-computer-performance-club/pkl-systemd/releases/latest)**.
 
 ## Quick Start
 
 Create `hello.pkl` (this is [`examples/hello.pkl`](examples/hello.pkl), with the package URI in place of the relative path):
 
 ```pkl
-amends "package://pkl.declix.org/pkl-systemd@X.Y.Z#/Service.pkl"
+amends "package://github.com/montreal-computer-performance-club/pkl-systemd/releases/download/X.Y.Z/pkl-systemd@X.Y.Z#/Service.pkl"
 
 unit = new {
   description = "Hello World Service"
@@ -85,7 +85,7 @@ Amend the module for the unit type you want, as in the Quick Start above. The mo
 Import the `systemd` module and create unit instances:
 
 ```pkl
-import "package://pkl.declix.org/pkl-systemd@X.Y.Z#/systemd.pkl" as systemd
+import "package://github.com/montreal-computer-performance-club/pkl-systemd/releases/download/X.Y.Z/pkl-systemd@X.Y.Z#/systemd.pkl" as systemd
 
 output {
   text = (new systemd.Service {
