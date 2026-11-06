@@ -23,7 +23,7 @@ examples {
     
     """
   }
-  ["backup_timer.pkl"] {
+  ["backup-timer.pkl"] {
     """
     [Unit]
     Description=Daily backup timer with flexible scheduling
@@ -98,7 +98,7 @@ examples {
     
     """#
   }
-  ["network_mount.pkl"] {
+  ["network-mount.pkl"] {
     """
     [Unit]
     Description=NFS mount for shared application data
@@ -165,7 +165,7 @@ examples {
     
     """
   }
-  ["podman_service.pkl"] {
+  ["podman-service.pkl"] {
     """
     [Unit]
     Description=testService
@@ -189,7 +189,7 @@ examples {
     
     """
   }
-  ["reference_service.pkl"] {
+  ["reference-service.pkl"] {
     """
     [Unit]
     Description=Advanced microservice with comprehensive configuration
@@ -421,7 +421,7 @@ examples {
     
     """
   }
-  ["web_socket.pkl"] {
+  ["web-socket.pkl"] {
     """
     [Unit]
     Description=Web service socket with multiple listeners
