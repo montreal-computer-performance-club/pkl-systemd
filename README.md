@@ -114,7 +114,7 @@ Every unit type has at least one example in the [`examples/`](examples/) directo
 
 | Module | Description | Documentation | Examples |
 |--------|-------------|---------------|----------|
-| `Service.pkl` | Service units for running processes | [systemd.service(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html) | [hello](examples/hello.pkl), [service](examples/service.pkl), [enhanced_service](examples/enhanced_service.pkl), [advanced_service](examples/advanced_service.pkl) |
+| `Service.pkl` | Service units for running processes | [systemd.service(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html) | [hello](examples/hello.pkl), [podman_service](examples/podman_service.pkl), [reference_service](examples/reference_service.pkl) |
 | `Timer.pkl` | Timer units for scheduled execution | [systemd.timer(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html) | [timer](examples/timer.pkl), [backup_timer](examples/backup_timer.pkl) |
 | `Socket.pkl` | Socket units for socket-based activation | [systemd.socket(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.socket.html) | [socket](examples/socket.pkl), [web_socket](examples/web_socket.pkl) |
 | `Mount.pkl` | Mount units for filesystem mounting | [systemd.mount(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.mount.html) | [mount](examples/mount.pkl), [network_mount](examples/network_mount.pkl) |

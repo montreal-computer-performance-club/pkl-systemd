@@ -1,89 +1,4 @@
 examples {
-  ["advanced_service.pkl"] {
-    """
-    [Unit]
-    Description=Advanced microservice with comprehensive configuration
-    Documentation=man:advanced-service(8)
-    Documentation=https://example.com/docs/advanced-service
-    Documentation=file:///usr/share/doc/advanced-service/README.md
-    Wants=network-online.target
-    Wants=time-sync.target
-    Wants=systemd-resolved.service
-    Requires=basic.target
-    Conflicts=shutdown.target
-    Before=multi-user.target
-    After=network-online.target
-    After=systemd-resolved.service
-    OnFailure=notify-failure@%n.service
-    RequiresMountsFor=/var/lib/advanced-service
-    RequiresMountsFor=/run/advanced-service
-    StartLimitAction=reboot
-    StartLimitBurst=5
-    StartLimitIntervalSec=300s
-    AllowIsolate=no
-    DefaultDependencies=yes
-    
-    [Install]
-    Alias=microservice.service
-    RequiredBy=application.target
-    WantedBy=multi-user.target
-    Also=advanced-service-monitor.timer
-    Also=advanced-service-backup.service
-    
-    [Service]
-    Type=notify
-    ExitType=main
-    RemainAfterExit=no
-    GuessMainPID=no
-    PidFile=/run/advanced-service/service.pid
-    BusName=com.example.AdvancedService
-    ExecStart=/usr/bin/advanced-service --daemon --config=/etc/advanced-service/config.yaml
-    ExecStartPre=/usr/bin/mkdir -p /run/advanced-service
-    ExecStartPre=/usr/bin/chown advanced-service:advanced-service /run/advanced-service
-    ExecStartPre=/usr/bin/advanced-service --validate-config
-    ExecStartPost=/usr/bin/advanced-service --post-start-hook
-    ExecReload=/bin/kill -HUP $MAINPID
-    ExecStop=/usr/bin/advanced-service --graceful-shutdown
-    ExecStopPost=/usr/bin/rm -rf /run/advanced-service
-    Restart=on-failure
-    RestartSec=10s
-    RestartSteps=3
-    RestartMaxDelaySec=60s
-    RestartMode=normal
-    RestartForceExitStatus=SIGKILL
-    RestartForceExitStatus=SIGABRT
-    RestartPreventExitStatus=SIGUSR1
-    TimeoutStartSec=60s
-    TimeoutStopSec=30s
-    TimeoutAbortSec=10s
-    TimeoutStartFailureMode=terminate
-    TimeoutStopFailureMode=kill
-    RuntimeMaxSec=86400s
-    RuntimeRandomizedExtraSec=3600s
-    WatchdogSec=30s
-    WatchdogSignal=SIGTERM
-    KillMode=mixed
-    KillSignal=SIGTERM
-    FinalKillSignal=SIGKILL
-    SendSIGHUP=yes
-    SendSIGKILL=yes
-    Environment=SERVICE_ENV=production
-    Environment=LOG_LEVEL=info
-    Environment=CONFIG_FILE=/etc/advanced-service/config.yaml
-    Environment=DATA_DIR=/var/lib/advanced-service
-    EnvironmentFile=/etc/advanced-service/environment
-    EnvironmentFile=/etc/advanced-service/secrets.env
-    SuccessExitStatus=0
-    SuccessExitStatus=SIGUSR1
-    NonBlocking=no
-    NotifyAccess=main
-    FileDescriptorStoreMax=10
-    FileDescriptorStorePreserve=restart
-    RootDirectoryStartOnly=no
-    OomPolicy=stop
-    
-    """
-  }
   ["automount.pkl"] {
     """
     [Unit]
@@ -139,42 +54,6 @@ examples {
     WakeSystem=no
     RemainAfterElapse=no
     DeferReactivation=yes
-    
-    """
-  }
-  ["enhanced_service.pkl"] {
-    """
-    [Unit]
-    Description=Enhanced Service Example
-    Documentation=man:enhanced-service(8)
-    Documentation=https://example.com/docs/enhanced-service
-    Wants=network-online.target
-    Wants=time-sync.target
-    Wants=systemd-resolved.service
-    Requires=basic.target
-    Requires=sysinit.target
-    Conflicts=shutdown.target
-    After=network.target
-    AllowIsolate=yes
-    DefaultDependencies=no
-    
-    [Install]
-    WantedBy=multi-user.target
-    Also=enhanced-service-helper.service
-    Also=enhanced-service-monitor.timer
-    
-    [Service]
-    Type=notify
-    RemainAfterExit=no
-    GuessMainPID=yes
-    ExecStart=/usr/bin/enhanced-service --daemon
-    Restart=on-failure
-    RestartSec=10s
-    TimeoutStartSec=60s
-    SendSIGHUP=yes
-    SendSIGKILL=no
-    NonBlocking=no
-    RootDirectoryStartOnly=yes
     
     """
   }
@@ -286,6 +165,115 @@ examples {
     
     """
   }
+  ["podman_service.pkl"] {
+    """
+    [Unit]
+    Description=testService
+    Wants=network-online.target
+    After=network-online.target
+    RequiresMountsFor=/run/containers/storage
+    
+    [Install]
+    WantedBy=default.target
+    
+    [Service]
+    Type=forking
+    PidFile=%t/%n.pid
+    ExecStartPre=/usr/bin/rm -f %t/%n.pid %t/%n.cid
+    ExecReload=podman restart testService
+    ExecStop=/usr/bin/sh -c "podman rm -f `cat %t/%n.cid`"
+    Restart=always
+    TimeoutStopSec=70s
+    KillMode=control-group
+    Environment=PODMAN_SYSTEMD_UNIT=%n
+    
+    """
+  }
+  ["reference_service.pkl"] {
+    """
+    [Unit]
+    Description=Advanced microservice with comprehensive configuration
+    Documentation=man:advanced-service(8)
+    Documentation=https://example.com/docs/advanced-service
+    Documentation=file:///usr/share/doc/advanced-service/README.md
+    Wants=network-online.target
+    Wants=time-sync.target
+    Wants=systemd-resolved.service
+    Requires=basic.target
+    Conflicts=shutdown.target
+    Before=multi-user.target
+    After=network-online.target
+    After=systemd-resolved.service
+    OnFailure=notify-failure@%n.service
+    RequiresMountsFor=/var/lib/advanced-service
+    RequiresMountsFor=/run/advanced-service
+    StartLimitAction=reboot
+    StartLimitBurst=5
+    StartLimitIntervalSec=300s
+    AllowIsolate=no
+    DefaultDependencies=yes
+    
+    [Install]
+    Alias=microservice.service
+    RequiredBy=application.target
+    WantedBy=multi-user.target
+    Also=advanced-service-monitor.timer
+    Also=advanced-service-backup.service
+    
+    [Service]
+    Type=notify
+    ExitType=main
+    RemainAfterExit=no
+    GuessMainPID=no
+    PidFile=/run/advanced-service/service.pid
+    BusName=com.example.AdvancedService
+    ExecStart=/usr/bin/advanced-service --daemon --config=/etc/advanced-service/config.yaml
+    ExecStartPre=/usr/bin/mkdir -p /run/advanced-service
+    ExecStartPre=/usr/bin/chown advanced-service:advanced-service /run/advanced-service
+    ExecStartPre=/usr/bin/advanced-service --validate-config
+    ExecStartPost=/usr/bin/advanced-service --post-start-hook
+    ExecReload=/bin/kill -HUP $MAINPID
+    ExecStop=/usr/bin/advanced-service --graceful-shutdown
+    ExecStopPost=/usr/bin/rm -rf /run/advanced-service
+    Restart=on-failure
+    RestartSec=10s
+    RestartSteps=3
+    RestartMaxDelaySec=60s
+    RestartMode=normal
+    RestartForceExitStatus=SIGKILL
+    RestartForceExitStatus=SIGABRT
+    RestartPreventExitStatus=SIGUSR1
+    TimeoutStartSec=60s
+    TimeoutStopSec=30s
+    TimeoutAbortSec=10s
+    TimeoutStartFailureMode=terminate
+    TimeoutStopFailureMode=kill
+    RuntimeMaxSec=86400s
+    RuntimeRandomizedExtraSec=3600s
+    WatchdogSec=30s
+    WatchdogSignal=SIGTERM
+    KillMode=mixed
+    KillSignal=SIGTERM
+    FinalKillSignal=SIGKILL
+    SendSIGHUP=yes
+    SendSIGKILL=yes
+    Environment=SERVICE_ENV=production
+    Environment=LOG_LEVEL=info
+    Environment=CONFIG_FILE=/etc/advanced-service/config.yaml
+    Environment=DATA_DIR=/var/lib/advanced-service
+    EnvironmentFile=/etc/advanced-service/environment
+    EnvironmentFile=/etc/advanced-service/secrets.env
+    SuccessExitStatus=0
+    SuccessExitStatus=SIGUSR1
+    NonBlocking=no
+    NotifyAccess=main
+    FileDescriptorStoreMax=10
+    FileDescriptorStorePreserve=restart
+    RootDirectoryStartOnly=no
+    OomPolicy=stop
+    
+    """
+  }
   ["scope.pkl"] {
     """
     [Unit]
@@ -313,30 +301,6 @@ examples {
     FinalKillSignal=SIGKILL
     SendSIGHUP=no
     SendSIGKILL=yes
-    
-    """
-  }
-  ["service.pkl"] {
-    """
-    [Unit]
-    Description=testService
-    Wants=network-online.target
-    After=network-online.target
-    RequiresMountsFor=/run/containers/storage
-    
-    [Install]
-    WantedBy=default.target
-    
-    [Service]
-    Type=forking
-    PidFile=%t/%n.pid
-    ExecStartPre=/usr/bin/rm -f %t/%n.pid %t/%n.cid
-    ExecReload=podman restart testService
-    ExecStop=/usr/bin/sh -c "podman rm -f `cat %t/%n.cid`"
-    Restart=always
-    TimeoutStopSec=70s
-    KillMode=control-group
-    Environment=PODMAN_SYSTEMD_UNIT=%n
     
     """
   }
