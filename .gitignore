@@ -3,3 +3,4 @@ out/
 .local/
 *.pkl-actual.pcf
 dist/
+.pkl-lsp/
