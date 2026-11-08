@@ -234,6 +234,17 @@ This package closely follows the official systemd documentation. When adding new
 3. Add comprehensive tests and examples
 4. Update documentation
 
+### Releasing
+
+Releases are cut by pushing a tag named after the bare version:
+
+```bash
+git tag 1.2.3
+git push origin 1.2.3
+```
+
+The release workflow runs the tests, packages the project with that version, and publishes a GitHub release with the package metadata and zip attached. The tag name is part of the package URI, so it must be a plain `X.Y.Z` with no prefix.
+
 ## Future Enhancements
 
 - [ ] pkldoc documentation generation

@@ -1,61 +1,62 @@
 name: Release
 on:
   push:
-    branches:
-      - main
+    tags:
+      # Bare semantic versions, e.g. 1.2.3. The tag name becomes the package
+      # version and is part of the package URI, so it must not carry a prefix.
+      - "[0-9]+.[0-9]+.[0-9]+"
 
 permissions:
-  contents: read # for checkout
+  contents: read
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-24.04
-
     permissions:
-      contents: write # to be able to publish a GitHub release
-      issues: write # to be able to comment on released issues
-      pull-requests: write # to be able to comment on released pull requests
-      id-token: write # to enable use of OIDC for npm provenance
+      contents: write # to create the GitHub release and upload assets
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install Pkl
         uses: pkl-community/setup-pkl@v0
         with:
-          pkl-version: "0.28.2"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "lts/*"
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install --no-install-recommends --no-upgrade -y just
-          
-      - name: Install semenatic-release dependencies
-        run: |
-          npm install \
-            semantic-release \
-            @semantic-release/exec \
-            @semantic-release/git \
-            @semantic-release/github \
-            @semantic-release/commit-analyzer \
-            @semantic-release/release-notes-generator \
-            conventional-changelog-conventionalcommits \
-            -D
+          pkl-version: "0.31.1"
 
       - name: Run tests
-        run: |
-          pkl test
+        run: pkl test
 
-      - name: Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+      - name: Package
+        run: |
+          mkdir -p dist
+          PKL_PACKAGE_VERSION="${GITHUB_REF_NAME}" pkl project package --output-path dist
+
+      - name: Write release notes header
+        run: |
+          cat > notes.md <<EOF
+          ## Installation
+
+          Add to your \`PklProject\` dependencies:
+
+          \`\`\`
+          dependencies {
+              ["systemd"] = "package://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/pkl-systemd@${GITHUB_REF_NAME}"
+          }
+          \`\`\`
+
+          Or amend a unit module directly:
+
+          \`\`\`pkl
+          amends "package://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/pkl-systemd@${GITHUB_REF_NAME}#/Service.pkl"
+          \`\`\`
+
+          EOF
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: notes.md
+          generate_release_notes: true
+          files: dist/*

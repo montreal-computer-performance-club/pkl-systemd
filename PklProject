@@ -2,7 +2,7 @@ amends "pkl:Project"
 
 package {
   name = "pkl-systemd"
-  version = "0.0.8"
+  version = read?("env:PKL_PACKAGE_VERSION") ?? "0.0.0"
   baseUri = "package://github.com/montreal-computer-performance-club/pkl-systemd/releases/download/\(version)/\(name)"
   license = "MIT"
   authors {
