@@ -1,0 +1,30 @@
+examples {
+  ["web pod quadlet"] {
+    """
+    [Unit]
+    Description=Web Application Pod
+    After=network.target
+
+    [Install]
+    WantedBy=multi-user.target
+
+    [Pod]
+    PodName=webapp
+    Network=bridge
+    PublishPort=8080:80
+    PublishPort=8443:443
+    Dns=8.8.8.8
+    Dns=8.8.4.4
+    Volume=/var/log/webapp:/var/log:Z
+    Volume=/etc/ssl/certs:/etc/ssl/certs:ro
+    PodmanArgs=--hostname=webapp.local
+    PodmanArgs=--exit-policy=stop
+    PodmanArgs=--label=app=webapp
+    PodmanArgs=--label=tier=web
+    PodmanArgs=--label=environment=production
+    PodmanArgs=--share=net
+    PodmanArgs=--share=ipc
+
+    """
+  }
+}

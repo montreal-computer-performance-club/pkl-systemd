@@ -1,0 +1,86 @@
+module declix.podman.Build
+
+extends "@pkl-systemd/Unit.pkl"
+
+unit: UnitSection?
+install: InstallSection?
+build: BuildSection
+
+// https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
+local class BuildSection {
+    // Image tag for the built image (required)
+    imageTag: String
+
+    // Containerfile location
+    file: String?
+
+    // Working directory for build context
+    setWorkingDirectory: String?
+
+    // Build-time environment variables
+    environment: Mapping<String, String>?
+
+    // Authentication file path
+    authFile: String?
+
+    // Containers.conf module
+    containersConfModule: (String|Listing<String>)?
+
+    // DNS settings for build
+    dns: (String|Listing<String>)?
+    dnsOption: (String|Listing<String>)?
+    dnsSearch: (String|Listing<String>)?
+
+    // Global args
+    globalArgs: (String|Listing<String>)?
+
+    // Group add
+    groupAdd: (String|Listing<String>)?
+
+    // Network configuration for build
+    network: String?
+
+    // Image pull policy
+    pull: PullPolicy?
+
+
+    // Labels for the built image
+    label: Mapping<String, String>?
+
+    // Annotations for the built image
+    annotation: Mapping<String, String>?
+
+    // Target architecture
+    arch: String?
+
+    // Architecture variant
+    variant: String?
+
+    // Platform specification
+    platform: String?
+
+    // Build arguments
+    buildArg: Mapping<String, String>?
+
+    // Secret mounts for build
+    secret: (String|Listing<String>)?
+
+    // Disable TLS verification
+    tlsVerify: Boolean?
+
+    // Force remove intermediate containers
+    forceRm: Boolean?
+
+    // Volume mounts during build
+    volume: (String|Listing<String>)?
+
+
+    // Build target stage
+    target: String?
+
+    // Additional podman build flags
+    podmanArgs: Listing<String>?
+
+}
+
+local typealias PullPolicy = "always" | "missing" | "never" | "newer"

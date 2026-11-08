@@ -1,0 +1,38 @@
+amends "../Kube.pkl"
+
+unit = new {
+    description = "Web Application Kubernetes Deployment"
+    after = "network.target"
+}
+
+kube = new {
+    yaml = "/etc/kubernetes/webapp/deployment.yaml"
+    autoUpdate = "registry"
+
+    configMap = new Listing {
+        "/etc/kubernetes/webapp/configmap.yaml"
+        "/etc/kubernetes/webapp/secrets.yaml"
+    }
+
+    network = "webapp-net"
+
+    publishPort = new Listing {
+        "8080:80"
+        "8443:443"
+    }
+
+    exitCodePropagation = "any"
+    workingDirectory = "/etc/kubernetes/webapp"
+
+// Use podmanArgs for unsupported Quadlet fields
+    podmanArgs {
+        "--volume=/var/log/webapp:/var/log:Z"
+        "--volume=/etc/ssl/certs:/etc/ssl/certs:ro"
+    }
+
+    logDriver = "journald"
+}
+
+install = new {
+    wantedBy = "multi-user.target"
+}

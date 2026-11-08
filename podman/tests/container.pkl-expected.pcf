@@ -1,0 +1,103 @@
+examples {
+  ["minimal container quadlet"] {
+    """
+    [Unit]
+    Description=Test Container
+
+    [Install]
+    WantedBy=default.target
+
+    [Container]
+    Image=alpine:latest
+
+    """
+  }
+  ["full container quadlet"] {
+    """
+    [Unit]
+    Description=Full Test Container
+    Wants=network-online.target
+    After=network-online.target
+
+    [Install]
+    WantedBy=multi-user.target
+
+    [Container]
+    Image=alpine:latest
+    ContainerName=test
+    Environment=FOO=bar
+    Environment=BAZ=qux
+    EnvironmentHost=yes
+    PublishPort=8080:80
+    PublishPort=8443:443
+    Volume=/host/path:/container/path
+    Volume=named-volume:/data
+    Network=bridge
+    Pull=always
+    User=1000:1000
+    WorkingDir=/app
+    Label=app=test
+    Label=version=1.0
+    Annotation=org.example.key=value
+    Exec=/bin/sh -c 'echo hello'
+    Entrypoint=/bin/sh
+    SecurityLabelDisable=yes
+    ReadOnly=yes
+    NoNewPrivileges=yes
+    PodmanArgs=--rm
+    PodmanArgs=--privileged
+    PodmanArgs=--cap-add=SYS_ADMIN
+    PodmanArgs=--cpus=1.5
+    PodmanArgs=--memory=256M
+    PodmanArgs=--pid=host
+    HealthCmd=echo ok
+    HealthInterval=30s
+    HealthTimeout=3s
+    HealthRetries=3
+    HealthStartPeriod=10s
+    LogDriver=journald
+    Timezone=America/New_York
+    LogOpt=path=/var/log/container.log
+    LogOpt=max-size=10MB
+    Secret=my-secret
+    Secret=other-secret,target=/run/secrets/custom
+    Device=/dev/fuse
+    Dns=8.8.8.8
+    Dns=8.8.4.4
+    DnsOption=ndots:2
+    DnsSearch=example.com
+    Hostname=test-host
+    AddHost=host1:192.168.1.1
+    AddHost=host2:192.168.1.2
+    AddCapability=NET_ADMIN
+    AddCapability=SYS_TIME
+    DropCapability=MKNOD
+    Ulimit=nofile=1024:2048
+    Tmpfs=/tmp:size=100M
+    Sysctl=net.ipv4.ip_forward=1
+    GroupAdd=audio
+    GroupAdd=video
+    UserNS=keep-id
+    NetworkAlias=test-alias
+    NetworkAlias=another-alias
+    AutoUpdate=registry
+    Notify=yes
+    RunInit=yes
+
+    [Service]
+    Type=notify
+    RemainAfterExit=yes
+    Restart=on-failure
+    RestartSec=10s
+    TimeoutStartSec=300s
+    TimeoutStopSec=90s
+    CpuWeight=200
+    CpuQuota=50%
+    MemoryMax=512M
+    MemoryHigh=256M
+    Requires=network.target
+    Wants=time-sync.target
+
+    """
+  }
+}

@@ -1,0 +1,27 @@
+examples {
+  ["webapp kube quadlet"] {
+    """
+    [Unit]
+    Description=Web Application Kubernetes Deployment
+    After=network.target
+
+    [Install]
+    WantedBy=multi-user.target
+
+    [Kube]
+    Yaml=/etc/kubernetes/webapp/deployment.yaml
+    AutoUpdate=registry
+    ConfigMap=/etc/kubernetes/webapp/configmap.yaml
+    ConfigMap=/etc/kubernetes/webapp/secrets.yaml
+    Network=webapp-net
+    PublishPort=8080:80
+    PublishPort=8443:443
+    ExitCodePropagation=any
+    WorkingDirectory=/etc/kubernetes/webapp
+    LogDriver=journald
+    PodmanArgs=--volume=/var/log/webapp:/var/log:Z
+    PodmanArgs=--volume=/etc/ssl/certs:/etc/ssl/certs:ro
+
+    """
+  }
+}

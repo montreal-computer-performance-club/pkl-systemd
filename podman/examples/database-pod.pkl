@@ -1,0 +1,70 @@
+amends "../Pod.pkl"
+
+unit = new {
+    description = "Database Pod with Security"
+    after = "network.target"
+    requires = "network.target"
+}
+
+pod = new {
+    podName = "database-cluster"
+    network = "db-network"
+
+    publishPort = new Listing {
+        "5432:5432"
+        "6379:6379"
+    }
+
+    // Security configuration and other removed fields moved to podmanArgs
+
+    // Custom DNS configuration
+    dns = "10.0.0.1"
+    dnsSearch = new Listing {
+        "internal.example.com"
+        "db.example.com"
+    }
+
+    // User namespace mapping for security
+    userNS = "keep-id"
+    uidMap = new Listing {
+        "0:100000:65536"
+    }
+    gidMap = new Listing {
+        "0:100000:65536"
+    }
+
+    // Persistent volumes
+    volume = new Listing {
+        "postgres-data:/var/lib/postgresql/data:Z"
+        "redis-data:/data:Z"
+        "/etc/database/config:/etc/config:ro"
+    }
+
+    // Network aliases for service discovery
+    networkAlias = new Listing {
+        "postgres.db"
+        "redis.db"
+        "primary.db"
+    }
+
+    podmanArgs {
+        "--hostname=db-cluster.internal"
+        "--exit-policy=continue"
+        "--security-opt=label:disable=false"
+        "--security-opt=label:type=container_t"
+        "--label=app=database"
+        "--label=tier=data"
+        "--label=security=high"
+        "--label=backup=enabled"
+        "--annotation=backup.schedule=0 2 * * *"
+        "--annotation=monitoring.enabled=true"
+        "--share=net"
+        "--share=uts"
+        "--infra-image=registry.redhat.io/ubi8/pause:latest"
+    }
+
+}
+
+install = new {
+    wantedBy = "multi-user.target"
+}

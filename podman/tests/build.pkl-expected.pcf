@@ -1,0 +1,50 @@
+examples {
+  ["full build quadlet"] {
+    """
+    [Unit]
+    Description=Test Build
+    After=network.target
+
+    [Install]
+    WantedBy=multi-user.target
+
+    [Build]
+    ImageTag=localhost/test:latest
+    File=/app/Containerfile
+    SetWorkingDirectory=/app
+    Environment=BUILDKIT_PROGRESS=plain
+    Environment=DOCKER_BUILDKIT=1
+    AuthFile=/etc/containers/auth.json
+    Dns=8.8.8.8
+    Dns=1.1.1.1
+    DnsOption=ndots:2
+    GlobalArgs=--log-level=debug
+    Network=host
+    Pull=always
+    Label=app=test
+    Label=version=1.0.0
+    Annotation=org.example.key=value
+    Arch=amd64
+    BuildArg=NODE_VERSION=18
+    BuildArg=ENV=test
+    Secret=id=token,src=/run/secrets/token
+    TlsVerify=yes
+    ForceRm=yes
+    Volume=/cache:/cache:Z
+    Target=production
+    PodmanArgs=--retry=3
+    PodmanArgs=--retry-delay=5s
+    PodmanArgs=--rm
+    PodmanArgs=--squash=false
+
+    """
+  }
+  ["simple build quadlet"] {
+    """
+    [Build]
+    ImageTag=localhost/simple:latest
+    File=./Containerfile
+
+    """
+  }
+}
