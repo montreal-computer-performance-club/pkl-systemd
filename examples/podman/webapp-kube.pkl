@@ -1,0 +1,38 @@
+amends "../../podman/Kube.pkl"
+
+unit {
+  description = "Web Application Kubernetes Deployment"
+  after { "network.target" }
+}
+
+kube {
+  yaml { "/etc/kubernetes/webapp/deployment.yaml" }
+  autoUpdate { "registry" }
+
+  configMap {
+    "/etc/kubernetes/webapp/configmap.yaml"
+    "/etc/kubernetes/webapp/secrets.yaml"
+  }
+
+  network { "webapp-net.network" }
+
+  publishPort {
+    "8080:80"
+    "8443:443"
+  }
+
+  exitCodePropagation = "any"
+  setWorkingDirectory = "yaml"
+
+  // Options without a Quadlet key go through podmanArgs
+  podmanArgs {
+    "--volume=/var/log/webapp:/var/log:Z"
+    "--volume=/etc/ssl/certs:/etc/ssl/certs:ro"
+  }
+
+  logDriver = "journald"
+}
+
+install {
+  wantedBy { "multi-user.target" }
+}

@@ -1,9 +1,0 @@
-amends "pkl:test"
-
-import "../examples/redis.pkl" as redis
-
-examples {
-    ["redis container quadlet"] {
-        redis.output.text
-    }
-}

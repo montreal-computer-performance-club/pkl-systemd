@@ -1,9 +1,0 @@
-amends "pkl:test"
-
-import "../examples/postgres.pkl" as postgres
-
-examples {
-    ["postgres container quadlet"] {
-        postgres.output.text
-    }
-}

@@ -7,9 +7,8 @@ This package provides comprehensive Pkl modules for generating systemd unit file
 ## Features
 
 - **Complete systemd support**: all eleven unit types, from Service to Device
+- **Podman Quadlet support**: Container, Pod, Volume, Network, Kube, Build and Image units
 - **Type safety**: all properties use proper types (String, Boolean, Duration, enums, listings) with validation
-- **Documentation**: every property carries the description from the systemd man pages
-- **IDE support**: full IntelliSense and autocomplete with Pkl IDE extensions
 
 ## Installation
 
@@ -127,7 +126,53 @@ Every unit type has at least one example in the [`examples/`](examples/) directo
 | `Device.pkl` | Device units (automatically generated) | [systemd.device(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.device.html) | |
 | `Unit.pkl` | Base unit with common properties | [systemd.unit(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html) | |
 
+### Podman Quadlet Units
+
+[Quadlet](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) units are systemd unit files with an extra Podman section, such as `[Container]`, that Podman's systemd generator turns into a regular service. The modules in [`podman/`](podman/) model them; they share the `[Unit]`, `[Install]` and `[Service]` sections with the rest of the package.
+
+```pkl
+amends "package://github.com/montreal-computer-performance-club/pkl-systemd/releases/download/X.Y.Z/pkl-systemd@X.Y.Z#/podman/Container.pkl"
+
+container {
+  image = "docker.io/library/nginx:latest"
+  publishPort { "8080:80" }
+}
+
+install {
+  wantedBy { "default.target" }
+}
+```
+
+```bash
+pkl eval nginx.pkl > ~/.config/containers/systemd/nginx.container
+systemctl --user daemon-reload
+systemctl --user start nginx.service
+```
+
+The `podman.pkl` module re-exports every Quadlet unit type, mirroring `systemd.pkl`.
+
+| Module | Description | Documentation | Examples |
+|--------|-------------|---------------|----------|
+| `podman/Container.pkl` | Run a container | [Container units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#container-units-container) | [nginx](examples/podman/nginx.pkl), [postgres](examples/podman/postgres.pkl), [redis](examples/podman/redis.pkl) |
+| `podman/Pod.pkl` | Create a pod for containers to join | [Pod units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#pod-units-pod) | [web-pod](examples/podman/web-pod.pkl), [database-pod](examples/podman/database-pod.pkl) |
+| `podman/Volume.pkl` | Create a volume | [Volume units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#volume-units-volume) | [postgres-volume](examples/podman/postgres-volume.pkl), [shared-volume](examples/podman/shared-volume.pkl) |
+| `podman/Network.pkl` | Create a network | [Network units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#network-units-network) | [app-network](examples/podman/app-network.pkl), [isolated-network](examples/podman/isolated-network.pkl) |
+| `podman/Kube.pkl` | Run a Kubernetes YAML file with `podman kube play` | [Kube units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#kube-units-kube) | [webapp-kube](examples/podman/webapp-kube.pkl), [microservices-kube](examples/podman/microservices-kube.pkl) |
+| `podman/Build.pkl` | Build an image | [Build units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#build-units-build) | [webapp-build](examples/podman/webapp-build.pkl), [multistage-build](examples/podman/multistage-build.pkl) |
+| `podman/Image.pkl` | Pull an image | [Image units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#image-units-image) | [redis-image](examples/podman/redis-image.pkl), [private-registry-image](examples/podman/private-registry-image.pkl) |
+| `podman/Quadlet.pkl` | Base module with the `[Quadlet]` section | [Quadlet section](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#quadlet-section-quadlet) | |
+
 ## Type System
+
+### Property Names
+
+A property is named after its unit file key with the first letter in lower case, and nothing else changes. Keys that start with an acronym therefore look unusual, but they render exactly as systemd and Quadlet expect them:
+
+```pkl
+slice = new { cPUWeight = 200 }   // CPUWeight=200
+container { dNS { "10.0.0.1" } }  // DNS=10.0.0.1
+pod { uIDMap { "0:100000:65536" } } // UIDMap=0:100000:65536
+```
 
 ### Repeatable Properties
 
@@ -219,17 +264,17 @@ service = new {
 
 ## Testing
 
-The package includes tests for type validation and for rendering every file in `examples/`:
+The package includes tests for type validation and for rendering every file in `examples/`, including `examples/podman/`:
 
 ```bash
-pkl test tests/*.pkl
+pkl test
 ```
 
 ## Contributing
 
 This package closely follows the official systemd documentation. When adding new properties or unit types:
 
-1. Reference the official systemd man pages
+1. Reference the official systemd man pages, or [podman-systemd.unit(5)](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) for Quadlet units
 2. Use proper type constraints (Boolean, Duration, type aliases, `Listing<String>` for repeatable options)
 3. Add comprehensive tests and examples
 4. Update documentation

@@ -1,52 +1,147 @@
-module declix.podman.Image
+/// A image unit pulls an image with `podman image pull` when the service
+/// starts. Other units reference it as `Image=<name>.image`.
+///
+/// See [Image units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#image-units-image) in podman-systemd.unit(5).
+///
+/// Quadlet units are systemd unit files with extra sections that the Podman
+/// Quadlet generator turns into regular services. They live in the same
+/// directories as other unit files, for example `/etc/containers/systemd/` or
+/// `~/.config/containers/systemd/`, with the extension `.image`.
+module declix.systemd.podman.Image
 
-extends "@pkl-systemd/Unit.pkl"
+extends "./Quadlet.pkl"
+
+import "../Service.pkl"
 
 unit: UnitSection?
 install: InstallSection?
 image: ImageSection
 
-// https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
-local class ImageSection {
-    // The image to pull (required)
-    image: String
+/// The `[Service]` section of the generated service. Quadlet fills in
+/// `ExecStart` and friends itself; set properties here to override or add to
+/// what it generates.
+service: Service.ServiceSection?
 
-    // Use this name when resolving .image references
-    imageTag: String?
+quadlet: QuadletSection?
 
-    // All tagged images in the repository are pulled
-    allTags: Boolean?
+class ImageSection {
+  /// The image to pull. It is recommended to use a fully qualified image name
+  /// rather than a short name, both for performance and robustness reasons.
+  ///
+  /// The format of the name is the same as when passed to `podman pull`. So, it
+  /// supports using `:tag` or digests to guarantee the specific image version.
+  image: String
 
-    // Override the architecture of the image to be pulled
-    arch: String?
+  /// All tagged images in the repository are pulled.
+  ///
+  /// This is equivalent to the Podman `--all-tags` option.
+  allTags: Boolean?
 
-    // Path of the authentication file
-    authFile: String?
+  /// Override the architecture, defaults to hosts, of the image to be pulled.
+  ///
+  /// This is equivalent to the Podman `--arch` option.
+  arch: String?
 
-    // Use certificates at path to connect to the registry
-    certDir: String?
+  /// Path of the authentication file.
+  ///
+  /// This is equivalent to the Podman `--authfile` option.
+  authFile: String?
 
-    // Containers.conf module
-    containersConfModule: (String|Listing<String>)?
+  /// Use certificates at path (*.crt, *.cert, *.key) to connect to the
+  /// registry.
+  ///
+  /// This is equivalent to the Podman `--cert-dir` option.
+  certDir: String?
 
-    // Username and password for authentication
-    creds: String?
+  /// Load the specified containers.conf(5) module. Equivalent to the Podman
+  /// `--module` option.
+  ///
+  /// This key can be listed multiple times.
+  containersConfModule: Listing<String>?
 
-    // Key and passphrase for decryption of images
-    decryptionKey: String?
+  /// The `[username[:password]]` to use to authenticate with the registry, if
+  /// required.
+  ///
+  /// This is equivalent to the Podman `--creds` option.
+  creds: String?
 
-    // Global args passed directly between podman and image
-    globalArgs: (String|Listing<String>)?
+  /// The `[key[:passphrase]]` to be used for decryption of images.
+  ///
+  /// This is equivalent to the Podman `--decryption-key` option.
+  decryptionKey: String?
 
-    // Override the OS of the image to be pulled
-    os: String?
+  /// This key contains a list of arguments passed directly between `podman` and
+  /// `image` in the generated file. It can be used to access Podman features
+  /// otherwise unsupported by the generator. Since the generator is unaware of
+  /// what unexpected interactions can be caused by these arguments, it is not
+  /// recommended to use this option.
+  ///
+  /// The format of this is a space separated list of arguments, which can
+  /// optionally be individually escaped to allow inclusion of whitespace and
+  /// other control characters.
+  ///
+  /// This key can be listed multiple times.
+  globalArgs: Listing<String>?
 
-    // Additional podman image pull flags
-    podmanArgs: (String|Listing<String>)?
+  /// Actual FQIN of the referenced `Image`. Only meaningful when source is a
+  /// file or directory archive.
+  ///
+  /// For example, an image saved into a `docker-archive` with the following
+  /// Podman command:
+  ///
+  /// `podman image save --format docker-archive --output /tmp/archive-file.tar
+  /// quay.io/podman/stable:latest`
+  ///
+  /// requires setting
+  /// - `Image=docker-archive:/tmp/archive-file.tar`
+  /// - `ImageTag=quay.io/podman/stable:latest`
+  imageTag: String?
 
-    // Verify TLS certificates
-    tlsVerify: Boolean?
+  /// Override the OS, defaults to hosts, of the image to be pulled.
+  ///
+  /// This is equivalent to the Podman `--os` option.
+  oS: String?
 
-    // Override the variant of the image to be pulled
-    variant: String?
+  /// This key contains a list of arguments passed directly to the end of the
+  /// `podman image pull` command in the generated file (right before the image
+  /// name in the command line). It can be used to access Podman features
+  /// otherwise unsupported by the generator. Since the generator is unaware of
+  /// what unexpected interactions can be caused by these arguments, it is not
+  /// recommended to use this option.
+  ///
+  /// The format of this is a space separated list of arguments, which can
+  /// optionally be individually escaped to allow inclusion of whitespace and
+  /// other control characters.
+  ///
+  /// This key can be listed multiple times.
+  podmanArgs: Listing<String>?
+
+  /// The pull policy to use when pulling the image.
+  ///
+  /// This is equivalent to the Podman `--policy` option.
+  policy: PullPolicy?
+
+  /// Number of times to retry the image pull when a HTTP error occurs.
+  /// Equivalent to the Podman `--retry` option.
+  retry: UInt?
+
+  /// Delay between retries. Equivalent to the Podman `--retry-delay` option.
+  retryDelay: Duration?
+
+  /// By default, Quadlet will name the systemd service unit by appending
+  /// `-image` to the name of the Quadlet. Setting this key overrides this
+  /// behavior by instructing Quadlet to use the provided name.
+  ///
+  /// Note, the name should not include the `.service` file extension
+  serviceName: String?
+
+  /// Require HTTPS and verification of certificates when contacting registries.
+  ///
+  /// This is equivalent to the Podman `--tls-verify` option.
+  tLSVerify: Boolean?
+
+  /// Override the default architecture variant of the container image.
+  ///
+  /// This is equivalent to the Podman `--variant` option.
+  variant: String?
 }

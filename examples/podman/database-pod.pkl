@@ -1,0 +1,67 @@
+amends "../../podman/Pod.pkl"
+
+unit {
+  description = "Database Pod with Security"
+  after { "network.target" }
+  requires { "network.target" }
+}
+
+pod {
+  podName = "database-cluster"
+  hostName = "db-cluster.internal"
+  network { "db-network.network" }
+  exitPolicy = "continue"
+
+  publishPort {
+    "5432:5432"
+    "6379:6379"
+  }
+
+  // Custom DNS configuration
+  dNS { "10.0.0.1" }
+  dNSSearch {
+    "internal.example.com"
+    "db.example.com"
+  }
+
+  // User namespace mapping for security
+  userNS = "keep-id"
+  uIDMap { "0:100000:65536" }
+  gIDMap { "0:100000:65536" }
+
+  // Persistent volumes
+  volume {
+    "postgres-data:/var/lib/postgresql/data:Z"
+    "redis-data:/data:Z"
+    "/etc/database/config:/etc/config:ro"
+  }
+
+  // Network aliases for service discovery
+  networkAlias {
+    "postgres.db"
+    "redis.db"
+    "primary.db"
+  }
+
+  label {
+    ["app"] = "database"
+    ["tier"] = "data"
+    ["security"] = "high"
+    ["backup"] = "enabled"
+  }
+
+  // Options without a Quadlet key go through podmanArgs
+  podmanArgs {
+    "--security-opt=label:disable=false"
+    "--security-opt=label:type=container_t"
+    "--annotation=backup.schedule=0 2 * * *"
+    "--annotation=monitoring.enabled=true"
+    "--share=net"
+    "--share=uts"
+    "--infra-image=registry.redhat.io/ubi8/pause:latest"
+  }
+}
+
+install {
+  wantedBy { "multi-user.target" }
+}

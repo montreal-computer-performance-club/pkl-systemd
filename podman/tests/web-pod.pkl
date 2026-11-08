@@ -1,9 +1,0 @@
-amends "pkl:test"
-
-import "../examples/web-pod.pkl" as webPod
-
-examples {
-    ["web pod quadlet"] {
-        webPod.output.text
-    }
-}

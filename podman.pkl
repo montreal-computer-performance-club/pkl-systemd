@@ -1,0 +1,22 @@
+/// Re-exports all Podman Quadlet unit types for convenient access
+module podman
+
+// Import all unit types
+import "podman/Build.pkl" as BuildModule
+import "podman/Container.pkl" as ContainerModule
+import "podman/Image.pkl" as ImageModule
+import "podman/Kube.pkl" as KubeModule
+import "podman/Network.pkl" as NetworkModule
+import "podman/Pod.pkl" as PodModule
+import "podman/Volume.pkl" as VolumeModule
+import "podman/Quadlet.pkl" as QuadletModule
+
+// Re-export all types
+typealias Build = BuildModule
+typealias Container = ContainerModule
+typealias Image = ImageModule
+typealias Kube = KubeModule
+typealias Network = NetworkModule
+typealias Pod = PodModule
+typealias Volume = VolumeModule
+typealias Quadlet = QuadletModule

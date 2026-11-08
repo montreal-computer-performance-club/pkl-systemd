@@ -1,49 +1,140 @@
-module declix.podman.Volume
+/// A volume unit creates a Podman volume with `podman volume create` when the
+/// service starts. Other units reference it as `Volume=<name>.volume:/path`.
+///
+/// See [Volume units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#volume-units-volume) in podman-systemd.unit(5).
+///
+/// Quadlet units are systemd unit files with extra sections that the Podman
+/// Quadlet generator turns into regular services. They live in the same
+/// directories as other unit files, for example `/etc/containers/systemd/` or
+/// `~/.config/containers/systemd/`, with the extension `.volume`.
+module declix.systemd.podman.Volume
 
-extends "@pkl-systemd/Unit.pkl"
+extends "./Quadlet.pkl"
+
+import "../Service.pkl"
 
 unit: UnitSection?
 install: InstallSection?
 volume: VolumeSection
 
-// https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
-local class VolumeSection {
-    // Volume name
-    volumeName: String?
+/// The `[Service]` section of the generated service. Quadlet fills in
+/// `ExecStart` and friends itself; set properties here to override or add to
+/// what it generates.
+service: Service.ServiceSection?
 
-    // Volume driver
-    driver: String?
+quadlet: QuadletSection?
 
-    // Device to mount for volume
-    device: String?
+class VolumeSection {
+  /// Load the specified containers.conf(5) module. Equivalent to the Podman
+  /// `--module` option.
+  ///
+  /// This key can be listed multiple times.
+  containersConfModule: Listing<String>?
 
-    // Image for volume (when using image driver)
-    image: String?
+  /// If enabled, the content of the image located at the mountpoint of the
+  /// volume is copied into the volume on the first run.
+  ///
+  /// Default to `true`.
+  copy: Boolean?
 
-    // User ownership
-    user: String?
+  /// The path of a device which is mounted for the volume.
+  device: String?
 
-    // Group ownership
-    group: String?
+  /// Specify the volume driver name. When set to `image`, the `Image` key must
+  /// also be set.
+  ///
+  /// This is equivalent to the Podman `--driver` option.
+  driver: String?
 
-    // Copy image content to volume
-    copy: Boolean?
+  /// The GID that the volume will be created as. Differently than `Group=`, the
+  /// specified value is not passed to the mount operation. The specified GID
+  /// will own the volume's mount point directory and affects the volume chown
+  /// operation.
+  gID: UInt?
 
-    // Labels
-    label: Mapping<String, String>?
+  /// This key contains a list of arguments passed directly between `podman` and
+  /// `volume` in the generated file. It can be used to access Podman features
+  /// otherwise unsupported by the generator. Since the generator is unaware of
+  /// what unexpected interactions can be caused by these arguments, it is not
+  /// recommended to use this option.
+  ///
+  /// The format of this is a space separated list of arguments, which can
+  /// optionally be individually escaped to allow inclusion of whitespace and
+  /// other control characters.
+  ///
+  /// This key can be listed multiple times.
+  globalArgs: Listing<String>?
 
-    // Driver options
-    options: (String|Listing<String>)?
+  /// The host (numeric) GID, or group name to use as the group for the volume.
+  /// Differently than `GID`, the specified value is passed to the mount
+  /// operation.
+  group: String?
 
-    // Filesystem type
-    type: String?
+  /// Specifies the image the volume is based on when `Driver` is set to the
+  /// `image`. It is recommended to use a fully qualified image name rather than
+  /// a short name, both for performance and robustness reasons.
+  ///
+  /// The format of the name is the same as when passed to `podman pull`. So, it
+  /// supports using `:tag` or digests to guarantee the specific image version.
+  ///
+  /// Special case:
+  ///
+  /// * If the `name` of the image ends with `.image`, Quadlet will use the
+  ///   image pulled by the corresponding `.image` file, and the generated
+  ///   systemd service contains a dependency on the `$name-image.service` (or
+  ///   the service name set in the .image file). Note: the corresponding
+  ///   `.image` file must exist.
+  image: String?
 
-    // Containers.conf module
-    containersConfModule: (String|Listing<String>)?
+  /// Set one or more OCI labels on the volume. The format is a list of
+  /// `key=value` items, similar to `Environment`.
+  ///
+  /// This key can be listed multiple times.
+  label: Mapping<String, String>?
 
-    // Global args
-    globalArgs: (String|Listing<String>)?
+  /// The mount options to use for a filesystem as used by the **mount(8)**
+  /// command `-o` option.
+  options: String?
 
-    // Additional podman volume create flags
-    podmanArgs: Listing<String>?
+  /// This key contains a list of arguments passed directly to the end of the
+  /// `podman volume create` command in the generated file (right before the
+  /// name of the volume in the command line). It can be used to access Podman
+  /// features otherwise unsupported by the generator. Since the generator is
+  /// unaware of what unexpected interactions can be caused by these arguments,
+  /// is not recommended to use this option.
+  ///
+  /// The format of this is a space separated list of arguments, which can
+  /// optionally be individually escaped to allow inclusion of whitespace and
+  /// other control characters.
+  ///
+  /// This key can be listed multiple times.
+  podmanArgs: Listing<String>?
+
+  /// By default, Quadlet will name the systemd service unit by appending
+  /// `-volume` to the name of the Quadlet. Setting this key overrides this
+  /// behavior by instructing Quadlet to use the provided name.
+  ///
+  /// Note, the name should not include the `.service` file extension
+  serviceName: String?
+
+  /// The filesystem type of `Device` as used by the **mount(8)** commands `-t`
+  /// option.
+  type: String?
+
+  /// The UID that the volume will be created as. Differently than `User`, the
+  /// specified value is not passed to the mount operation. The specified UID
+  /// will own the volume's mount point directory and affects the volume chown
+  /// operation.
+  uID: UInt?
+
+  /// The host (numeric) UID, or user name to use as the owner for the volume.
+  /// Differently than `UID`, the specified value is passed to the mount
+  /// operation.
+  user: String?
+
+  /// The (optional) name of the Podman volume. If this is not specified, the
+  /// default value is the same name as the unit, but with a `systemd-` prefix,
+  /// i.e. a `$name.volume` file creates a `systemd-$name` Podman volume to
+  /// avoid conflicts with user-managed volumes.
+  volumeName: String?
 }

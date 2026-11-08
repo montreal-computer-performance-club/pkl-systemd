@@ -1,9 +1,0 @@
-amends "pkl:test"
-
-import "../examples/nginx.pkl" as nginx
-
-examples {
-    ["nginx container quadlet"] {
-        nginx.output.text
-    }
-}

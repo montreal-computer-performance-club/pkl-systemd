@@ -1,0 +1,20 @@
+amends "../../podman/Volume.pkl"
+
+unit {
+  description = "PostgreSQL Data Volume"
+  after { "local-fs.target" }
+}
+
+volume {
+  volumeName = "postgres-data"
+  driver = "local"
+
+  label {
+    ["app"] = "postgres"
+    ["purpose"] = "database-storage"
+  }
+}
+
+install {
+  wantedBy { "multi-user.target" }
+}

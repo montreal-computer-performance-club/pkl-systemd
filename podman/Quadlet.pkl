@@ -1,0 +1,55 @@
+/// Base module for Podman Quadlet units, see
+/// [podman-systemd.unit(5)](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html).
+///
+/// Quadlet units are systemd units with an additional Podman-specific section
+/// (`[Container]`, `[Pod]`, ...). This module holds what every Quadlet unit
+/// shares: the `[Quadlet]` section and common value types.
+abstract module declix.systemd.podman.Quadlet
+
+extends "../Unit.pkl"
+
+/// The `[Quadlet]` section, which controls how Quadlet itself generates the
+/// service. See [the manual](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#quadlet-section-quadlet).
+class QuadletSection {
+  /// Add Quadlet's default network dependencies to the unit (default is
+  /// `true`).
+  ///
+  /// When set to false, Quadlet will **not** add a dependency (After=, Wants=)
+  /// to `network-online.target`/`podman-user-wait-network-online.service` to
+  /// the generated unit.
+  ///
+  /// Note, this option is set in the `[Quadlet]` section. The _systemd_
+  /// `[Unit]` section has an option with the same name but a different meaning.
+  defaultDependencies: Boolean?
+
+  /// Configure the systemd mount dependency generated for mount source paths.
+  /// This option applies to all mount source paths in the Quadlet file.
+  ///
+  /// Valid values are:
+  ///
+  /// - `Requires` (default): add `RequiresMountsFor=`. The service is stopped
+  ///   if the mount becomes inactive.
+  /// - `Wants` (systemd 256 or later): add `WantsMountsFor=`. The mount is
+  ///   started when the service starts, but the service is not stopped if the
+  ///   mount becomes inactive.
+  /// - `None`: do not add a mount dependency.
+  ///
+  /// This setting does not change Quadlet's dependency on its container storage
+  /// directory.
+  ///
+  /// For example, to use a weaker dependency for an automount share:
+  ///
+  /// ```
+  /// [Quadlet]
+  /// SetMountsDependency=Wants
+  /// ```
+  setMountsDependency: MountsDependency?
+}
+
+/// How the service handles mount source paths, see
+/// [`SetMountsDependency=`](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#setmountsdependency).
+typealias MountsDependency = "Requires" | "Wants" | "None"
+
+/// Image pull policy, see
+/// [podman-pull(1)](https://docs.podman.io/en/latest/markdown/podman-pull.1.html).
+typealias PullPolicy = "always" | "missing" | "never" | "newer"

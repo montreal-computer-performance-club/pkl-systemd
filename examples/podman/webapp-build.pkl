@@ -1,0 +1,37 @@
+amends "../../podman/Build.pkl"
+
+unit {
+  description = "Web Application Build"
+  after { "network.target" }
+}
+
+build {
+  imageTag { "localhost/webapp:latest" }
+  file = "/app/Containerfile"
+  setWorkingDirectory = "/app"
+
+  buildArg {
+    ["NODE_VERSION"] = "18"
+    ["BUILD_ENV"] = "production"
+  }
+
+  environment {
+    ["BUILDKIT_PROGRESS"] = "plain"
+  }
+
+  label {
+    ["app"] = "webapp"
+    ["version"] = "1.0.0"
+    ["maintainer"] = "devops@example.com"
+  }
+
+  pull = "missing"
+  network { "host" }
+  forceRM = true
+
+  podmanArgs { "--rm" }
+}
+
+install {
+  wantedBy { "multi-user.target" }
+}

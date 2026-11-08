@@ -1,56 +1,175 @@
-module declix.podman.Kube
+/// A kube unit runs a Kubernetes YAML file with `podman kube play` as a systemd
+/// service.
+///
+/// See [Kube units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#kube-units-kube) in podman-systemd.unit(5).
+///
+/// Quadlet units are systemd unit files with extra sections that the Podman
+/// Quadlet generator turns into regular services. They live in the same
+/// directories as other unit files, for example `/etc/containers/systemd/` or
+/// `~/.config/containers/systemd/`, with the extension `.kube`.
+module declix.systemd.podman.Kube
 
-extends "@pkl-systemd/Unit.pkl"
+extends "./Quadlet.pkl"
+
+import "../Service.pkl"
 
 unit: UnitSection?
 install: InstallSection?
 kube: KubeSection
 
-// https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
-local class KubeSection {
-    // Path to Kubernetes YAML file (required)
-    yaml: String
+/// The `[Service]` section of the generated service. Quadlet fills in
+/// `ExecStart` and friends itself; set properties here to override or add to
+/// what it generates.
+service: Service.ServiceSection?
 
-    // Automatic image updates
-    autoUpdate: AutoUpdatePolicy?
+quadlet: QuadletSection?
 
-    // ConfigMap YAML paths
-    configMap: (String|Listing<String>)?
+class KubeSection {
+  /// The path, absolute or relative to the location of the unit file, to the
+  /// Kubernetes YAML file to use.
+  ///
+  /// This key can be listed multiple times.
+  yaml: Listing<String>
 
-    // Containers.conf module
-    containersConfModule: (String|Listing<String>)?
+  /// Indicates whether containers will be auto-updated ([podman-auto-
+  /// update(1)](https://docs.podman.io/en/latest/markdown/podman-auto-
+  /// update.1.html)). AutoUpdate can be specified multiple times. The following
+  /// values are supported:
+  ///
+  /// * `registry`: Requires a fully-qualified image reference (e.g.,
+  ///   quay.io/podman/stable:latest) to be used to create the container. This
+  ///   enforcement is necessary to know which images to actually check and
+  ///   pull. If an image ID was used, Podman does not know which image to
+  ///   check/pull anymore.
+  ///
+  /// * `local`: Tells Podman to compare the image a container is using to the
+  ///   image with its raw name in local storage. If an image is updated
+  ///   locally, Podman simply restarts the systemd unit executing the
+  ///   Kubernetes Quadlet.
+  ///
+  /// * `name/(local|registry)`: Tells Podman to perform the `local` or
+  ///   `registry` autoupdate on the specified container name.
+  autoUpdate: Listing<String>?
 
-    // Network configuration
-    network: String?
+  /// Pass the Kubernetes ConfigMap YAML path to `podman kube play` via the
+  /// `--configmap` argument. Unlike the `configmap` argument, the value may
+  /// contain only one path but it may be absolute or relative to the location
+  /// of the unit file.
+  ///
+  /// This key may be used multiple times
+  configMap: Listing<String>?
 
-    // Expose ports from containers
-    publishPort: (String|Listing<String>)?
+  /// Load the specified containers.conf(5) module. Equivalent to the Podman
+  /// `--module` option.
+  ///
+  /// This key can be listed multiple times.
+  containersConfModule: Listing<String>?
 
-    // Exit code propagation policy
-    exitCodePropagation: ExitCodePolicy?
+  /// Control how the main PID of the systemd service should exit. The
+  ///   following values are supported:
+  /// - `all`: exit non-zero if all containers have failed (i.e., exited non-
+  ///   zero)
+  /// - `any`: exit non-zero if any container has failed
+  /// - `none`: exit zero and ignore failed containers
+  ///
+  /// The current default value is `none`.
+  exitCodePropagation: ExitCodePropagation?
 
-    // Global args
-    globalArgs: (String|Listing<String>)?
+  /// This key contains a list of arguments passed directly between `podman` and
+  /// `kube` in the generated file. It can be used to access Podman features
+  /// otherwise unsupported by the generator. Since the generator is unaware of
+  /// what unexpected interactions can be caused by these arguments, it is not
+  /// recommended to use this option.
+  ///
+  /// The format of this is a space separated list of arguments, which can
+  /// optionally be individually escaped to allow inclusion of whitespace and
+  /// other control characters.
+  ///
+  /// This key can be listed multiple times.
+  globalArgs: Listing<String>?
 
-    // Force down
-    kubeDownForce: Boolean?
+  /// Remove all resources, including volumes, when calling `podman kube down`.
+  /// Equivalent to the Podman `--force` option.
+  kubeDownForce: Boolean?
 
-    // Working directory for relative paths (deprecated, use setWorkingDirectory)
-    workingDirectory: String?
+  /// Set the log-driver Podman uses when running the container. Equivalent to
+  /// the Podman `--log-driver` option.
+  logDriver: String?
 
-    // User namespace mapping
-    userNS: String?
+  /// Specify a custom network for the container. This has the same format as
+  /// the `--network` option to `podman kube play`. For example, use `host` to
+  /// use the host network in the container, or `none` to not set up networking
+  /// in the container.
+  ///
+  /// Special case:
+  ///
+  /// * If the `name` of the network ends with `.network`, a Podman network
+  ///   called `systemd-$name` is used, and the generated systemd service
+  ///   contains a dependency on the `$name-network.service`. Such a network can
+  ///   be automatically created by using a `$name.network` Quadlet file. Note:
+  ///   the corresponding `.network` file must exist.
+  ///
+  /// This key can be listed multiple times.
+  network: Listing<String>?
 
-    // Log driver
-    logDriver: String?
+  /// This key contains a list of arguments passed directly to the end of the
+  /// `podman kube play` command in the generated file (right before the path to
+  /// the yaml file in the command line). It can be used to access Podman
+  /// features otherwise unsupported by the generator. Since the generator is
+  /// unaware of what unexpected interactions can be caused by these arguments,
+  /// is not recommended to use this option.
+  ///
+  /// The format of this is a space separated list of arguments, which can
+  /// optionally be individually escaped to allow inclusion of whitespace and
+  /// other control characters.
+  ///
+  /// This key can be listed multiple times.
+  podmanArgs: Listing<String>?
 
+  /// Exposes a port, or a range of ports (e.g. `50-59`), from the container to
+  /// the host. Equivalent to the `podman kube play`'s `--publish` option. The
+  /// format is similar to the Podman options, which is of the form
+  /// `ip:hostPort:containerPort`, `ip::containerPort`, `hostPort:containerPort`
+  /// or `containerPort`, where the number of host and container ports must be
+  /// the same (in the case of a range). The protocol can be provided at the
+  /// end, e.g., `hostPort:containerPort/tcp`. Valid protocols are `tcp` and
+  /// `udp`; the `sctp` protocol is supported only for rootful containers.
+  ///
+  /// If the IP is set to 0.0.0.0 or not set at all, the port is bound on all
+  /// IPv4 addresses on the host; use [::] for IPv6.
+  ///
+  /// The list of published ports specified in the unit file is merged with the
+  /// list of ports specified in the Kubernetes YAML file. If the same container
+  /// port and protocol is specified in both, the entry from the unit file takes
+  /// precedence
+  ///
+  /// This key can be listed multiple times.
+  publishPort: Listing<String>?
 
-    // Set working directory
-    setWorkingDirectory: String?
+  /// By default, Quadlet will name the systemd service unit using the name of
+  /// the Quadlet. Setting this key overrides this behavior by instructing
+  /// Quadlet to use the provided name.
+  ///
+  /// Note, the name should not include the `.service` file extension
+  serviceName: String?
 
-    // Additional podman kube play options
-    podmanArgs: Listing<String>?
+  /// Set the `WorkingDirectory` field of the `Service` group of the Systemd
+  /// service unit file. Used to allow `podman kube play` to correctly resolve
+  /// relative paths. Supported values are `yaml` and `unit` to set the working
+  /// directory to that of the YAML or Quadlet Unit file respectively.
+  ///
+  /// Alternatively, users can explicitly set the `WorkingDirectory` field of
+  /// the `Service` group in the `.kube` file. Please note that if the
+  /// `WorkingDirectory` field of the `Service` group is set, Quadlet will not
+  /// set it even if `SetWorkingDirectory` is set
+  ///
+  /// Special case:
+  /// * If multiple `Yaml` path are provided only `unit` is supported.
+  setWorkingDirectory: ("yaml"|"unit")?
+
+  /// Set the user namespace mode for the container. This is equivalent to the
+  /// Podman `--userns` option and generally has the form `MODE[:OPTIONS,...]`.
+  userNS: String?
 }
 
-local typealias AutoUpdatePolicy = "registry" | "local" | String
-local typealias ExitCodePolicy = "all" | "any" | "none"
+local typealias ExitCodePropagation = "all" | "any" | "none"

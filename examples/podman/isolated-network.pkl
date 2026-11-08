@@ -1,0 +1,40 @@
+amends "../../podman/Network.pkl"
+
+unit {
+  description = "Isolated Internal Network"
+  after { "network.target" }
+}
+
+network {
+  networkName = "isolated-net"
+  driver = "bridge"
+  subnet { "172.20.0.0/24" }
+  gateway { "172.20.0.1" }
+
+  // Restrict external access
+  internal = true
+
+  // Enable IPv6
+  iPv6 = true
+
+  // Custom DNS servers
+  dNS {
+    "172.20.0.1"
+    "8.8.8.8"
+  }
+
+  // Driver options
+  options {
+    ["com.docker.network.bridge.name"] = "isolated0"
+    ["com.docker.network.driver.mtu"] = "1450"
+  }
+
+  label {
+    ["tier"] = "isolated"
+    ["security"] = "high"
+  }
+}
+
+install {
+  wantedBy { "multi-user.target" }
+}

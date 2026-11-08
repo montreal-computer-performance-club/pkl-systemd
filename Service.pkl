@@ -7,7 +7,7 @@ install: InstallSection
 service: ServiceSection
 
 // https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html
-local class ServiceSection {
+class ServiceSection {
   // Service type and behavior
   type: ServiceType?
   exitType: ServiceExitType?

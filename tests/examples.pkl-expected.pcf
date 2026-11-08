@@ -486,4 +486,417 @@ examples {
     
     """
   }
+  ["podman/app-network.pkl"] {
+    """
+    [Unit]
+    Description=Application Network
+    After=network.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Network]
+    Driver=bridge
+    Gateway=10.88.0.1
+    Label=app=myapp
+    Label=environment=production
+    NetworkName=app-net
+    Subnet=10.88.0.0/16
+    
+    """
+  }
+  ["podman/database-pod.pkl"] {
+    """
+    [Unit]
+    Description=Database Pod with Security
+    Requires=network.target
+    After=network.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Pod]
+    DNS=10.0.0.1
+    DNSSearch=internal.example.com
+    DNSSearch=db.example.com
+    ExitPolicy=continue
+    GIDMap=0:100000:65536
+    HostName=db-cluster.internal
+    Label=app=database
+    Label=tier=data
+    Label=security=high
+    Label=backup=enabled
+    Network=db-network.network
+    NetworkAlias=postgres.db
+    NetworkAlias=redis.db
+    NetworkAlias=primary.db
+    PodName=database-cluster
+    PodmanArgs=--security-opt=label:disable=false
+    PodmanArgs=--security-opt=label:type=container_t
+    PodmanArgs=--annotation=backup.schedule=0 2 * * *
+    PodmanArgs=--annotation=monitoring.enabled=true
+    PodmanArgs=--share=net
+    PodmanArgs=--share=uts
+    PodmanArgs=--infra-image=registry.redhat.io/ubi8/pause:latest
+    PublishPort=5432:5432
+    PublishPort=6379:6379
+    UIDMap=0:100000:65536
+    UserNS=keep-id
+    Volume=postgres-data:/var/lib/postgresql/data:Z
+    Volume=redis-data:/data:Z
+    Volume=/etc/database/config:/etc/config:ro
+    
+    """
+  }
+  ["podman/isolated-network.pkl"] {
+    """
+    [Unit]
+    Description=Isolated Internal Network
+    After=network.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Network]
+    DNS=172.20.0.1
+    DNS=8.8.8.8
+    Driver=bridge
+    Gateway=172.20.0.1
+    IPv6=yes
+    Internal=yes
+    Label=tier=isolated
+    Label=security=high
+    NetworkName=isolated-net
+    Options=com.docker.network.bridge.name=isolated0
+    Options=com.docker.network.driver.mtu=1450
+    Subnet=172.20.0.0/24
+    
+    """
+  }
+  ["podman/microservices-kube.pkl"] {
+    """
+    [Unit]
+    Description=Microservices Stack
+    Requires=webapp-network.service
+    After=network.target
+    After=webapp-network.service
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Kube]
+    Yaml=/app/k8s/microservices.yaml
+    AutoUpdate=local
+    ConfigMap=/app/k8s/config/app-config.yaml
+    ConfigMap=/app/k8s/config/database-config.yaml
+    ConfigMap=/app/k8s/secrets/api-keys.yaml
+    ExitCodePropagation=all
+    LogDriver=journald
+    Network=microservices.network
+    PodmanArgs=--uidmap=0:100000:65536
+    PodmanArgs=--gidmap=0:100000:65536
+    PodmanArgs=--volume=postgres-data:/var/lib/postgresql/data:Z
+    PodmanArgs=--volume=redis-data:/data:Z
+    PodmanArgs=--volume=/app/logs:/var/log/app:Z
+    PodmanArgs=--volume=/app/uploads:/uploads:Z
+    PublishPort=3000:3000
+    PublishPort=3001:3001
+    PublishPort=3002:3002
+    PublishPort=9090:9090
+    SetWorkingDirectory=unit
+    UserNS=auto
+    
+    """
+  }
+  ["podman/multistage-build.pkl"] {
+    """
+    [Unit]
+    Description=Multi-stage Application Build
+    After=network.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Build]
+    ImageTag=localhost/myapp:production
+    Annotation=org.opencontainers.image.source=https://github.com/example/myapp
+    Annotation=org.opencontainers.image.documentation=https://docs.example.com/myapp
+    Arch=amd64
+    BuildArg=GO_VERSION=1.21
+    BuildArg=CGO_ENABLED=0
+    BuildArg=GOOS=linux
+    File=./docker/Containerfile.prod
+    Label=app=myapp
+    Label=tier=backend
+    Label=build-type=production
+    PodmanArgs=--squash
+    PodmanArgs=--rm
+    Pull=always
+    Secret=id=github_token,src=/run/secrets/github_token
+    Secret=id=registry_auth,src=/run/secrets/registry_auth
+    SetWorkingDirectory=/workspace
+    TLSVerify=yes
+    Target=production
+    Volume=/var/cache/go:/go/pkg/mod:Z
+    Volume=/var/cache/build:/root/.cache:Z
+    
+    """
+  }
+  ["podman/nginx.pkl"] {
+    """
+    [Unit]
+    Description=Nginx Web Server Container
+    After=network-online.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Container]
+    ContainerName=nginx
+    Environment=NGINX_HOST=example.com
+    Environment=NGINX_PORT=80
+    HealthCmd=curl -f http://localhost/ || exit 1
+    HealthInterval=30s
+    HealthRetries=3
+    HealthTimeout=3s
+    Image=docker.io/library/nginx:latest
+    PublishPort=80:80
+    PublishPort=443:443
+    Pull=missing
+    Volume=/etc/nginx/conf.d:/etc/nginx/conf.d:ro
+    Volume=/var/www/html:/usr/share/nginx/html:ro
+    
+    [Service]
+    Restart=always
+    RestartSec=5s
+    
+    """
+  }
+  ["podman/postgres-volume.pkl"] {
+    """
+    [Unit]
+    Description=PostgreSQL Data Volume
+    After=local-fs.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Volume]
+    Driver=local
+    Label=app=postgres
+    Label=purpose=database-storage
+    VolumeName=postgres-data
+    
+    """
+  }
+  ["podman/postgres.pkl"] {
+    """
+    [Unit]
+    Description=PostgreSQL Database Container
+    Requires=network-online.target
+    After=network-online.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Container]
+    ContainerName=postgres
+    Environment=POSTGRES_DB=myapp
+    Environment=POSTGRES_USER=myuser
+    Environment=POSTGRES_PASSWORD=mypassword
+    Environment=PGDATA=/var/lib/postgresql/data/pgdata
+    HealthCmd=pg_isready -U myuser -d myapp
+    HealthInterval=10s
+    HealthOnFailure=kill
+    HealthRetries=5
+    HealthStartPeriod=30s
+    HealthTimeout=5s
+    Image=docker.io/library/postgres:15
+    Memory=1G
+    PodmanArgs=--cpus=2.0
+    PublishPort=5432:5432
+    Pull=missing
+    Volume=postgres-data.volume:/var/lib/postgresql/data
+    Volume=/etc/postgresql/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    
+    [Service]
+    Restart=on-failure
+    RestartSec=10s
+    TimeoutStartSec=90s
+    
+    """
+  }
+  ["podman/private-registry-image.pkl"] {
+    """
+    [Unit]
+    Description=Private application image
+    Wants=network-online.target
+    After=network-online.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Image]
+    Image=private.company.com/apps/webapp:v2.1.0
+    Arch=amd64
+    AuthFile=/etc/containers/registries/auth.json
+    CertDir=/etc/containers/registries/certs.d
+    GlobalArgs=--log-level=info
+    OS=linux
+    Retry=3
+    RetryDelay=10s
+    TLSVerify=yes
+    
+    """
+  }
+  ["podman/redis-image.pkl"] {
+    """
+    [Unit]
+    Description=Redis container image
+    After=network-online.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Image]
+    Image=docker.io/library/redis:7-alpine
+    TLSVerify=yes
+    
+    """
+  }
+  ["podman/redis.pkl"] {
+    """
+    [Unit]
+    Description=Redis In-Memory Data Store
+    After=network.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Container]
+    ContainerName=redis
+    Exec=redis-server /usr/local/etc/redis/redis.conf
+    Group=999
+    HealthCmd=redis-cli ping
+    HealthInterval=10s
+    HealthRetries=3
+    HealthTimeout=3s
+    Image=docker.io/library/redis:7-alpine
+    Memory=512M
+    NoNewPrivileges=yes
+    PodmanArgs=--cpus=1.0
+    PublishPort=6379:6379
+    Pull=newer
+    ReadOnly=yes
+    User=999
+    Volume=redis-data:/data
+    Volume=/etc/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    
+    [Service]
+    Restart=on-failure
+    RestartSec=5s
+    
+    """
+  }
+  ["podman/shared-volume.pkl"] {
+    """
+    [Unit]
+    Description=Shared Application Volume
+    After=local-fs.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Volume]
+    Device=tmpfs
+    Driver=local
+    Group=1000
+    Label=app=shared
+    Label=tier=storage
+    Options=size=1G
+    Type=tmpfs
+    User=1000
+    VolumeName=app-shared
+    
+    """
+  }
+  ["podman/web-pod.pkl"] {
+    """
+    [Unit]
+    Description=Web Application Pod
+    After=network.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Pod]
+    DNS=8.8.8.8
+    DNS=8.8.4.4
+    ExitPolicy=stop
+    HostName=webapp.local
+    Label=app=webapp
+    Label=tier=web
+    Label=environment=production
+    Network=bridge
+    PodName=webapp
+    PodmanArgs=--share=net
+    PodmanArgs=--share=ipc
+    PublishPort=8080:80
+    PublishPort=8443:443
+    Volume=/var/log/webapp:/var/log:Z
+    Volume=/etc/ssl/certs:/etc/ssl/certs:ro
+    
+    """
+  }
+  ["podman/webapp-build.pkl"] {
+    """
+    [Unit]
+    Description=Web Application Build
+    After=network.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Build]
+    ImageTag=localhost/webapp:latest
+    BuildArg=NODE_VERSION=18
+    BuildArg=BUILD_ENV=production
+    Environment=BUILDKIT_PROGRESS=plain
+    File=/app/Containerfile
+    ForceRM=yes
+    Label=app=webapp
+    Label=version=1.0.0
+    Label=maintainer=devops@example.com
+    Network=host
+    PodmanArgs=--rm
+    Pull=missing
+    SetWorkingDirectory=/app
+    
+    """
+  }
+  ["podman/webapp-kube.pkl"] {
+    """
+    [Unit]
+    Description=Web Application Kubernetes Deployment
+    After=network.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Kube]
+    Yaml=/etc/kubernetes/webapp/deployment.yaml
+    AutoUpdate=registry
+    ConfigMap=/etc/kubernetes/webapp/configmap.yaml
+    ConfigMap=/etc/kubernetes/webapp/secrets.yaml
+    ExitCodePropagation=any
+    LogDriver=journald
+    Network=webapp-net.network
+    PodmanArgs=--volume=/var/log/webapp:/var/log:Z
+    PodmanArgs=--volume=/etc/ssl/certs:/etc/ssl/certs:ro
+    PublishPort=8080:80
+    PublishPort=8443:443
+    SetWorkingDirectory=yaml
+    
+    """
+  }
 }

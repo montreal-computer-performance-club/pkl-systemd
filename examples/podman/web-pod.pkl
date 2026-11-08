@@ -1,0 +1,43 @@
+amends "../../podman/Pod.pkl"
+
+unit {
+  description = "Web Application Pod"
+  after { "network.target" }
+}
+
+pod {
+  podName = "webapp"
+  hostName = "webapp.local"
+  network { "bridge" }
+  exitPolicy = "stop"
+
+  publishPort {
+    "8080:80"
+    "8443:443"
+  }
+
+  dNS {
+    "8.8.8.8"
+    "8.8.4.4"
+  }
+
+  volume {
+    "/var/log/webapp:/var/log:Z"
+    "/etc/ssl/certs:/etc/ssl/certs:ro"
+  }
+
+  label {
+    ["app"] = "webapp"
+    ["tier"] = "web"
+    ["environment"] = "production"
+  }
+
+  podmanArgs {
+    "--share=net"
+    "--share=ipc"
+  }
+}
+
+install {
+  wantedBy { "multi-user.target" }
+}

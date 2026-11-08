@@ -52,6 +52,12 @@ jobs:
           amends "package://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/pkl-systemd@${GITHUB_REF_NAME}#/Service.pkl"
           \`\`\`
 
+          Podman Quadlet units live under \`podman/\`:
+
+          \`\`\`pkl
+          amends "package://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/pkl-systemd@${GITHUB_REF_NAME}#/podman/Container.pkl"
+          \`\`\`
+
           EOF
 
       - name: Create release

@@ -1,9 +1,0 @@
-amends "pkl:test"
-
-import "../examples/microservices-kube.pkl" as microservicesKube
-
-examples {
-    ["microservices kube quadlet"] {
-        microservicesKube.output.text
-    }
-}

@@ -1,0 +1,15 @@
+amends "../../podman/Image.pkl"
+
+unit {
+  description = "Redis container image"
+  after { "network-online.target" }
+}
+
+image {
+  image = "docker.io/library/redis:7-alpine"
+  tLSVerify = true
+}
+
+install {
+  wantedBy { "multi-user.target" }
+}

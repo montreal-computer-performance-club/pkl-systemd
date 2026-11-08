@@ -2,7 +2,7 @@
 amends "pkl:test"
 
 examples {
-  for (path, example in import*("../examples/*.pkl")) {
+  for (path, example in import*("../examples/**.pkl")) {
     [path.drop("../examples/".length)] {
       example.output.text
     }

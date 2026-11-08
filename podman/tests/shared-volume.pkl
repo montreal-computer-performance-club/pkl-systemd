@@ -1,9 +1,0 @@
-amends "pkl:test"
-
-import "../examples/shared-volume.pkl" as sharedVolume
-
-examples {
-    ["shared volume quadlet"] {
-        sharedVolume.output.text
-    }
-}

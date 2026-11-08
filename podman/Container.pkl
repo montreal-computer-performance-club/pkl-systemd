@@ -1,235 +1,702 @@
-module declix.podman.Container
+/// A container unit runs a Podman container as a systemd service. The generated
+/// service runs `podman run` with the options described by the `[Container]`
+/// section.
+///
+/// See [Container units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#container-units-container) in podman-systemd.unit(5).
+///
+/// Quadlet units are systemd unit files with extra sections that the Podman
+/// Quadlet generator turns into regular services. They live in the same
+/// directories as other unit files, for example `/etc/containers/systemd/` or
+/// `~/.config/containers/systemd/`, with the extension `.container`.
+module declix.systemd.podman.Container
 
-extends "@pkl-systemd/Unit.pkl"
+extends "./Quadlet.pkl"
 
-unit: UnitSection
-install: InstallSection
+import "../Service.pkl"
+
+unit: UnitSection?
+install: InstallSection?
 container: ContainerSection
-service: ServiceSection?
 
-// https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html
-local class ContainerSection {
-    // Container image to run
-    image: String?
+/// The `[Service]` section of the generated service. Quadlet fills in
+/// `ExecStart` and friends itself; set properties here to override or add to
+/// what it generates.
+service: Service.ServiceSection?
 
-    // Container name
-    containerName: String?
+quadlet: QuadletSection?
 
-    // Environment variables
-    environment: Mapping<String, String>?
+class ContainerSection {
+  /// Add these capabilities, in addition to the default Podman capability set,
+  /// to the container.
+  ///
+  /// This is a space separated list of capabilities. This key can be listed
+  /// multiple times.
+  ///
+  /// For example: ``` AddCapability=CAP_DAC_OVERRIDE CAP_IPC_OWNER ```
+  addCapability: Listing<String>?
 
-    // Environment file
-    environmentFile: String?
+  /// Adds a device node from the host into the container. The format of this is
+  /// `HOST-DEVICE[:CONTAINER-DEVICE][:PERMISSIONS]`, where `HOST-DEVICE` is the
+  /// path of the device node on the host, `CONTAINER-DEVICE` is the path of the
+  /// device node in the container, and `PERMISSIONS` is a list of permissions
+  /// combining 'r' for read, 'w' for write, and 'm' for mknod(2). The `-`
+  /// prefix tells Quadlet to add the device only if it exists on the host.
+  ///
+  /// This key can be listed multiple times.
+  addDevice: Listing<String>?
 
-    // Use host environment in container
-    environmentHost: Boolean?
+  /// Add host-to-IP mapping to /etc/hosts. The format is `hostname:ip`.
+  ///
+  /// Equivalent to the Podman `--add-host` option. This key can be listed
+  /// multiple times.
+  addHost: Listing<String>?
 
-    // Expose ports
-    publishPort: (String|Listing<String>)?
+  /// Set one or more OCI annotations on the container. The format is a list of
+  /// `key=value` items, similar to `Environment`.
+  ///
+  /// This key can be listed multiple times.
+  annotation: Mapping<String, String>?
 
-    // Volume mounts
-    volume: (String|Listing<String>)?
+  /// Sets the apparmor confinement profile for the container. A value of
+  /// `unconfined` turns off apparmor confinement.
+  appArmor: String?
 
-    // Network mode
-    network: String?
+  /// Indicates whether the container will be auto-updated ([podman-auto-
+  /// update(1)](https://docs.podman.io/en/latest/markdown/podman-auto-
+  /// update.1.html)). The following values are supported:
+  ///
+  /// * `registry`: Requires a fully-qualified image reference (e.g.,
+  ///   quay.io/podman/stable:latest) to be used to create the container. This
+  ///   enforcement is necessary to know which image to actually check and pull.
+  ///   If an image ID was used, Podman does not know which image to check/pull
+  ///   anymore.
+  ///
+  /// * `local`: Tells Podman to compare the image a container is using to the
+  ///   image with its raw name in local storage. If an image is updated
+  ///   locally, Podman simply restarts the systemd unit executing the
+  ///   container.
+  autoUpdate: AutoUpdatePolicy?
 
-    // Pull policy
-    pull: PullPolicy?
+  /// The cgroups mode of the Podman container. Equivalent to the Podman
+  /// `--cgroups` option.
+  ///
+  /// By default, the cgroups mode of the container created by Quadlet is
+  /// `split`, which differs from the default (`enabled`) used by the Podman
+  /// CLI.
+  ///
+  /// If the container joins a pod (i.e. `Pod=` is specified), you may want to
+  /// change this to `no-conmon` or `enabled` so that pod level cgroup resource
+  /// limits can take effect.
+  cgroupsMode: CgroupsMode?
 
-    // User to run as
-    user: String?
+  /// The (optional) name of the Podman container. If this is not specified, the
+  /// default value of `systemd-%N` is used, which is the same as the service
+  /// name but with a `systemd-` prefix to avoid conflicts with user-managed
+  /// containers.
+  containerName: String?
 
-    // Working directory
-    workingDir: String?
+  /// Load the specified containers.conf(5) module. Equivalent to the Podman
+  /// `--module` option.
+  ///
+  /// This key can be listed multiple times.
+  containersConfModule: Listing<String>?
 
-    // Labels
-    label: Mapping<String, String>?
+  /// Set network-scoped DNS resolver/nameserver for containers in this network.
+  ///
+  /// This key can be listed multiple times.
+  dNS: Listing<String>?
 
-    // Annotations
-    annotation: Mapping<String, String>?
+  /// Set custom DNS options.
+  ///
+  /// This key can be listed multiple times.
+  dNSOption: Listing<String>?
 
-    // Command to run
-    exec: String?
+  /// Set custom DNS search domains. Use **DNSSearch=.** to remove the search
+  /// domain.
+  ///
+  /// This key can be listed multiple times.
+  dNSSearch: Listing<String>?
 
-    // Entry point
-    entrypoint: String?
+  /// Drop these capabilities from the default podman capability set, or `all`
+  /// to drop all capabilities.
+  ///
+  /// This is a space separated list of capabilities. This key can be listed
+  /// multiple times.
+  ///
+  /// For example: ``` DropCapability=CAP_DAC_OVERRIDE CAP_IPC_OWNER ```
+  dropCapability: Listing<String>?
 
-    // Security options
-    securityLabelDisable: Boolean?
-    readOnly: Boolean?
-    noNewPrivileges: Boolean?
+  /// Override the default ENTRYPOINT from the image. Equivalent to the Podman
+  /// `--entrypoint` option. Specify multi option commands in the form of a JSON
+  /// string.
+  entrypoint: String?
 
-    // Additional podman run flags
-    podmanArgs: Listing<String>?
+  /// Set an environment variable in the container. This uses the same format as
+  /// [services in systemd](https://www.freedesktop.org/software/systemd/man/sys
+  /// temd.exec.html#Environment=) and can be listed multiple times.
+  environment: Mapping<String, String>?
 
-    // Health check
-    healthCmd: String?
-    healthInterval: Duration?
-    healthTimeout: Duration?
-    healthRetries: UInt?
-    healthStartPeriod: Duration?
+  /// Use a line-delimited file to set environment variables in the container.
+  /// The path may be absolute or relative to the location of the unit file.
+  /// This key may be used multiple times, and the order persists when passed to
+  /// `podman run`.
+  environmentFile: Listing<String>?
 
-    // Logging
-    logDriver: String?
+  /// Use the host environment inside of the container.
+  environmentHost: Boolean?
 
-    // Timezone
-    timezone: String?
+  /// Additional arguments for the container; this has exactly the same effect
+  /// as passing more arguments after a `podman run <image> <arguments>`
+  /// invocation.
+  ///
+  /// The format is the same as for [systemd command lines](https://www.freedesk
+  /// top.org/software/systemd/man/systemd.service.html#Command%20lines),
+  /// However, unlike the usage scenario for similarly-named systemd
+  /// `ExecStart=` verb which operates on the ambient root filesystem, it is
+  /// very common for container images to have their own `ENTRYPOINT` or `CMD`
+  /// metadata which this interacts with.
+  ///
+  /// The default expectation for many images is that the image will include an
+  /// `ENTRYPOINT` with a default binary, and this field will add arguments to
+  /// that entrypoint.
+  ///
+  /// Another way to describe this is that it works the same way as the [args
+  /// field in a Kubernetes pod](https://kubernetes.io/docs/tasks/inject-data-
+  /// application/define-command-argument-container/#running-a-command-in-a-
+  /// shell).
+  exec: String?
 
-    // Logging options
-    logOpt: (String|Listing<String>)?
+  /// Exposes a port, or a range of ports (e.g. `50-59`), from the host to the
+  /// container. Equivalent to the Podman `--expose` option.
+  ///
+  /// This key can be listed multiple times.
+  exposeHostPort: Listing<String>?
 
-    // Secrets
-    secret: (String|Listing<String>)?
+  /// Run the container in a new user namespace using the supplied GID mapping.
+  /// Equivalent to the Podman `--gidmap` option.
+  ///
+  /// This key can be listed multiple times.
+  gIDMap: Listing<String>?
 
-    // Devices
-    device: (String|Listing<String>)?
+  /// This key contains a list of arguments passed directly between `podman` and
+  /// `run` in the generated file. It can be used to access Podman features
+  /// otherwise unsupported by the generator. Since the generator is unaware of
+  /// what unexpected interactions can be caused by these arguments, it is not
+  /// recommended to use this option.
+  ///
+  /// The format of this is a space separated list of arguments, which can
+  /// optionally be individually escaped to allow inclusion of whitespace and
+  /// other control characters.
+  ///
+  /// This key can be listed multiple times.
+  globalArgs: Listing<String>?
 
-    // DNS settings
-    dns: (String|Listing<String>)?
-    dnsOption: (String|Listing<String>)?
-    dnsSearch: (String|Listing<String>)?
+  /// The (numeric) GID to run as inside the container. This does not need to
+  /// match the GID on the host, which can be modified with `UserNS`, but if
+  /// that is not specified, this GID is also used on the host.
+  ///
+  /// Note: when both `User=` and `Group=` are specified, they are combined into
+  /// a single `--user USER:GROUP` argument passed to Podman. Using `Group=`
+  /// without `User=` will result in an error.
+  group: String?
 
-    // Hostname
-    hostname: String?
+  /// Assign additional groups to the primary user running within the container
+  /// process. Also supports the `keep-groups` special flag. Equivalent to the
+  /// Podman `--group-add` option.
+  ///
+  /// Note: for a rootless unit, `keep-groups` passes in the supplementary
+  /// groups of the `systemd --user` manager, which only holds the groups the
+  /// user had when that manager was started. Groups the user is added to
+  /// afterwards are not passed into the container until the user's systemd
+  /// manager is restarted, for example with `loginctl terminate-user <user>`
+  /// followed by a new login.
+  groupAdd: Listing<String>?
 
-    // Add host entries
-    addHost: (String|Listing<String>)?
+  /// Set or alter a healthcheck command for a container. A value of none
+  /// disables existing healthchecks. Equivalent to the Podman `--health-cmd`
+  /// option.
+  healthCmd: String?
 
-    // Capabilities
-    addCapability: (String|Listing<String>)?
-    dropCapability: (String|Listing<String>)?
+  /// Set an interval for the healthchecks. An interval of disable results in no
+  /// automatic timer setup. Equivalent to the Podman `--health-interval`
+  /// option.
+  healthInterval: (Duration|"disable")?
 
-    // Ulimits
-    ulimit: (String|Listing<String>)?
+  /// Set the destination of the HealthCheck log. Directory path, local or
+  /// events_logger (local use container state file) (Default: local) Equivalent
+  /// to the Podman `--health-log-destination` option.
+  ///
+  /// * `local`: (default) HealthCheck logs are stored in overlay containers.
+  ///   (For example: `$runroot/healthcheck.log`)
+  /// * `directory`: creates a log file named `<container-ID>-healthcheck.log`
+  ///   with HealthCheck logs in the specified directory.
+  /// * `events_logger`: The log will be written with logging mechanism set by
+  ///   events_logger. It also saves the log to a default directory, for
+  ///   performance on a system with a large number of logs.
+  healthLogDestination: String?
 
-    // Tmpfs mounts
-    tmpfs: (String|Listing<String>)?
+  /// Set maximum number of attempts in the HealthCheck log file. ('0' value
+  /// means an infinite number of attempts in the log file) (Default: 5
+  /// attempts) Equivalent to the Podman `--Health-max-log-count` option.
+  healthMaxLogCount: UInt?
 
-    // Sysctl settings
-    sysctl: Mapping<String, String>?
+  /// Set maximum length in characters of stored HealthCheck log. ("0" value
+  /// means an infinite log length) (Default: 500 characters) Equivalent to the
+  /// Podman `--Health-max-log-size` option.
+  healthMaxLogSize: UInt?
 
-    // Group add
-    groupAdd: (String|Listing<String>)?
+  /// Action to take once the container transitions to an unhealthy state. The
+  /// "kill" action in combination integrates best with systemd. Once the
+  /// container turns unhealthy, it gets killed, and systemd restarts the
+  /// service. Equivalent to the Podman `--health-on-failure` option.
+  healthOnFailure: HealthOnFailure?
 
-    // Userns
-    userNS: String?
+  /// The number of retries allowed before a healthcheck is considered to be
+  /// unhealthy. Equivalent to the Podman `--health-retries` option.
+  healthRetries: UInt?
 
-    // Network aliases
-    networkAlias: (String|Listing<String>)?
+  /// The initialization time needed for a container to bootstrap. Equivalent to
+  /// the Podman `--health-start-period` option.
+  healthStartPeriod: Duration?
 
-    // Additional missing fields from podman-systemd.unit(5)
+  /// Set a startup healthcheck command for a container. Equivalent to the
+  /// Podman `--health-startup-cmd` option.
+  healthStartupCmd: String?
 
-    // AutoUpdate policy
-    autoUpdate: AutoUpdatePolicy?
+  /// Set an interval for the startup healthcheck. An interval of disable
+  /// results in no automatic timer setup. Equivalent to the Podman `--health-
+  /// startup-interval` option.
+  healthStartupInterval: (Duration|"disable")?
 
-    // CGroups mode
-    cgroupsMode: String?
+  /// The number of attempts allowed before the startup healthcheck restarts the
+  /// container. Equivalent to the Podman `--health-startup-retries` option.
+  healthStartupRetries: UInt?
 
-    // Expose host ports
-    exposeHostPort: (String|Listing<String>)?
+  /// The number of successful runs required before the startup healthcheck
+  /// succeeds and the regular healthcheck begins. Equivalent to the Podman
+  /// `--health-startup-success` option.
+  healthStartupSuccess: UInt?
 
-    // GID mapping
-    gidMap: (String|Listing<String>)?
+  /// The maximum time a startup healthcheck command has to complete before it
+  /// is marked as failed. Equivalent to the Podman `--health-startup-timeout`
+  /// option.
+  healthStartupTimeout: Duration?
 
-    // Global args
-    globalArgs: (String|Listing<String>)?
+  /// The maximum time allowed to complete the healthcheck before an interval is
+  /// considered failed. Equivalent to the Podman `--health-timeout` option.
+  healthTimeout: Duration?
 
-    // Group ID
-    group: String?
+  /// Sets the host name that is available inside the container. Equivalent to
+  /// the Podman `--hostname` option.
+  hostName: String?
 
-    // Additional health check options
-    healthLogDestination: String?
-    healthMaxLogCount: UInt?
-    healthMaxLogSize: String?
-    healthOnFailure: String?
-    healthStartupCmd: String?
-    healthStartupInterval: Duration?
-    healthStartupRetries: UInt?
-    healthStartupSuccess: UInt?
-    healthStartupTimeout: Duration?
+  /// Controls whether proxy environment variables (http_proxy, https_proxy,
+  /// ftp_proxy, no_proxy) are passed from the Podman process into the container
+  /// during image pulls and builds.
+  ///
+  /// Set to `true` to enable proxy inheritance (default Podman behavior) or
+  /// `false` to disable it. This option is particularly useful on systems that
+  /// require proxy configuration for internet access but don't want proxy
+  /// settings passed to the container runtime.
+  ///
+  /// Equivalent to the Podman `--http-proxy` option.
+  httpProxy: Boolean?
 
-    // IP addresses
-    ip: String?
-    ip6: String?
+  /// Specify a static IPv4 address for the container, for example
+  /// **10.88.64.128**. Equivalent to the Podman `--ip` option.
+  iP: String?
 
-    // Security options
-    mask: (String|Listing<String>)?
+  /// Specify a static IPv6 address for the container, for example
+  /// **fd46:db93:aa76:ac37::10**. Equivalent to the Podman `--ip6` option.
+  iP6: String?
 
-    // Mount options
-    mount: (String|Listing<String>)?
+  /// The image to run in the container. It is recommended to use a fully
+  /// qualified image name rather than a short name, both for performance and
+  /// robustness reasons.
+  ///
+  /// The format of the name is the same as when passed to `podman pull`. So, it
+  /// supports using `:tag` or digests to guarantee the specific image version.
+  ///
+  /// Special Cases:
+  ///
+  /// * If the `name` of the image ends with `.image`, Quadlet will use the
+  ///   image pulled by the corresponding `.image` file, and the generated
+  ///   systemd service contains a dependency on the `$name-image.service` (or
+  ///   the service name set in the .image file). Note that the corresponding
+  ///   `.image` file must exist.
+  /// * If the `name` of the image ends with `.build`, Quadlet will use the
+  ///   image built by the corresponding `.build` file, and the generated
+  ///   systemd service contains a dependency on the `$name-build.service`.
+  ///   Note: the corresponding `.build` file must exist.
+  image: String?
 
-    // Notify
-    notify: Boolean?
+  /// Tells Podman how to handle the builtin image volumes. Default is
+  /// **anonymous**. In the past, a **bind** option was accepted as well. This
+  /// is deprecated, and currently aliased to **anonymous**. Equivalent to the
+  /// Podman `--image-volume` option.
+  imageVolume: ImageVolumeMode?
 
-    // PID limits
-    pidsLimit: UInt?
+  /// Set one or more OCI labels on the container. The format is a list of
+  /// `key=value` items, similar to `Environment`.
+  ///
+  /// This key can be listed multiple times.
+  label: Mapping<String, String>?
 
-    // Pod reference
-    pod: String?
+  /// Set the log-driver used by Podman when running the container. Equivalent
+  /// to the Podman `--log-driver` option.
+  logDriver: String?
 
-    // Read-only tmpfs
-    readOnlyTmpfs: Boolean?
+  /// Set the log-opt (logging options) used by Podman when running the
+  /// container. Equivalent to the Podman `--log-opt` option. This key can be
+  /// listed multiple times.
+  logOpt: Listing<String>?
 
-    // Rootfs
-    rootfs: String?
+  /// Specify the paths to mask separated by a colon. `Mask=/path/1:/path/2`. A
+  /// masked path cannot be accessed inside the container.
+  mask: Listing<String>?
 
-    // Run init
-    runInit: Boolean?
+  /// Specify the amount of memory for the container.
+  memory: String?
 
-    // Seccomp profile
-    seccompProfile: String?
+  /// Attach a filesystem mount to the container. This is equivalent to the
+  /// Podman `--mount` option, and generally has the form `type=TYPE,TYPE-
+  /// SPECIFIC-OPTION[,...]`.
+  ///
+  /// Special cases:
+  ///
+  /// * For `type=volume`, if `source` ends with `.volume`, the Podman named
+  ///   volume generated by the corresponding `.volume` file is used.
+  /// * For `type=image`, if `source` ends with `.image`, the image generated
+  ///   by the corresponding `.image` file is used.
+  ///
+  /// In both cases, the generated systemd service will contain a dependency on
+  /// the service generated for the corresponding unit. Note: the corresponding
+  /// `.volume` or `.image` file must exist.
+  ///
+  /// This key can be listed multiple times.
+  mount: Listing<String>?
 
-    // Security label options
-    securityLabelFileType: String?
-    securityLabelLevel: String?
-    securityLabelNested: Boolean?
-    securityLabelType: String?
+  /// Specify a custom network for the container. This has the same format as
+  /// the `--network` option to `podman run`. For example, use `host` to use the
+  /// host network in the container, or `none` to not set up networking in the
+  /// container.
+  ///
+  /// Special cases:
+  ///
+  /// * If the `name` of the network ends with `.network`, a Podman network
+  ///   called `systemd-$name` is used, and the generated systemd service
+  ///   contains a dependency on the `$name-network.service`. Such a network can
+  ///   be automatically created by using a `$name.network` Quadlet file. Note:
+  ///   the corresponding `.network` file must exist.
+  ///
+  /// * If the `name` ends with `.container`, the container will reuse the
+  ///   network stack of another container created by `$name.container`. The
+  ///   generated systemd service contains a dependency on `$name.service`.
+  ///   Note: the corresponding `.container` file must exist.
+  ///
+  /// This key can be listed multiple times.
+  network: Listing<String>?
 
-    // Shared memory size
-    shmSize: String?
+  /// Add a network-scoped alias for the container. This has the same format as
+  /// the `--network-alias` option to `podman run`. Aliases can be used to group
+  /// containers together in DNS resolution: for example, setting
+  /// `NetworkAlias=web` on multiple containers will make a DNS query for `web`
+  /// resolve to all the containers with that alias.
+  ///
+  /// This key can be listed multiple times.
+  networkAlias: Listing<String>?
 
-    // Start with pod
-    startWithPod: Boolean?
+  /// If enabled, this disables the container processes from gaining additional
+  /// privileges via things like setuid and file capabilities.
+  ///
+  /// Defaults to `false`.
+  noNewPrivileges: Boolean?
 
-    // Stop signal
-    stopSignal: String?
+  /// By default, Podman is run in such a way that the systemd startup notify
+  /// command is handled by the container runtime. In other words, the service
+  /// is deemed started when the container runtime starts the child in the
+  /// container. However, if the container application supports [sd_notify](http
+  /// s://www.freedesktop.org/software/systemd/man/sd_notify.html), then setting
+  /// `Notify` to true passes the notification details to the container allowing
+  /// it to notify of startup on its own.
+  ///
+  /// In addition, setting `Notify` to `healthy` will postpone startup
+  /// notifications until such time as the container is marked healthy, as
+  /// determined by Podman healthchecks. Note that this requires setting up a
+  /// container healthcheck, see the `HealthCmd` option for more.
+  ///
+  /// Defaults to `false`.
+  notify: (Boolean|"healthy")?
 
-    // Stop timeout
-    stopTimeout: UInt?
+  /// Tune the container's pids limit. This is equivalent to the Podman `--pids-
+  /// limit` option.
+  pidsLimit: Int?
 
-    // Sub GID/UID mapping
-    subGIDMap: String?
-    subUIDMap: String?
+  /// Specify a Quadlet `.pod` unit to link the container to. The value must
+  /// take the form of `<name>.pod` and the `.pod` unit must exist.
+  ///
+  /// Quadlet will add all the necessary parameters to link between the
+  /// container and the pod and between their corresponding services.
+  pod: String?
 
-    // UID mapping
-    uidMap: (String|Listing<String>)?
+  /// This key contains a list of arguments passed directly to the end of the
+  /// `podman run` command in the generated file (right before the image name in
+  /// the command line). It can be used to access Podman features otherwise
+  /// unsupported by the generator. Since the generator is unaware of what
+  /// unexpected interactions can be caused by these arguments, it is not
+  /// recommended to use this option.
+  ///
+  /// The format of this is a space separated list of arguments, which can
+  /// optionally be individually escaped to allow inclusion of whitespace and
+  /// other control characters.
+  ///
+  /// This key can be listed multiple times.
+  podmanArgs: Listing<String>?
 
-    // Unmask
-    unmask: (String|Listing<String>)?
+  /// Exposes a port, or a range of ports (e.g. `50-59`), from the container to
+  /// the host. Equivalent to the Podman `--publish` option. The format is
+  /// similar to the Podman options, which is of the form
+  /// `ip:hostPort:containerPort`, `ip::containerPort`, `hostPort:containerPort`
+  /// or `containerPort`, where the number of host and container ports must be
+  /// the same (in the case of a range). The protocol can be provided at the
+  /// end, e.g., `hostPort:containerPort/tcp`. Valid protocols are `tcp` and
+  /// `udp`; the `sctp` protocol is supported only for rootful containers.
+  ///
+  /// If the IP is set to 0.0.0.0 or not set at all, the port is bound on all
+  /// IPv4 addresses on the host; use [::] for IPv6.
+  ///
+  /// Note that not listing a host port means that Podman automatically selects
+  /// one, and it may be different for each invocation of service. This makes
+  /// that a less useful option. The allocated port can be found with the
+  /// `podman port` command.
+  ///
+  /// This key can be listed multiple times.
+  publishPort: Listing<String>?
+
+  /// Set the image pull policy. This is equivalent to the Podman `--pull`
+  /// option
+  pull: PullPolicy?
+
+  /// If enabled, makes the image read-only.
+  ///
+  /// Defaults to `false`.
+  readOnly: Boolean?
+
+  /// If ReadOnly is set to `true`, mount a read-write tmpfs on /dev, /dev/shm,
+  /// /run, /tmp, and /var/tmp.
+  ///
+  /// Defaults to `true`.
+  readOnlyTmpfs: Boolean?
+
+  /// Add `ExecReload` line to the `Service` that runs ` podman exec` with this
+  /// command in this container.
+  ///
+  /// In order to execute the reload run `systemctl reload <Service>`
+  ///
+  /// Mutually exclusive with `ReloadSignal`
+  reloadCmd: String?
+
+  /// Add `ExecReload` line to the `Service` that runs `podman kill` with this
+  /// signal which sends the signal to the main container process.
+  ///
+  /// In order to execute the reload run `systemctl reload <Service>`
+  ///
+  /// Mutually exclusive with `ReloadCmd`
+  reloadSignal: String?
+
+  /// Number of times to retry the image pull when a HTTP error occurs.
+  /// Equivalent to the Podman `--retry` option.
+  retry: UInt?
+
+  /// Delay between retries. Equivalent to the Podman `--retry-delay` option.
+  retryDelay: Duration?
+
+  /// The rootfs to use for the container. Rootfs points to a directory on the
+  /// system that contains the content to be run within the container. This
+  /// option conflicts with the `Image` option.
+  ///
+  /// The format of the rootfs is the same as when passed to `podman run
+  /// --rootfs`, so it supports overlay mounts as well.
+  ///
+  /// Note: On SELinux systems, the rootfs needs the correct label, which is by
+  /// default unconfined_u:object_r:container_file_t:s0.
+  rootfs: String?
+
+  /// If enabled, the container has a minimal init process inside the container
+  /// that forwards signals and reaps processes.
+  ///
+  /// Defaults to `false`.
+  runInit: Boolean?
+
+  /// Set the seccomp profile to use in the container. If unset, the default
+  /// podman profile is used. Set to either the pathname of a JSON file, or
+  /// `unconfined` to disable the seccomp filters.
+  seccompProfile: String?
+
+  /// Use a Podman secret in the container either as a file or an environment
+  /// variable. This is equivalent to the Podman `--secret` option and generally
+  /// has the form `secret[,opt=opt ...]`
+  secret: Listing<String>?
+
+  /// Turn off label separation for the container.
+  securityLabelDisable: Boolean?
+
+  /// Set the label file type for the container files.
+  securityLabelFileType: String?
+
+  /// Set the label process level for the container processes.
+  securityLabelLevel: String?
+
+  /// Allow SecurityLabels to function within the container. This allows
+  /// separation of containers created within the container.
+  securityLabelNested: Boolean?
+
+  /// Set the label process type for the container processes.
+  securityLabelType: String?
+
+  /// By default, Quadlet will name the systemd service unit using the name of
+  /// the Quadlet. Setting this key overrides this behavior by instructing
+  /// Quadlet to use the provided name.
+  ///
+  /// Note, the name should not include the `.service` file extension
+  serviceName: String?
+
+  /// Size of /dev/shm.
+  ///
+  /// This is equivalent to the Podman `--shm-size` option and generally has the
+  /// form `number[unit]`
+  shmSize: String?
+
+  /// Start the container after the associated pod is created. Default to
+  /// **true**.
+  ///
+  /// If `true`, container will be started/stopped/restarted alongside the pod.
+  ///
+  /// If `false`, the container will not be started when the pod starts. The
+  /// container will be stopped with the pod. Restarting the pod will also
+  /// restart the container as long as the container was also running before.
+  ///
+  /// Note, the container can still be started manually or through a target by
+  /// configuring the `[Install]` section. The pod will be started as needed in
+  /// any case.
+  startWithPod: Boolean?
+
+  /// Signal to stop a container. Default is **SIGTERM**.
+  ///
+  /// This is equivalent to the Podman `--stop-signal` option
+  stopSignal: String?
+
+  /// Seconds to wait before forcibly stopping the container.
+  ///
+  /// Note, this value should be lower than the actual systemd unit timeout to
+  /// make sure the podman rm command is not killed by systemd.
+  ///
+  /// This is equivalent to the Podman `--stop-timeout` option
+  stopTimeout: UInt?
+
+  /// Run the container in a new user namespace using the map with name in the
+  /// /etc/subgid file. Equivalent to the Podman `--subgidname` option.
+  subGIDMap: String?
+
+  /// Run the container in a new user namespace using the map with name in the
+  /// /etc/subuid file. Equivalent to the Podman `--subuidname` option.
+  subUIDMap: String?
+
+  /// Configures namespaced kernel parameters for the container. The format is
+  /// `Sysctl=name=value`.
+  ///
+  /// This is a space separated list of kernel parameters. This key can be
+  /// listed multiple times.
+  ///
+  /// For example: ``` Sysctl=net.ipv6.conf.all.disable_ipv6=1
+  /// net.ipv6.conf.all.use_tempaddr=1 ```
+  sysctl: Mapping<String, String>?
+
+  /// The timezone to run the container in.
+  ///
+  /// If unset uses system-configured default.
+  timezone: String?
+
+  /// Mount a tmpfs in the container. This is equivalent to the Podman `--tmpfs`
+  /// option, and generally has the form `CONTAINER-DIR[:OPTIONS]`.
+  ///
+  /// This key can be listed multiple times.
+  tmpfs: Listing<String>?
+
+  /// Run the container in a new user namespace using the supplied UID mapping.
+  /// Equivalent to the Podman `--uidmap` option.
+  ///
+  /// This key can be listed multiple times.
+  uIDMap: Listing<String>?
+
+  /// Ulimit options. Sets the ulimits values inside of the container.
+  ///
+  /// This key can be listed multiple times.
+  ulimit: Listing<String>?
+
+  /// Set the umask inside the container.
+  ///
+  /// This is equivalent to the Podman `--umask` option.
+  ///
+  /// Defaults to `0022`.
+  umask: String?
+
+  /// Specify the paths to unmask separated by a colon. unmask=ALL or
+  /// /path/1:/path/2, or shell expanded paths (/proc/*):
+  ///
+  /// If set to `ALL`, Podman will unmask all the paths that are masked or made
+  /// read-only by default.
+  ///
+  /// The default masked paths are /proc/acpi, /proc/kcore, /proc/keys,
+  /// /proc/latency_stats, /proc/sched_debug, /proc/scsi, /proc/timer_list,
+  /// /proc/timer_stats, /sys/firmware, and /sys/fs/selinux.
+  ///
+  /// The default paths that are read-only are /proc/asound, /proc/bus,
+  /// /proc/fs, /proc/irq, /proc/sys, /proc/sysrq-trigger, /sys/fs/cgroup.
+  unmask: Listing<String>?
+
+  /// The (numeric) UID to run as inside the container. This does not need to
+  /// match the UID on the host, which can be modified with `UserNS`, but if
+  /// that is not specified, this UID is also used on the host.
+  ///
+  /// Note: when both `User=` and `Group=` are specified, they are combined into
+  /// a single `--user USER:GROUP` argument passed to Podman.
+  user: String?
+
+  /// Set the user namespace mode for the container. This is equivalent to the
+  /// Podman `--userns` option and generally has the form `MODE[:OPTIONS,...]`.
+  userNS: String?
+
+  /// Mount a volume in the container. This is equivalent to the Podman
+  /// `--volume` option, and generally has the form `[[SOURCE-VOLUME|HOST-
+  /// DIR:]CONTAINER-DIR[:OPTIONS]]`.
+  ///
+  /// If `SOURCE-VOLUME` starts with `.`, Quadlet resolves the path relative to
+  /// the location of the unit file.
+  ///
+  /// Special case:
+  ///
+  /// * If `SOURCE-VOLUME` ends with `.volume`, a Podman named volume called
+  ///   `systemd-$name` is used as the source, and the generated systemd service
+  ///   contains a dependency on the `$name-volume.service`. Note that the
+  ///   corresponding `.volume` file must exist.
+  ///
+  /// This key can be listed multiple times.
+  volume: Listing<String>?
+
+  /// Working directory inside the container.
+  ///
+  /// The default working directory for running binaries within a container is
+  /// the root directory (/). The image developer can set a different default
+  /// with the WORKDIR instruction. This option overrides the working directory
+  /// by using the -w option.
+  workingDir: String?
 }
 
-// https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html
-local class ServiceSection {
-    // Systemd service options that apply to container units
-    type: ServiceType?
-    remainAfterExit: Boolean?
-    restart: RestartPolicy?
-    restartSec: Duration?
-    timeoutStartSec: Duration?
-    timeoutStopSec: Duration?
+local typealias AutoUpdatePolicy = "registry" | "local"
 
-    // Resource control
-    cpuWeight: UInt?
-    cpuQuota: String?
-    memoryMax: String?
-    memoryHigh: String?
+local typealias CgroupsMode = "enabled" | "disabled" | "no-conmon" | "split"
 
-    // Dependencies
-    requires: String?
-    wants: String?
-}
+local typealias HealthOnFailure = "none" | "kill" | "restart" | "stop"
 
-local typealias PullPolicy = "always" | "missing" | "never" | "newer"
-local typealias AutoUpdatePolicy = "registry" | "local" | "disabled"
-local typealias ServiceType = "simple" | "exec" | "forking" | "oneshot" | "notify"
-local typealias RestartPolicy = "no" | "always" | "on-success" | "on-failure" | "on-abnormal" | "on-abort" | "on-watchdog"
+local typealias ImageVolumeMode = "anonymous" | "tmpfs" | "ignore"
