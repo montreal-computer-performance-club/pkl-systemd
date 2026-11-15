@@ -95,4 +95,3 @@ class ScopeSection extends Kill {
 }
 
 local typealias OOMPolicy = "continue" | "stop" | "kill"
-

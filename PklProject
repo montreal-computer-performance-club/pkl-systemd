@@ -3,7 +3,8 @@ amends "pkl:Project"
 package {
   name = "pkl-systemd"
   version = read?("env:PKL_PACKAGE_VERSION") ?? "0.0.0"
-  baseUri = "package://github.com/montreal-computer-performance-club/pkl-systemd/releases/download/\(version)/\(name)"
+  baseUri =
+    "package://github.com/montreal-computer-performance-club/pkl-systemd/releases/download/\(version)/\(name)"
   license = "MIT AND LGPL-2.1-or-later AND Apache-2.0"
   authors {
     "Mike Aizatsky <mike.aizatsky@gmail.com>"

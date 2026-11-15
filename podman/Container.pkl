@@ -232,7 +232,7 @@ class ContainerSection {
   /// Set an interval for the healthchecks. An interval of disable results in no
   /// automatic timer setup. Equivalent to the Podman `--health-interval`
   /// option.
-  healthInterval: (Duration|"disable")?
+  healthInterval: (Duration | "disable")?
 
   /// Set the destination of the HealthCheck log. Directory path, local or
   /// events_logger (local use container state file) (Default: local) Equivalent
@@ -278,7 +278,7 @@ class ContainerSection {
   /// Set an interval for the startup healthcheck. An interval of disable
   /// results in no automatic timer setup. Equivalent to the Podman `--health-
   /// startup-interval` option.
-  healthStartupInterval: (Duration|"disable")?
+  healthStartupInterval: (Duration | "disable")?
 
   /// The number of attempts allowed before the startup healthcheck restarts the
   /// container. Equivalent to the Podman `--health-startup-retries` option.
@@ -440,7 +440,7 @@ class ContainerSection {
   /// container healthcheck, see the `HealthCmd` option for more.
   ///
   /// Defaults to `false`.
-  notify: (Boolean|"healthy")?
+  notify: (Boolean | "healthy")?
 
   /// Tune the container's pids limit. This is equivalent to the Podman `--pids-
   /// limit` option.

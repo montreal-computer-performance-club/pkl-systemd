@@ -173,7 +173,7 @@ class KubeSection {
   ///
   /// Special case:
   /// * If multiple `Yaml` path are provided only `unit` is supported.
-  setWorkingDirectory: ("yaml"|"unit")?
+  setWorkingDirectory: ("yaml" | "unit")?
 
   /// Set the user namespace mode for the container. This is equivalent to the
   /// Podman `--userns` option and generally has the form `MODE[:OPTIONS,...]`.

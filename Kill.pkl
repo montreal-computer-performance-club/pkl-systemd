@@ -21,7 +21,6 @@ abstract module systemd.Kill
 
 extends "./ResourceControl.pkl"
 
-
 /// Specifies how processes of this unit shall be killed. One of:
 ///
 /// - `control-group`: all remaining processes in the control group of this

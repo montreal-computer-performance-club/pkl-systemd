@@ -8,8 +8,8 @@ import "podman/Image.pkl" as ImageModule
 import "podman/Kube.pkl" as KubeModule
 import "podman/Network.pkl" as NetworkModule
 import "podman/Pod.pkl" as PodModule
-import "podman/Volume.pkl" as VolumeModule
 import "podman/Quadlet.pkl" as QuadletModule
+import "podman/Volume.pkl" as VolumeModule
 
 // Re-export all types
 typealias Build = BuildModule

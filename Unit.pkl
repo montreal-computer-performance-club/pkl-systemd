@@ -820,9 +820,7 @@ local class UnitFileRenderer extends ValueRenderer {
       reflect
         .Class(section.getClass())
         .allProperties
-        .mapValues((_, property) ->
-          property.annotations.filterIsInstance(Key).firstOrNull?.name
-        )
+        .mapValues((_, property) -> property.annotations.filterIsInstance(Key).firstOrNull?.name)
         .filter((_, name) -> name != null)
     else
       Map()

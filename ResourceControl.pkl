@@ -21,7 +21,6 @@ abstract module systemd.ResourceControl
 
 import "./Unit.pkl"
 
-
 /// The `CPUAccounting=` setting is deprecated since systemd 258, because CPU
 /// accounting is always available on the unified cgroup hierarchy and such
 /// setting has no effect.
