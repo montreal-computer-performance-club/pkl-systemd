@@ -20,7 +20,7 @@
 /// Note that swap support on Linux is privileged, swap units are hence only
 /// available in the system service manager (and root's user service manager),
 /// but not in unprivileged user's service manager.
-module declix.systemd.Swap
+module systemd.Swap
 
 extends "./Unit.pkl"
 

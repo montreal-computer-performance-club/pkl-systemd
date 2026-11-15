@@ -17,7 +17,7 @@
 /// classes that accept these options, such as `ServiceSection` in
 /// `Service.pkl`. It extends `ResourceControl`, because every unit type that
 /// accepts the kill options also accepts the resource control options.
-abstract module declix.systemd.Kill
+abstract module systemd.Kill
 
 extends "./ResourceControl.pkl"
 

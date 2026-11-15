@@ -28,7 +28,7 @@
 /// kernel-to-userspace and userspace-to-userspace interfaces. Some of them may
 /// not be changed via mount units, and cannot be disabled. For a longer
 /// discussion see [API File Systems](https://systemd.io/API_FILE_SYSTEMS).
-module declix.systemd.Mount
+module systemd.Mount
 
 extends "./Unit.pkl"
 

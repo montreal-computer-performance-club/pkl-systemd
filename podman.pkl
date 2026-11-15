@@ -1,5 +1,5 @@
 /// Re-exports all Podman Quadlet unit types for convenient access
-module podman
+module systemd.podman
 
 // Import all unit types
 import "podman/Build.pkl" as BuildModule

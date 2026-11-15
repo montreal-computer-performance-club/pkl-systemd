@@ -12,7 +12,7 @@
 /// Quadlet units are systemd units with an additional Podman-specific section
 /// (`[Container]`, `[Pod]`, ...). This module holds what every Quadlet unit
 /// shares: the `[Quadlet]` section and common value types.
-abstract module declix.systemd.podman.Quadlet
+abstract module systemd.podman.Quadlet
 
 extends "../Unit.pkl"
 

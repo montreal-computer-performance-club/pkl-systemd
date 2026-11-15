@@ -22,7 +22,7 @@
 /// Note that slice units cannot be templated, nor is it possible to add
 /// multiple names to a slice unit by creating additional symlinks to its unit
 /// file.
-module declix.systemd.Slice
+module systemd.Slice
 
 extends "./Unit.pkl"
 

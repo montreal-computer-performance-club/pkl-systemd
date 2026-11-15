@@ -33,7 +33,7 @@
 /// Device units will be reloaded by **systemd** whenever the corresponding
 /// device generates a `changed` event. Other units can use
 /// `ReloadPropagatedFrom=` to react to that event.
-module declix.systemd.Device
+module systemd.Device
 
 extends "./Unit.pkl"
 

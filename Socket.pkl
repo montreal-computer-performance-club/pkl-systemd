@@ -21,7 +21,7 @@
 ///
 /// Socket units may be used to implement on-demand starting of services, as
 /// well as parallelized starting of services.
-module declix.systemd.Socket
+module systemd.Socket
 
 extends "./Unit.pkl"
 

@@ -12,7 +12,7 @@
 /// partition, a start-up target, a watched file system path, a timer controlled
 /// and supervised by systemd, a resource management slice or a group of
 /// externally created processes.
-abstract module declix.systemd.Unit
+abstract module systemd.Unit
 
 import "pkl:reflect"
 

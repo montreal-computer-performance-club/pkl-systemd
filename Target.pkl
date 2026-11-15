@@ -30,7 +30,7 @@
 /// Note that a target unit file must not be empty, lest it be considered a
 /// masked unit. It is recommended to provide a `[Unit]` section which includes
 /// informative `Description=` and `Documentation=` options.
-module declix.systemd.Target
+module systemd.Target
 
 extends "./Unit.pkl"
 

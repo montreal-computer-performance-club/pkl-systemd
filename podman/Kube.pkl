@@ -15,7 +15,7 @@
 /// Quadlet generator turns into regular services. They live in the same
 /// directories as other unit files, for example `/etc/containers/systemd/` or
 /// `~/.config/containers/systemd/`, with the extension `.kube`.
-module declix.systemd.podman.Kube
+module systemd.podman.Kube
 
 extends "./Quadlet.pkl"
 

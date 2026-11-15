@@ -17,7 +17,7 @@
 ///
 /// This module is not a unit by itself: it is the base class of the section
 /// classes that accept these options, such as `SliceSection` in `Slice.pkl`.
-abstract module declix.systemd.ResourceControl
+abstract module systemd.ResourceControl
 
 import "./Unit.pkl"
 

@@ -23,7 +23,7 @@
 /// element. systemd merges such lines into a single list, and each element may
 /// itself hold several values in the syntax the option accepts, for instance
 /// separated by spaces.
-abstract module declix.systemd.Exec
+abstract module systemd.Exec
 
 extends "./Kill.pkl"
 

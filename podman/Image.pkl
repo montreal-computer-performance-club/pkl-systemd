@@ -15,7 +15,7 @@
 /// Quadlet generator turns into regular services. They live in the same
 /// directories as other unit files, for example `/etc/containers/systemd/` or
 /// `~/.config/containers/systemd/`, with the extension `.image`.
-module declix.systemd.podman.Image
+module systemd.podman.Image
 
 extends "./Quadlet.pkl"
 

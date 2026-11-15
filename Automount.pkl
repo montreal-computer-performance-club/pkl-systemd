@@ -37,7 +37,7 @@
 /// Note that automount units should not be nested. (The establishment of the
 /// inner automount point would unconditionally pin the outer mount point,
 /// defeating its purpose.)
-module declix.systemd.Automount
+module systemd.Automount
 
 extends "./Unit.pkl"
 

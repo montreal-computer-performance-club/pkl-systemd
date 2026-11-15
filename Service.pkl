@@ -19,7 +19,7 @@
 /// define the way the processes of the service are terminated, and in
 /// systemd.resource-control(5), which configure resource control settings for
 /// the processes of the service.
-module declix.systemd.Service
+module systemd.Service
 
 extends "./Unit.pkl"
 

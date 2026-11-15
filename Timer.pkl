@@ -27,7 +27,7 @@
 /// `StopWhenUnneeded=yes` on them. This will cause a target unit to be stopped
 /// immediately after its activation, if it is not a dependency of another
 /// running unit.
-module declix.systemd.Timer
+module systemd.Timer
 
 extends "./Unit.pkl"
 

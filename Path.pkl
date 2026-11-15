@@ -30,7 +30,7 @@
 /// error condition that the start rate limit is hit is propagated from the
 /// service unit to the path unit and causes the path unit to fail as well, thus
 /// ending the loop.
-module declix.systemd.Path
+module systemd.Path
 
 extends "./Unit.pkl"
 
