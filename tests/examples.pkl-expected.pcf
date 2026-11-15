@@ -276,31 +276,11 @@ examples {
   }
   ["scope.pkl"] {
     """
-    [Unit]
-    Description=User session scope for external processes
-    Documentation=man:systemd.scope(5)
-    
-    [Install]
-    
     [Scope]
+    MemoryHigh=4G
+    MemoryMax=6G
+    TasksMax=2000
     OOMPolicy=kill
-    RuntimeMaxSec=86400s
-    RuntimeRandomizedExtraSec=3600s
-    CPUAccounting=yes
-    CPUWeight=100
-    CPUQuota=25%
-    MemoryAccounting=yes
-    MemoryHigh=1G
-    MemoryMax=2G
-    TasksAccounting=yes
-    TasksMax=500
-    IOAccounting=yes
-    IOWeight=100
-    KillMode=control-group
-    KillSignal=SIGTERM
-    FinalKillSignal=SIGKILL
-    SendSIGHUP=no
-    SendSIGKILL=yes
     
     """
   }

@@ -122,7 +122,7 @@ Every unit type has at least one example in the [`examples/`](examples/) directo
 | `Path.pkl` | Path units for file system monitoring | [systemd.path(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.path.html) | [path](examples/path.pkl) |
 | `Swap.pkl` | Swap units for swap file/partition management | [systemd.swap(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.swap.html) | [swap](examples/swap.pkl) |
 | `Slice.pkl` | Slice units for resource management | [systemd.slice(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.slice.html) | [slice](examples/slice.pkl) |
-| `Scope.pkl` | Scope units for managing external processes | [systemd.scope(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.scope.html) | [scope](examples/scope.pkl) |
+| `Scope.pkl` | Drop-ins for scope units, which are only created programmatically | [systemd.scope(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.scope.html) | [scope](examples/scope.pkl) |
 | `Device.pkl` | Device units (automatically generated) | [systemd.device(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.device.html) | |
 | `Unit.pkl` | Base unit with common properties | [systemd.unit(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html) | |
 

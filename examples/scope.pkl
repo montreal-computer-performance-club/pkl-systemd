@@ -1,44 +1,17 @@
 amends "../Scope.pkl"
 
-// Example scope unit for managing external processes
-unit = new {
-  description = "User session scope for external processes"
-  documentation { "man:systemd.scope(5)" }
-
-  // Scope units are typically created programmatically
-  // This example shows configuration options that can be set
-}
-
+// Scope units cannot be defined with unit files: this renders a drop-in for
+// scopes created by something else. Installed as
+// /etc/systemd/system/session-.scope.d/50-limits.conf, it applies to every
+// login session scope (session-1.scope, session-2.scope, ...).
 scope = new {
-  // OOM handling
-  oOMPolicy = "kill"
-
-  // Runtime limits
-  runtimeMaxSec = 24.h // Maximum runtime of 24 hours
-  runtimeRandomizedExtraSec = 1.h // Add up to 1 hour randomization
-
-  // CPU resource limits
-  cPUAccounting = true
-  cPUWeight = 100
-  cPUQuota = "25%"
-
-  // Memory resource limits
-  memoryAccounting = true
-  memoryHigh = "1G"
-  memoryMax = "2G"
+  // Memory limits
+  memoryHigh = "4G"
+  memoryMax = "6G"
 
   // Task limits
-  tasksAccounting = true
-  tasksMax = "500"
+  tasksMax = "2000"
 
-  // IO limits
-  iOAccounting = true
-  iOWeight = 100
-
-  // Kill settings
-  killMode = "control-group"
-  killSignal = "SIGTERM"
-  finalKillSignal = "SIGKILL"
-  sendSIGHUP = false
-  sendSIGKILL = true
+  // Kill the whole session if one of its processes is killed by the OOM killer
+  oOMPolicy = "kill"
 }
