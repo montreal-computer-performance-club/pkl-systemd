@@ -1,28 +1,180 @@
+// SPDX-License-Identifier: MIT AND LGPL-2.1-or-later
+//
+// The documentation comments in this file are adapted from the systemd man
+// pages, mainly systemd.path(5), copyright the systemd contributors and
+// licensed under LGPL-2.1-or-later. The text was converted to Markdown and
+// edited to fit this module. The original is available at
+// https://github.com/systemd/systemd/tree/main/man
+
+/// A [path unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.path.html)
+/// encodes information about a path monitored by **systemd**, for path-based
+/// activation. Its file name ends in `.path`.
+///
+/// For each path file, a matching unit file must exist, describing the unit to
+/// activate when the path changes. By default, a service by the same name as
+/// the path (except for the suffix) is activated. Example: a path file
+/// `foo.path` activates a matching service `foo.service`. The unit to activate
+/// may be controlled by `Unit=`.
+///
+/// Internally, path units use the inotify(7) API to monitor file systems. Due
+/// to that, it suffers by the same limitations as inotify, and for example
+/// cannot be used to monitor files or directories changed by other machines on
+/// remote NFS file systems.
+///
+/// When a service unit triggered by a path unit terminates (regardless whether
+/// it exited successfully or failed), monitored paths are checked immediately
+/// again, and the service accordingly restarted instantly. As protection
+/// against busy looping in this trigger/start cycle, a start rate limit is
+/// enforced on the service unit, see `StartLimitIntervalSec=` and
+/// `StartLimitBurst=` in systemd.unit(5). Unlike other service failures, the
+/// error condition that the start rate limit is hit is propagated from the
+/// service unit to the path unit and causes the path unit to fail as well, thus
+/// ending the loop.
 module declix.systemd.Path
 
 extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
+
+/// The `[Path]` section, which carries information about the path or paths
+/// this unit monitors.
 path: PathSection
 
-// https://www.freedesktop.org/software/systemd/man/latest/systemd.path.html
 class PathSection {
-  // Path monitoring types
+  /// Watches the mere existence of a file or directory. If the file specified
+  /// exists, the configured unit is activated.
+  ///
+  /// The value must be an absolute file system path. This may be combined with
+  /// the other path directives (`PathExistsGlob=`, `PathChanged=`,
+  /// `PathModified=`, `DirectoryNotEmpty=`) to watch multiple paths.
+  ///
+  /// If the path already exists at the time the path unit is activated, then
+  /// the configured unit is immediately activated as well.
+  ///
+  /// If the path itself or any of the containing directories are not
+  /// accessible, **systemd** will watch for permission changes and notice that
+  /// conditions are satisfied when permissions allow that.
+  ///
+  /// Note that files whose name starts with a dot (i.e. hidden files) are
+  /// generally ignored when monitoring these paths.
   pathExists: String?
+
+  /// Works similarly to `PathExists=`, but checks for the existence of at least
+  /// one file matching the globbing pattern specified. If such a file exists,
+  /// the configured unit is activated.
+  ///
+  /// The value must be an absolute file system path. This may be combined with
+  /// the other path directives (`PathExists=`, `PathChanged=`, `PathModified=`,
+  /// `DirectoryNotEmpty=`) to watch multiple paths.
+  ///
+  /// If a matching path already exists at the time the path unit is activated,
+  /// then the configured unit is immediately activated as well.
+  ///
+  /// If the path itself or any of the containing directories are not
+  /// accessible, **systemd** will watch for permission changes and notice that
+  /// conditions are satisfied when permissions allow that.
+  ///
+  /// Note that files whose name starts with a dot (i.e. hidden files) are
+  /// generally ignored when monitoring these paths.
   pathExistsGlob: String?
+
+  /// Watches a file or directory and activates the configured unit whenever it
+  /// changes. The unit is not activated on every write to the watched file but
+  /// it is activated if the file which was open for writing gets closed. See
+  /// `PathModified=` to also activate on simple writes.
+  ///
+  /// The value must be an absolute file system path. This may be combined with
+  /// the other path directives (`PathExists=`, `PathExistsGlob=`,
+  /// `PathModified=`, `DirectoryNotEmpty=`) to watch multiple paths.
+  ///
+  /// Unlike with `PathExists=`, the configured unit is not immediately
+  /// activated if the path already exists at the time the path unit is
+  /// activated.
+  ///
+  /// If the path itself or any of the containing directories are not
+  /// accessible, **systemd** will watch for permission changes and notice that
+  /// conditions are satisfied when permissions allow that.
+  ///
+  /// Note that files whose name starts with a dot (i.e. hidden files) are
+  /// generally ignored when monitoring these paths.
   pathChanged: String?
+
+  /// Watches a file or directory and activates the configured unit whenever it
+  /// changes. This is similar to `PathChanged=`, but additionally the unit is
+  /// activated also on simple writes to the watched file, and not only when
+  /// the file which was open for writing gets closed.
+  ///
+  /// The value must be an absolute file system path. This may be combined with
+  /// the other path directives (`PathExists=`, `PathExistsGlob=`,
+  /// `PathChanged=`, `DirectoryNotEmpty=`) to watch multiple paths.
+  ///
+  /// Unlike with `PathExists=`, the configured unit is not immediately
+  /// activated if the path already exists at the time the path unit is
+  /// activated.
+  ///
+  /// If the path itself or any of the containing directories are not
+  /// accessible, **systemd** will watch for permission changes and notice that
+  /// conditions are satisfied when permissions allow that.
+  ///
+  /// Note that files whose name starts with a dot (i.e. hidden files) are
+  /// generally ignored when monitoring these paths.
   pathModified: String?
+
+  /// Watches a directory and activates the configured unit whenever it contains
+  /// at least one file.
+  ///
+  /// The value must be an absolute file system path. This may be combined with
+  /// the other path directives (`PathExists=`, `PathExistsGlob=`,
+  /// `PathChanged=`, `PathModified=`) to watch multiple paths.
+  ///
+  /// If the directory already is not empty at the time the path unit is
+  /// activated, then the configured unit is immediately activated as well.
+  ///
+  /// If the path itself or any of the containing directories are not
+  /// accessible, **systemd** will watch for permission changes and notice that
+  /// conditions are satisfied when permissions allow that.
+  ///
+  /// Note that files whose name starts with a dot (i.e. hidden files) are
+  /// generally ignored when monitoring these paths.
   directoryNotEmpty: String?
 
-  // Target unit
+  /// The unit to activate when any of the configured paths changes. The
+  /// argument is a unit name, whose suffix is not `.path`. If not specified,
+  /// this value defaults to a service that has the same name as the path unit,
+  /// except for the suffix. It is recommended that the unit name that is
+  /// activated and the unit name of the path unit are named identical, except
+  /// for the suffix.
   unit: String?
 
-  // Directory creation
+  /// If true, the directories to watch are created before watching. This option
+  /// is ignored for `PathExists=` settings. Defaults to `false`.
   makeDirectory: Boolean?
+
+  /// If `MakeDirectory=` is enabled, use the mode specified here to create the
+  /// directories in question. Takes an access mode in octal notation. Defaults
+  /// to `0755`.
   directoryMode: String?
 
-  // Rate limiting
+  /// Configures the length of the time interval used to limit how often this
+  /// path unit may be activated: at most `TriggerLimitBurst=` activations are
+  /// permitted per interval. Takes a Pkl duration and defaults to 2s. Set
+  /// either this or `TriggerLimitBurst=` to 0 to disable any form of trigger
+  /// rate limiting. If the limit is hit, the unit is placed into a failure
+  /// mode, and will not watch the paths anymore until restarted. Note that this
+  /// limit is enforced before the service activation is enqueued.
+  ///
+  /// Added in version 250.
   triggerLimitIntervalSec: Duration?
+
+  /// Configures the number of activations of this path unit permitted within
+  /// the time interval set by `TriggerLimitIntervalSec=`. Takes a positive
+  /// integer value and defaults to 200. Set either this or
+  /// `TriggerLimitIntervalSec=` to 0 to disable any form of trigger rate
+  /// limiting. If the limit is hit, the unit is placed into a failure mode, and
+  /// will not watch the paths anymore until restarted. Note that this limit is
+  /// enforced before the service activation is enqueued.
+  ///
+  /// Added in version 250.
   triggerLimitBurst: UInt?
 }

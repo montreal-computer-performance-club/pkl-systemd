@@ -1,51 +1,524 @@
+// SPDX-License-Identifier: MIT AND LGPL-2.1-or-later
+//
+// The documentation comments in this file are adapted from the systemd man
+// pages, mainly systemd.scope(5), systemd.resource-control(5) and
+// systemd.kill(5), copyright the systemd contributors and licensed under
+// LGPL-2.1-or-later. The text was converted to Markdown and edited to fit this
+// module. The original is available at
+// https://github.com/systemd/systemd/tree/main/man
+
+/// A [scope unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.scope.html)
+/// manages a set of system processes. Unlike service units, scope units manage
+/// externally created processes, and do not fork off processes on their own.
+/// The main purpose of scope units is grouping worker processes of a system
+/// service for organization and for managing resources.
+///
+/// Note that, unlike service units, scope units have no "main" process: all
+/// processes in the scope are equivalent. The lifecycle of the scope unit is
+/// thus not bound to the lifetime of one specific process, but to the existence
+/// of at least one process in the scope.
 module declix.systemd.Scope
 
 extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
+
+/// The `[Scope]` section, which carries information about the scope and the
+/// units it contains. A number of options that may be used in this section are
+/// shared with other unit types and are documented in systemd.kill(5) and
+/// systemd.resource-control(5).
 scope: ScopeSection
 
-// https://www.freedesktop.org/software/systemd/man/latest/systemd.scope.html
 class ScopeSection {
-  // Scope-specific configuration
+  /// Configure the out-of-memory (OOM) killing policy for the kernel and the
+  /// userspace OOM killer systemd-oomd.service(8). On Linux, when memory
+  /// becomes scarce to the point that the kernel has trouble allocating memory
+  /// for itself, it might decide to kill a running process in order to free up
+  /// memory and reduce memory pressure. Note that `systemd-oomd.service` is a
+  /// more flexible solution that aims to prevent out-of-memory situations for
+  /// the userspace too, not just the kernel, by attempting to terminate
+  /// services earlier, before the kernel would have to act.
+  ///
+  /// This setting takes one of `continue`, `stop` or `kill`:
+  ///
+  /// - `continue`: if a process in the unit is killed by the OOM killer, this
+  ///   is logged but the unit continues running.
+  /// - `stop`: the event is logged and the unit's processes are terminated
+  ///   cleanly by the service manager.
+  /// - `kill`: if one of the unit's processes is killed by the OOM killer the
+  ///   kernel is instructed to kill all remaining processes of the unit too, by
+  ///   setting the `memory.oom.group` attribute to `1`; also see kernel page
+  ///   [Control Group v2](https://docs.kernel.org/admin-guide/cgroup-v2.html).
+  ///
+  /// In case of both `stop` and `kill`, the service ultimately ends up in the
+  /// `oom-kill` failed state after which `Restart=` may apply.
+  ///
+  /// Defaults to the setting `DefaultOOMPolicy=` in systemd-system.conf(5) is
+  /// set to, except for units where `Delegate=` is turned on, where it defaults
+  /// to `continue`.
+  ///
+  /// Use the `OOMScoreAdjust=` setting to configure whether processes of the
+  /// unit shall be considered preferred or less preferred candidates for
+  /// process termination by the Linux OOM killer logic. See systemd.exec(5) for
+  /// details.
+  ///
+  /// Added in version 253.
   oOMPolicy: OOMPolicy?
+
+  /// Configures a maximum time for the scope to run. If this is used and the
+  /// scope has been active for longer than the specified time it is terminated
+  /// and put into a failure state. Takes a Pkl duration such as `30.min`. The
+  /// default is `infinity`, which configures no runtime limit.
+  ///
+  /// Added in version 244.
   runtimeMaxSec: Duration?
+
+  /// This option modifies `RuntimeMaxSec=` by increasing the maximum runtime by
+  /// an evenly distributed duration between 0 and the specified value. Takes a
+  /// Pkl duration such as `5.min`. If `RuntimeMaxSec=` is unspecified, then
+  /// this feature will be disabled.
+  ///
+  /// Added in version 250.
   runtimeRandomizedExtraSec: Duration?
 
-  // Resource control settings (from systemd.resource-control)
-  // CPU accounting and limits
+  /// The `CPUAccounting=` setting is deprecated since systemd 258, because CPU
+  /// accounting is always available on the unified cgroup hierarchy and such
+  /// setting has no effect.
   cPUAccounting: Boolean?
+
+  /// This setting controls the `cpu` controller in the unified hierarchy.
+  ///
+  /// This option accepts an integer value or the special string "idle":
+  ///
+  /// - If set to an integer value, assign the specified CPU time weight to the
+  ///   processes executed, if the unified control group hierarchy is used on
+  ///   the system. This option controls the `cpu.weight` control group
+  ///   attribute. The allowed range is 1 to 10000. Defaults to unset, but the
+  ///   kernel default is 100. For details about this control group attribute,
+  ///   see
+  ///   [Control Groups v2](https://docs.kernel.org/admin-guide/cgroup-v2.html)
+  ///   and
+  ///   [CFS Scheduler](https://docs.kernel.org/scheduler/sched-design-CFS.html).
+  ///   The available CPU time is split up among all units within one slice
+  ///   relative to their CPU time weight. A higher weight means more CPU time,
+  ///   a lower weight means less.
+  /// - If set to the special string "idle", mark the cgroup for "idle
+  ///   scheduling", which means that it will get CPU resources only when there
+  ///   are no processes not marked in this way to execute in this cgroup or its
+  ///   siblings. This setting corresponds to the `cpu.idle` cgroup attribute.
+  ///   Note that this value only has an effect on cgroup-v2, for cgroup-v1 it
+  ///   is equivalent to the minimum weight.
+  ///
+  /// While `StartupCPUWeight=` applies to the startup and shutdown phases of
+  /// the system, `CPUWeight=` applies to normal runtime of the system, and if
+  /// the former is not set also to the startup and shutdown phases. Using
+  /// `StartupCPUWeight=` allows prioritizing specific services at boot-up and
+  /// shutdown differently than during normal runtime.
+  ///
+  /// In addition to the resource allocation performed by the `cpu` controller,
+  /// the kernel may automatically divide resources based on session-id
+  /// grouping, see "The autogroup feature" in sched(7). The effect of this
+  /// feature is similar to the `cpu` controller with no explicit configuration,
+  /// so users should be careful to not mistake one for the other.
+  ///
+  /// Added in version 232.
   cPUWeight: UInt?
+
+  /// This setting controls the `cpu` controller in the unified hierarchy.
+  ///
+  /// Like `CPUWeight=`, but applies to the startup and shutdown phases of the
+  /// system only. This option accepts an integer value or the special string
+  /// "idle":
+  ///
+  /// - If set to an integer value, assign the specified CPU time weight to the
+  ///   processes executed, if the unified control group hierarchy is used on
+  ///   the system. This option controls the `cpu.weight` control group
+  ///   attribute. The allowed range is 1 to 10000. Defaults to unset, but the
+  ///   kernel default is 100. For details about this control group attribute,
+  ///   see
+  ///   [Control Groups v2](https://docs.kernel.org/admin-guide/cgroup-v2.html)
+  ///   and
+  ///   [CFS Scheduler](https://docs.kernel.org/scheduler/sched-design-CFS.html).
+  ///   The available CPU time is split up among all units within one slice
+  ///   relative to their CPU time weight. A higher weight means more CPU time,
+  ///   a lower weight means less.
+  /// - If set to the special string "idle", mark the cgroup for "idle
+  ///   scheduling", which means that it will get CPU resources only when there
+  ///   are no processes not marked in this way to execute in this cgroup or its
+  ///   siblings. This setting corresponds to the `cpu.idle` cgroup attribute.
+  ///   Note that this value only has an effect on cgroup-v2, for cgroup-v1 it
+  ///   is equivalent to the minimum weight.
+  ///
+  /// While `StartupCPUWeight=` applies to the startup and shutdown phases of
+  /// the system, `CPUWeight=` applies to normal runtime of the system, and if
+  /// the former is not set also to the startup and shutdown phases. Using
+  /// `StartupCPUWeight=` allows prioritizing specific services at boot-up and
+  /// shutdown differently than during normal runtime.
+  ///
+  /// In addition to the resource allocation performed by the `cpu` controller,
+  /// the kernel may automatically divide resources based on session-id
+  /// grouping, see "The autogroup feature" in sched(7). The effect of this
+  /// feature is similar to the `cpu` controller with no explicit configuration,
+  /// so users should be careful to not mistake one for the other.
+  ///
+  /// Added in version 232.
   startupCPUWeight: UInt?
+
+  /// This setting controls the `cpu` controller in the unified hierarchy.
+  ///
+  /// Assign the specified CPU time quota to the processes executed. Takes a
+  /// percentage value, suffixed with "%". The percentage specifies how much CPU
+  /// time the unit shall get at maximum, relative to the total CPU time
+  /// available on one CPU. Use values > 100% for allotting CPU time on more
+  /// than one CPU. This controls the `cpu.max` attribute on the unified control
+  /// group hierarchy and `cpu.cfs_quota_us` on legacy. For details about these
+  /// control group attributes, see
+  /// [Control Groups v2](https://docs.kernel.org/admin-guide/cgroup-v2.html)
+  /// and
+  /// [CFS Bandwidth Control](https://docs.kernel.org/scheduler/sched-bwc.html).
+  /// Setting `CPUQuota=` to an empty value unsets the quota.
+  ///
+  /// Example: `CPUQuota=20%` ensures that the executed processes will never get
+  /// more than 20% CPU time on one CPU.
+  ///
+  /// Added in version 213.
   cPUQuota: String?
 
-  // Memory accounting and limits
+  /// This setting controls the `memory` controller in the unified hierarchy.
+  ///
+  /// Turn on process and kernel memory accounting for this unit. Takes a
+  /// boolean argument. Note that turning on memory accounting for one unit will
+  /// also implicitly turn it on for all units contained in the same slice and
+  /// for all its parent slices and the units contained therein. The system
+  /// default for this setting may be controlled with `DefaultMemoryAccounting=`
+  /// in systemd-system.conf(5).
+  ///
+  /// Added in version 208.
   memoryAccounting: Boolean?
+
+  /// This setting controls the `memory` controller in the unified hierarchy.
+  ///
+  /// Specify the memory usage protection of the executed processes in this
+  /// unit. When reclaiming memory, the unit is treated as if it was using less
+  /// memory resulting in memory to be preferentially reclaimed from unprotected
+  /// units. Using `MemoryLow=` instead results in a weaker protection where
+  /// memory may still be reclaimed to avoid invoking the OOM killer in case
+  /// there is no other reclaimable memory.
+  ///
+  /// For a protection to be effective, it is generally required to set a
+  /// corresponding allocation on all ancestors, which is then distributed
+  /// between children (with the exception of the root slice). Any `MemoryMin=`
+  /// allocation that is not explicitly distributed to specific children is used
+  /// to create a shared protection for all children. As this is a shared
+  /// protection, the children will freely compete for the memory.
+  ///
+  /// Takes a memory size in bytes. If the value is suffixed with K, M, G or T,
+  /// the specified memory size is parsed as Kilobytes, Megabytes, Gigabytes, or
+  /// Terabytes (with the base 1024), respectively. Alternatively, a percentage
+  /// value may be specified, which is taken relative to the installed physical
+  /// memory on the system. If assigned the special value `infinity`, all
+  /// available memory is protected, which may be useful in order to always
+  /// inherit all of the protection afforded by ancestors. This controls the
+  /// `memory.min` control group attribute. For details about this control group
+  /// attribute, see
+  /// [Memory Interface Files](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files).
+  ///
+  /// Added in version 240.
   memoryMin: String?
+
+  /// This setting controls the `memory` controller in the unified hierarchy.
+  ///
+  /// Specify the memory usage protection of the executed processes in this
+  /// unit. When reclaiming memory, the unit is treated as if it was using less
+  /// memory resulting in memory to be preferentially reclaimed from unprotected
+  /// units. Compared to `MemoryMin=`, using `MemoryLow=` results in a weaker
+  /// protection where memory may still be reclaimed to avoid invoking the OOM
+  /// killer in case there is no other reclaimable memory.
+  ///
+  /// For a protection to be effective, it is generally required to set a
+  /// corresponding allocation on all ancestors, which is then distributed
+  /// between children (with the exception of the root slice). Any `MemoryLow=`
+  /// allocation that is not explicitly distributed to specific children is used
+  /// to create a shared protection for all children. As this is a shared
+  /// protection, the children will freely compete for the memory.
+  ///
+  /// Takes a memory size in bytes. If the value is suffixed with K, M, G or T,
+  /// the specified memory size is parsed as Kilobytes, Megabytes, Gigabytes, or
+  /// Terabytes (with the base 1024), respectively. Alternatively, a percentage
+  /// value may be specified, which is taken relative to the installed physical
+  /// memory on the system. If assigned the special value `infinity`, all
+  /// available memory is protected, which may be useful in order to always
+  /// inherit all of the protection afforded by ancestors. This controls the
+  /// `memory.low` control group attribute. For details about this control group
+  /// attribute, see
+  /// [Memory Interface Files](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files).
+  ///
+  /// While `StartupMemoryLow=` applies to the startup and shutdown phases of
+  /// the system, `MemoryLow=` applies to normal runtime of the system, and if
+  /// the former is not set also to the startup and shutdown phases. Using
+  /// `StartupMemoryLow=` allows prioritizing specific services at boot-up and
+  /// shutdown differently than during normal runtime.
+  ///
+  /// Added in version 240.
   memoryLow: String?
+
+  /// This setting controls the `memory` controller in the unified hierarchy.
+  ///
+  /// Specify the throttling limit on memory usage of the executed processes in
+  /// this unit. Memory usage may go above the limit if unavoidable, but the
+  /// processes are heavily slowed down and memory is taken away aggressively in
+  /// such cases. This is the main mechanism to control memory usage of a unit.
+  ///
+  /// Takes a memory size in bytes. If the value is suffixed with K, M, G or T,
+  /// the specified memory size is parsed as Kilobytes, Megabytes, Gigabytes, or
+  /// Terabytes (with the base 1024), respectively. Alternatively, a percentage
+  /// value may be specified, which is taken relative to the installed physical
+  /// memory on the system. If assigned the special value `infinity`, no memory
+  /// throttling is applied. This controls the `memory.high` control group
+  /// attribute. For details about this control group attribute, see
+  /// [Memory Interface Files](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files).
+  /// The effective configuration is reported as `EffectiveMemoryHigh=` (see
+  /// also `EffectiveMemoryMax=`).
+  ///
+  /// While `StartupMemoryHigh=` applies to the startup and shutdown phases of
+  /// the system, `MemoryHigh=` applies to normal runtime of the system, and if
+  /// the former is not set also to the startup and shutdown phases. Using
+  /// `StartupMemoryHigh=` allows prioritizing specific services at boot-up and
+  /// shutdown differently than during normal runtime.
+  ///
+  /// Added in version 231.
   memoryHigh: String?
+
+  /// This setting controls the `memory` controller in the unified hierarchy.
+  ///
+  /// Specify the absolute limit on memory usage of the executed processes in
+  /// this unit. If memory usage cannot be contained under the limit,
+  /// out-of-memory killer is invoked inside the unit. It is recommended to use
+  /// `MemoryHigh=` as the main control mechanism and use `MemoryMax=` as the
+  /// last line of defense.
+  ///
+  /// Takes a memory size in bytes. If the value is suffixed with K, M, G or T,
+  /// the specified memory size is parsed as Kilobytes, Megabytes, Gigabytes, or
+  /// Terabytes (with the base 1024), respectively. Alternatively, a percentage
+  /// value may be specified, which is taken relative to the installed physical
+  /// memory on the system. If assigned the special value `infinity`, no memory
+  /// limit is applied. This controls the `memory.max` control group attribute.
+  /// For details about this control group attribute, see
+  /// [Memory Interface Files](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files).
+  /// The effective configuration is reported as `EffectiveMemoryMax=` (the
+  /// value is the most stringent limit of the unit and parent slices and it is
+  /// capped by physical memory).
+  ///
+  /// While `StartupMemoryMax=` applies to the startup and shutdown phases of
+  /// the system, `MemoryMax=` applies to normal runtime of the system, and if
+  /// the former is not set also to the startup and shutdown phases. Using
+  /// `StartupMemoryMax=` allows prioritizing specific services at boot-up and
+  /// shutdown differently than during normal runtime.
+  ///
+  /// Added in version 231.
   memoryMax: String?
+
+  /// This setting controls the `memory` controller in the unified hierarchy.
+  ///
+  /// Specify the absolute limit on swap usage of the executed processes in this
+  /// unit.
+  ///
+  /// Takes a swap size in bytes. If the value is suffixed with K, M, G or T,
+  /// the specified swap size is parsed as Kilobytes, Megabytes, Gigabytes, or
+  /// Terabytes (with the base 1024), respectively. Alternatively, a percentage
+  /// value may be specified, which is taken relative to the specified swap size
+  /// on the system. If assigned the special value `infinity`, no swap limit is
+  /// applied. This controls the `memory.swap.max` control group attribute. For
+  /// details about this control group attribute, see
+  /// [Memory Interface Files](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files).
+  ///
+  /// While `StartupMemorySwapMax=` applies to the startup and shutdown phases
+  /// of the system, `MemorySwapMax=` applies to normal runtime of the system,
+  /// and if the former is not set also to the startup and shutdown phases.
+  /// Using `StartupMemorySwapMax=` allows prioritizing specific services at
+  /// boot-up and shutdown differently than during normal runtime.
+  ///
+  /// Added in version 232.
   memorySwapMax: String?
 
-  // Tasks accounting and limits
+  /// This setting controls the `pids` controller in the unified hierarchy.
+  ///
+  /// Turn on task accounting for this unit. Takes a boolean argument. If
+  /// enabled, the kernel will keep track of the total number of tasks in the
+  /// unit and its children. This number includes both kernel threads and
+  /// userspace processes, with each thread counted individually. Note that
+  /// turning on tasks accounting for one unit will also implicitly turn it on
+  /// for all units contained in the same slice and for all its parent slices
+  /// and the units contained therein. The system default for this setting may
+  /// be controlled with `DefaultTasksAccounting=` in systemd-system.conf(5).
+  ///
+  /// Added in version 227.
   tasksAccounting: Boolean?
+
+  /// This setting controls the `pids` controller in the unified hierarchy.
+  ///
+  /// Specify the maximum number of tasks that may be created in the unit. This
+  /// ensures that the number of tasks accounted for the unit (see
+  /// `TasksAccounting=`) stays below a specific limit. This either takes an
+  /// absolute number of tasks or a percentage value that is taken relative to
+  /// the configured maximum number of tasks on the system. If assigned the
+  /// special value `infinity`, no tasks limit is applied. This controls the
+  /// `pids.max` control group attribute. For details about this control group
+  /// attribute, see the
+  /// [pids controller](https://docs.kernel.org/admin-guide/cgroup-v2.html#pid).
+  /// The effective configuration is reported as `EffectiveTasksMax=`.
+  ///
+  /// The system default for this setting may be controlled with
+  /// `DefaultTasksMax=` in systemd-system.conf(5).
+  ///
+  /// Added in version 227.
   tasksMax: String?
 
-  // IO accounting and limits
+  /// This setting controls the `io` controller in the unified hierarchy.
+  ///
+  /// Turn on Block I/O accounting for this unit, if the unified control group
+  /// hierarchy is used on the system. Takes a boolean argument. Note that
+  /// turning on block I/O accounting for one unit will also implicitly turn it
+  /// on for all units contained in the same slice and all for its parent slices
+  /// and the units contained therein. The system default for this setting may
+  /// be controlled with `DefaultIOAccounting=` in systemd-system.conf(5).
+  ///
+  /// Added in version 230.
   iOAccounting: Boolean?
+
+  /// This setting controls the `io` controller in the unified hierarchy.
+  ///
+  /// Set the default overall block I/O weight for the executed processes, if
+  /// the unified control group hierarchy is used on the system. Takes a single
+  /// weight value (between 1 and 10000) to set the default block I/O weight.
+  /// This controls the `io.weight` control group attribute, which defaults to
+  /// 100. For details about this control group attribute, see
+  /// [IO Interface Files](https://docs.kernel.org/admin-guide/cgroup-v2.html#io-interface-files).
+  /// The available I/O bandwidth is split up among all units within one slice
+  /// relative to their block I/O weight. A higher weight means more I/O
+  /// bandwidth, a lower weight means less.
+  ///
+  /// While `StartupIOWeight=` applies to the startup and shutdown phases of the
+  /// system, `IOWeight=` applies to the later runtime of the system, and if the
+  /// former is not set also to the startup and shutdown phases. This allows
+  /// prioritizing specific services at boot-up and shutdown differently than
+  /// during runtime.
+  ///
+  /// Added in version 230.
   iOWeight: UInt?
+
+  /// This setting controls the `io` controller in the unified hierarchy.
+  ///
+  /// Like `IOWeight=`, but applies to the startup and shutdown phases of the
+  /// system only. Set the default overall block I/O weight for the executed
+  /// processes, if the unified control group hierarchy is used on the system.
+  /// Takes a single weight value (between 1 and 10000) to set the default block
+  /// I/O weight. This controls the `io.weight` control group attribute, which
+  /// defaults to 100. For details about this control group attribute, see
+  /// [IO Interface Files](https://docs.kernel.org/admin-guide/cgroup-v2.html#io-interface-files).
+  /// The available I/O bandwidth is split up among all units within one slice
+  /// relative to their block I/O weight. A higher weight means more I/O
+  /// bandwidth, a lower weight means less.
+  ///
+  /// While `StartupIOWeight=` applies to the startup and shutdown phases of the
+  /// system, `IOWeight=` applies to the later runtime of the system, and if the
+  /// former is not set also to the startup and shutdown phases. This allows
+  /// prioritizing specific services at boot-up and shutdown differently than
+  /// during runtime.
+  ///
+  /// Added in version 230.
   startupIOWeight: UInt?
 
-  // Kill settings (from systemd.kill)
+  /// Specifies how processes of this unit shall be killed. One of:
+  ///
+  /// - `control-group`: all remaining processes in the control group of this
+  ///   unit will be killed on unit stop (for services: after the stop command
+  ///   is executed, as configured with `ExecStop=`).
+  /// - `mixed`: the `SIGTERM` signal (see `KillSignal=`) is sent to the main
+  ///   process while the subsequent `SIGKILL` signal (see `FinalKillSignal=`
+  ///   and `SendSIGKILL=`) is sent to all remaining processes of the unit's
+  ///   control group.
+  /// - `process`: only the main process itself is killed (not recommended!).
+  /// - `none`: no process is killed (strongly recommended against!). In this
+  ///   case, only the stop command will be executed on unit stop, but no
+  ///   process will be killed otherwise. Processes remaining alive after stop
+  ///   are left in their control group and the control group continues to exist
+  ///   after stop unless empty.
+  ///
+  /// Note that it is not recommended to set `KillMode=` to `process` or even
+  /// `none`, as this allows processes to escape the service manager's lifecycle
+  /// and resource management, and to remain running even while their service is
+  /// considered stopped and is assumed to not consume any resources.
+  ///
+  /// Processes will first be terminated via `SIGTERM` (unless the signal to
+  /// send is changed via `KillSignal=` or `RestartKillSignal=`). Optionally,
+  /// this is immediately followed by a `SIGHUP` (if enabled with
+  /// `SendSIGHUP=`). If processes still remain after:
+  ///
+  /// - the main process of a unit has exited (applies to `KillMode=`: `mixed`)
+  /// - the delay configured via the `TimeoutStopSec=` has passed (applies to
+  ///   `KillMode=`: `control-group`, `mixed`, `process`)
+  ///
+  /// the termination request is repeated with the `SIGKILL` signal or the
+  /// signal specified via `FinalKillSignal=` (unless this is disabled via the
+  /// `SendSIGKILL=` option). See kill(2) for more information.
+  ///
+  /// Defaults to `control-group`.
+  ///
+  /// Added in version 187.
   killMode: KillMode?
+
+  /// Specifies which signal to use when stopping a service. This controls the
+  /// signal that is sent as first step of shutting down a unit (see
+  /// `KillMode=`), and is usually followed by `SIGKILL` (see `SendSIGKILL=` and
+  /// `FinalKillSignal=`). For a list of valid signals, see signal(7). Defaults
+  /// to `SIGTERM`.
+  ///
+  /// Note that, right after sending the signal specified in this setting,
+  /// **systemd** will always send `SIGCONT`, to ensure that even suspended
+  /// tasks can be terminated cleanly.
+  ///
+  /// Added in version 187.
   killSignal: String?
+
+  /// Specifies which signal to send to remaining processes after a timeout if
+  /// `SendSIGKILL=` is enabled. The signal configured here should be one that
+  /// is not typically caught and processed by services (`SIGTERM` is not
+  /// suitable). Developers can find it useful to use this to generate a
+  /// coredump to troubleshoot why a service did not terminate upon receiving
+  /// the initial `SIGTERM` signal. This can be achieved by configuring
+  /// `LimitCORE=` and setting `FinalKillSignal=` to either `SIGQUIT` or
+  /// `SIGABRT`. Defaults to `SIGKILL`.
+  ///
+  /// Added in version 240.
   finalKillSignal: String?
+
+  /// Specifies whether to send `SIGHUP` to remaining processes immediately
+  /// after sending the signal configured with `KillSignal=`. This is useful to
+  /// indicate to shells and shell-like programs that their connection has been
+  /// severed. Takes a boolean value. Defaults to `false`.
+  ///
+  /// Added in version 207.
   sendSIGHUP: Boolean?
+
+  /// Specifies whether to send `SIGKILL` (or the signal specified by
+  /// `FinalKillSignal=`) to remaining processes after a timeout, if the normal
+  /// shutdown procedure left processes of the service around. When disabled, a
+  /// `KillMode=` of `control-group` or `mixed` service will not restart if
+  /// processes from prior services exist within the control group. Takes a
+  /// boolean value. Defaults to `true`.
+  ///
+  /// Added in version 187.
   sendSIGKILL: Boolean?
+
+  /// Specifies which signal to use to terminate the service when the watchdog
+  /// timeout expires (enabled through `WatchdogSec=`). Defaults to `SIGABRT`.
+  ///
+  /// Added in version 240.
   watchdogSignal: String?
 }
 
-// Type aliases
 local typealias OOMPolicy = "continue" | "stop" | "kill"
+
 local typealias KillMode = "control-group" | "mixed" | "process" | "none"

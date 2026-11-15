@@ -1,11 +1,38 @@
+// SPDX-License-Identifier: MIT AND LGPL-2.1-or-later
+//
+// The documentation comments in this file are adapted from the systemd man
+// pages, mainly systemd.target(5), copyright the systemd contributors and
+// licensed under LGPL-2.1-or-later. The text was converted to Markdown and
+// edited to fit this module. The original is available at
+// https://github.com/systemd/systemd/tree/main/man
+
+/// A [target unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.target.html)
+/// is used to group units and to set synchronization points for ordering
+/// dependencies with other unit files. Its file name ends in `.target`.
+///
+/// This unit type has no specific options. The common configuration items are
+/// configured in the generic `[Unit]` and `[Install]` sections. A separate
+/// `[Target]` section does not exist, since no target-specific options may be
+/// configured.
+///
+/// Target units do not offer any additional functionality on top of the generic
+/// functionality provided by units. They merely group units, allowing a single
+/// target name to be used in `Wants=` and `Requires=` settings to establish a
+/// dependency on a set of units defined by the target, and in `Before=` and
+/// `After=` settings to establish ordering. Targets establish standardized
+/// names for synchronization points during boot and shutdown. Importantly, see
+/// systemd.special(7) for examples and descriptions of standard **systemd**
+/// targets.
+///
+/// Target units provide a more flexible replacement for SysV runlevels in the
+/// classic SysV init system.
+///
+/// Note that a target unit file must not be empty, lest it be considered a
+/// masked unit. It is recommended to provide a `[Unit]` section which includes
+/// informative `Description=` and `Documentation=` options.
 module declix.systemd.Target
 
 extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
-
-// https://www.freedesktop.org/software/systemd/man/latest/systemd.target.html
-// Target units do not have a dedicated [Target] section.
-// They only use the standard [Unit] and [Install] sections for configuration.
-// Targets are used to group units and provide synchronization points.

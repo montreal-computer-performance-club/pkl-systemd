@@ -304,7 +304,7 @@ The documentation comments are adapted from the upstream manuals and they remain
 
 | Files | Documentation source | License |
 |-------|----------------------|---------|
-| `Unit.pkl` | [systemd man pages](https://github.com/systemd/systemd/tree/main/man) | LGPL-2.1-or-later |
+| `*.pkl` in the root directory, except `systemd.pkl` and `podman.pkl` | [systemd man pages](https://github.com/systemd/systemd/tree/main/man) | LGPL-2.1-or-later |
 | `podman/*.pkl` | [podman-systemd.unit(5)](https://github.com/containers/podman/blob/main/docs/source/markdown/podman-systemd.unit.5.md) | Apache-2.0 |
 
 Unit files you generate with this package do not contain the documentation and are not covered by these licenses. They only matter if you redistribute or modify the package itself.

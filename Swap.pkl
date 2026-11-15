@@ -1,20 +1,68 @@
+// SPDX-License-Identifier: MIT AND LGPL-2.1-or-later
+//
+// The documentation comments in this file are adapted from the systemd man
+// pages, mainly systemd.swap(5), copyright the systemd contributors and
+// licensed under LGPL-2.1-or-later. The text was converted to Markdown and
+// edited to fit this module. The original is available at
+// https://github.com/systemd/systemd/tree/main/man
+
+/// A [swap unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.swap.html)
+/// encodes information about a swap device or file for memory paging controlled
+/// and supervised by **systemd**. Its file name ends in `.swap`.
+///
+/// Swap units must be named after the devices or files they control. Example:
+/// the swap device `/dev/sda5` must be configured in a unit file
+/// `dev-sda5.swap`. For details about the escaping logic used to convert a file
+/// system path to a unit name, see systemd.unit(5). Note that swap units cannot
+/// be templated, nor is possible to add multiple names to a swap unit by
+/// creating additional symlinks to it.
+///
+/// Note that swap support on Linux is privileged, swap units are hence only
+/// available in the system service manager (and root's user service manager),
+/// but not in unprivileged user's service manager.
 module declix.systemd.Swap
 
 extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
+
+/// The `[Swap]` section, which carries information about the swap device this
+/// unit supervises.
 swap: SwapSection
 
-// https://www.freedesktop.org/software/systemd/man/latest/systemd.swap.html
 class SwapSection {
-  // Mandatory - swap device or file path
+  /// Takes an absolute path or a fstab-style identifier of a device node or
+  /// file to use for paging. See swapon(8) for details. If this refers to a
+  /// device node, a dependency on the respective device unit is automatically
+  /// created. (See systemd.device(5) for more information.) If this refers to a
+  /// file, a dependency on the respective mount unit is automatically created.
+  /// (See systemd.mount(5) for more information.) This option is mandatory.
+  /// Note that the usual specifier expansion is applied to this setting,
+  /// literal percent characters should hence be written as `%%`.
   what: String
 
-  // Optional swap configuration
+  /// Swap priority to use when activating the swap device or file. This takes
+  /// an integer. This setting is optional and ignored when the priority is set
+  /// by `pri=` in the `Options=` key.
   priority: UInt?
+
+  /// May contain an option string for the swap device. This may be used for
+  /// controlling discard options among other functionality, if the swap backing
+  /// device supports the discard or trim operation. (See swapon(8) for more
+  /// information.) Note that the usual specifier expansion is applied to this
+  /// setting, literal percent characters should hence be written as `%%`.
+  ///
+  /// Added in version 217.
   options: String?
 
-  // Timeout configuration
+  /// Configures the time to wait for the swapon command to finish. If a command
+  /// does not exit within the configured time, the swap will be considered
+  /// failed and be shut down again. All commands still running will be
+  /// terminated forcibly via `SIGTERM`, and after another delay of this time
+  /// with `SIGKILL`. (See `KillMode=` in systemd.kill(5).) Takes a Pkl
+  /// duration, such as `5.min`. Pass `0.s` to disable the timeout logic.
+  /// Defaults to `DefaultTimeoutStartSec=` from the manager configuration file
+  /// (see systemd-system.conf(5)).
   timeoutSec: Duration?
 }

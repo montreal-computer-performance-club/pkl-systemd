@@ -1,28 +1,120 @@
+// SPDX-License-Identifier: MIT AND LGPL-2.1-or-later
+//
+// The documentation comments in this file are adapted from the systemd man
+// pages, mainly systemd.mount(5), copyright the systemd contributors and
+// licensed under LGPL-2.1-or-later. The text was converted to Markdown and
+// edited to fit this module. The original is available at
+// https://github.com/systemd/systemd/tree/main/man
+
+/// A [mount unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.mount.html)
+/// encodes information about a file system mount point controlled and
+/// supervised by **systemd**. Its file name ends in `.mount`.
+///
+/// **systemd** passes two parameters to mount(8); the values of `What=` and
+/// `Where=`. When invoked in this way, mount(8) does not read any options from
+/// `/etc/fstab`, and must be run as UID 0.
+///
+/// Mount units must be named after the mount point directories they control.
+/// Example: the mount point `/home/lennart` must be configured in a unit file
+/// `home-lennart.mount`. For details about the escaping logic used to convert a
+/// file system path to a unit name, see systemd.unit(5). Note that mount units
+/// cannot be templated, nor is possible to add multiple names to a mount unit
+/// by creating symlinks to its unit file.
+///
+/// Optionally, a mount unit may be accompanied by an automount unit, to allow
+/// on-demand or parallelized mounting. See systemd.automount(5).
+///
+/// Some file systems have special semantics as API file systems for
+/// kernel-to-userspace and userspace-to-userspace interfaces. Some of them may
+/// not be changed via mount units, and cannot be disabled. For a longer
+/// discussion see [API File Systems](https://systemd.io/API_FILE_SYSTEMS).
 module declix.systemd.Mount
 
 extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
+
+/// The `[Mount]` section, which carries information about the file system
+/// mount point this unit supervises.
 mount: MountSection
 
-// https://www.freedesktop.org/software/systemd/man/latest/systemd.mount.html
 class MountSection {
-  // Mandatory properties
+  /// Takes an absolute path or a fstab-style identifier of a device node, file
+  /// or other resource to mount. See mount(8) for details. If this refers to a
+  /// device node, a dependency on the respective device unit is automatically
+  /// created. (See systemd.device(5) for more information.) This option is
+  /// mandatory. Note that the usual specifier expansion is applied to this
+  /// setting, literal percent characters should hence be written as `%%`. If
+  /// this mount is a bind mount and the specified path does not exist yet it is
+  /// created as directory.
   what: String
+
+  /// Takes an absolute path of a file or directory for the mount point; in
+  /// particular, the destination cannot be a symbolic link. If the mount point
+  /// does not exist at the time of mounting, it is created as either a
+  /// directory or a file. The former is the usual case; the latter is done only
+  /// if this mount is a bind mount and the source (`What=`) is not a directory.
+  /// This string must be reflected in the unit filename: the mount point
+  /// `/home/lennart` must be configured in a unit file `home-lennart.mount`.
+  /// This option is mandatory.
   where: String
 
-  // Optional mount configuration
+  /// Takes a string for the file system type. See mount(8) for details. This
+  /// setting is optional.
+  ///
+  /// If the type is `overlay`, and `upperdir=` or `workdir=` are specified as
+  /// options and the directories do not exist, they will be created.
   type: String?
+
+  /// Mount options to use when mounting. This takes a comma-separated list of
+  /// options. This setting is optional. Note that the usual specifier expansion
+  /// is applied to this setting, literal percent characters should hence be
+  /// written as `%%`.
   options: String?
 
-  // Mount behavior options
+  /// If true, parsing of the options specified in `Options=` is relaxed, and
+  /// unknown mount options are tolerated. This corresponds with mount(8)'s `-s`
+  /// switch. Defaults to off.
+  ///
+  /// Added in version 215.
   sloppyOptions: Boolean?
+
+  /// If true, detach the filesystem from the filesystem hierarchy at time of
+  /// the unmount operation, and clean up all references to the filesystem as
+  /// soon as they are not busy anymore. This corresponds with umount(8)'s `-l`
+  /// switch. Defaults to off.
+  ///
+  /// Added in version 232.
   lazyUnmount: Boolean?
+
+  /// If false, a mount point that shall be mounted read-write but cannot be
+  /// mounted so is retried to be mounted read-only. If true the operation will
+  /// fail immediately after the read-write mount attempt did not succeed. This
+  /// corresponds with mount(8)'s `-w` switch. Defaults to off.
+  ///
+  /// Added in version 246.
   readWriteOnly: Boolean?
+
+  /// If true, force an unmount (in case of an unreachable NFS system). This
+  /// corresponds with umount(8)'s `-f` switch. Defaults to off.
+  ///
+  /// Added in version 232.
   forceUnmount: Boolean?
 
-  // Directory and timeout settings
+  /// Directories of mount points (and any parent directories) are automatically
+  /// created if needed. This option specifies the file system access mode used
+  /// when creating these directories. Takes an access mode in octal notation.
+  /// Defaults to `0755`.
   directoryMode: String?
+
+  /// Configures the time to wait for the mount command to finish. If a command
+  /// does not exit within the configured time, the mount will be considered
+  /// failed and be shut down again. All commands still running will be
+  /// terminated forcibly via `SIGTERM`, and after another delay of this time
+  /// with `SIGKILL`. (See `KillMode=` in systemd.kill(5).) Takes a Pkl
+  /// duration, such as `5.min`. Pass `0.s` to disable the timeout logic. The
+  /// default value is set from the `DefaultTimeoutStartSec=` option in
+  /// systemd-system.conf(5).
   timeoutSec: Duration?
 }

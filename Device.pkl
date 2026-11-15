@@ -1,11 +1,41 @@
+// SPDX-License-Identifier: MIT AND LGPL-2.1-or-later
+//
+// The documentation comments in this file are adapted from the systemd man
+// pages, mainly systemd.device(5), copyright the systemd contributors and
+// licensed under LGPL-2.1-or-later. The text was converted to Markdown and
+// edited to fit this module. The original is available at
+// https://github.com/systemd/systemd/tree/main/man
+
+/// A [device unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.device.html)
+/// encodes information about a device as exposed in the sysfs/udev(7) device
+/// tree. Its file name ends in `.device`. This may be used to define
+/// dependencies between devices and other units.
+///
+/// This unit type has no specific options. The common configuration items are
+/// configured in the generic `[Unit]` and `[Install]` sections. A separate
+/// `[Device]` section does not exist, since no device-specific options may be
+/// configured.
+///
+/// **systemd** will dynamically create device units for all kernel devices that
+/// are marked with the `systemd` udev tag (by default all block and network
+/// devices, and a few others). Note that *if `systemd-udevd.service` is not
+/// running, no device units will be available (for example in a typical
+/// container)*.
+///
+/// Device units are named after the `/sys/` and `/dev/` paths they control.
+/// Example: the device `/dev/sda5` is exposed in **systemd** as
+/// `dev-sda5.device`. For details about the escaping logic used to convert a
+/// file system path to a unit name see systemd.unit(5).
+///
+/// To tag a udev device, use `TAG+="systemd"` in the udev rules file, see
+/// udev(7) for details.
+///
+/// Device units will be reloaded by **systemd** whenever the corresponding
+/// device generates a `changed` event. Other units can use
+/// `ReloadPropagatedFrom=` to react to that event.
 module declix.systemd.Device
 
 extends "./Unit.pkl"
 
 unit: UnitSection
 install: InstallSection
-
-// https://www.freedesktop.org/software/systemd/man/latest/systemd.device.html
-// Device units do not have a dedicated [Device] section.
-// They only use the standard [Unit] and [Install] sections for configuration.
-// Device-specific configuration is done through udev properties, not systemd unit files.
