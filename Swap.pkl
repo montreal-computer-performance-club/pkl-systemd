@@ -24,7 +24,7 @@ module declix.systemd.Swap
 
 extends "./Unit.pkl"
 
-import "./Kill.pkl"
+import "./Exec.pkl"
 
 unit: UnitSection
 install: InstallSection
@@ -32,11 +32,12 @@ install: InstallSection
 /// The `[Swap]` section, which carries information about the swap device this
 /// unit supervises.
 ///
-/// The kill and resource control options are inherited from `Kill` and
-/// documented in systemd.kill(5) and systemd.resource-control(5).
+/// The execution environment, kill and resource control options are inherited
+/// from `Exec` and documented in systemd.exec(5), systemd.kill(5) and
+/// systemd.resource-control(5).
 swap: SwapSection
 
-class SwapSection extends Kill {
+class SwapSection extends Exec {
   /// Takes an absolute path or a fstab-style identifier of a device node or
   /// file to use for paging. See swapon(8) for details. If this refers to a
   /// device node, a dependency on the respective device unit is automatically

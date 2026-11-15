@@ -868,7 +868,11 @@ local class UnitFileRenderer extends ValueRenderer {
     else if (value is Boolean)
       if (value) "yes" else "no"
     else if (value is Duration)
-      "\(value.toUnit("s").value)s"
+      // Sub-millisecond durations would render in scientific notation as seconds.
+      if (value.unit == "ns" || value.unit == "us")
+        "\(value.value)\(value.unit)"
+      else
+        "\(value.toUnit("s").value)s"
     else
       throw("unexpected value \(value.getClass())")
 }

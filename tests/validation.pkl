@@ -3,6 +3,7 @@ amends "pkl:test"
 import "../Mount.pkl"
 import "../Service.pkl"
 import "../Socket.pkl"
+import "../Swap.pkl"
 import "../Timer.pkl"
 
 // Validation tests to ensure proper constraints and error handling
@@ -181,5 +182,128 @@ facts {
     service.output.text.contains("ExecStartPre=/bin/setup")
     service.output.text.contains("FileDescriptorStoreMax=10")
     service.output.text.contains("RequiredBy=app.target")
+  }
+
+  ["Execution environment options render in every unit type that accepts them"] {
+    local service = new Service {
+      service = new {
+        execStart { "/bin/app" }
+        user = "app"
+        protectSystem = "strict"
+      }
+    }
+    local socket = new Socket {
+      socket = new {
+        listenStream { "8080" }
+        user = "app"
+        protectSystem = "strict"
+      }
+    }
+    local mount = new Mount {
+      mount = new {
+        what = "/dev/test"
+        where = "/mnt/test"
+        user = "app"
+        protectSystem = "strict"
+      }
+    }
+    local swap = new Swap {
+      swap = new {
+        what = "/dev/test"
+        user = "app"
+        protectSystem = "strict"
+      }
+    }
+    service.output.text.contains("User=app\nProtectSystem=strict")
+    socket.output.text.contains("User=app\nProtectSystem=strict")
+    mount.output.text.contains("User=app\nProtectSystem=strict")
+    swap.output.text.contains("User=app\nProtectSystem=strict")
+  }
+
+  ["Execution environment options starting with acronyms keep their spelling"] {
+    local service = new Service {
+      service = new {
+        execStart { "/bin/app" }
+        uMask = "0027"
+        pamName = "login"
+        selinuxContext = "system_u:system_r:app_t:s0"
+        oomScoreAdjust = -500
+        cpuAffinity = "0-3"
+        numaPolicy = "bind"
+        ioSchedulingClass = "idle"
+        ipcNamespacePath = "/run/netns/app"
+        ttyVHangup = true
+        ttyVTDisallocate = true
+        limitNOFILE = "1024:4096"
+        mountAPIVFS = true
+        restrictSUIDSGID = true
+        bpfDelegateCommands = "any"
+      }
+    }
+    local text = service.output.text
+    text.contains("UMask=0027")
+    text.contains("PAMName=login")
+    text.contains("SELinuxContext=system_u:system_r:app_t:s0")
+    text.contains("OOMScoreAdjust=-500")
+    text.contains("CPUAffinity=0-3")
+    text.contains("NUMAPolicy=bind")
+    text.contains("IOSchedulingClass=idle")
+    text.contains("IPCNamespacePath=/run/netns/app")
+    text.contains("TTYVHangup=yes")
+    text.contains("TTYVTDisallocate=yes")
+    text.contains("LimitNOFILE=1024:4096")
+    text.contains("MountAPIVFS=yes")
+    text.contains("RestrictSUIDSGID=yes")
+    text.contains("BPFDelegateCommands=any")
+  }
+
+  ["Execution environment options accept booleans, keywords and listings"] {
+    local service = new Service {
+      service = new {
+        execStart { "/bin/app" }
+        protectHome = "read-only"
+        privateTmp = true
+        restrictNamespaces = new Listing { "cgroup"; "net" }
+        delegateNamespaces = false
+        systemCallFilter { "@system-service"; "~@privileged" }
+        timerSlackNSec = 50.us
+        logRateLimitIntervalSec = 30.s
+      }
+    }
+    local text = service.output.text
+    text.contains("ProtectHome=read-only")
+    text.contains("PrivateTmp=yes")
+    text.contains("RestrictNamespaces=cgroup\nRestrictNamespaces=net")
+    text.contains("DelegateNamespaces=no")
+    text.contains("SystemCallFilter=@system-service\nSystemCallFilter=~@privileged")
+    text.contains("TimerSlackNSec=50us")
+    text.contains("LogRateLimitIntervalSec=30s")
+  }
+
+  ["Execution environment options reject unknown keywords"] {
+    module
+      .catch(() ->
+        new Service {
+          service = new {
+            execStart { "/bin/app" }
+            protectSystem = "everything"
+          }
+        }
+          .output
+          .text
+      )
+      .contains("everything")
+    module
+      .catch(() ->
+        new Service {
+          service = new {
+            execStart { "/bin/app" }
+            nice = 20
+          }
+        }
+          .output
+          .text
+      )
+      .contains("isBetween")
   }
 }

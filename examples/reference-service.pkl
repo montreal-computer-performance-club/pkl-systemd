@@ -107,6 +107,32 @@ service = new {
     "/etc/advanced-service/secrets.env"
   }
 
+  // Execution environment
+  user = "advanced-service"
+  group = "advanced-service"
+  workingDirectory = "/var/lib/advanced-service"
+  uMask = "0027"
+  stateDirectory { "advanced-service" }
+  runtimeDirectory { "advanced-service" }
+  limitNOFILE = "65536"
+  oomScoreAdjust = -500
+  standardOutput = "journal"
+  standardError = "journal"
+  syslogIdentifier = "advanced-service"
+
+  // Sandboxing
+  noNewPrivileges = true
+  protectSystem = "strict"
+  protectHome = true
+  privateTmp = true
+  privateDevices = true
+  readWritePaths { "/var/lib/advanced-service" }
+  capabilityBoundingSet { "CAP_NET_BIND_SERVICE" }
+  restrictAddressFamilies { "AF_UNIX"; "AF_INET"; "AF_INET6" }
+  restrictNamespaces = true
+  systemCallFilter { "@system-service"; "~@privileged" }
+  systemCallArchitectures { "native" }
+
   // Status and notifications
   successExitStatus {
     "0"

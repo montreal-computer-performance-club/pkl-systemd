@@ -178,6 +178,7 @@ examples {
     
     [Service]
     KillMode=control-group
+    Environment=PODMAN_SYSTEMD_UNIT=%n
     Type=forking
     PIDFile=%t/%n.pid
     ExecStartPre=/usr/bin/rm -f %t/%n.pid %t/%n.cid
@@ -185,7 +186,6 @@ examples {
     ExecStop=/usr/bin/sh -c "podman rm -f `cat %t/%n.cid`"
     Restart=always
     TimeoutStopSec=70s
-    Environment=PODMAN_SYSTEMD_UNIT=%n
     
     """
   }
@@ -227,6 +227,37 @@ examples {
     SendSIGKILL=yes
     FinalKillSignal=SIGKILL
     WatchdogSignal=SIGTERM
+    WorkingDirectory=/var/lib/advanced-service
+    User=advanced-service
+    Group=advanced-service
+    CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+    NoNewPrivileges=yes
+    LimitNOFILE=65536
+    UMask=0027
+    OOMScoreAdjust=-500
+    ProtectSystem=strict
+    ProtectHome=yes
+    RuntimeDirectory=advanced-service
+    StateDirectory=advanced-service
+    ReadWritePaths=/var/lib/advanced-service
+    PrivateTmp=yes
+    PrivateDevices=yes
+    RestrictAddressFamilies=AF_UNIX
+    RestrictAddressFamilies=AF_INET
+    RestrictAddressFamilies=AF_INET6
+    RestrictNamespaces=yes
+    SystemCallFilter=@system-service
+    SystemCallFilter=~@privileged
+    SystemCallArchitectures=native
+    Environment=SERVICE_ENV=production
+    Environment=LOG_LEVEL=info
+    Environment=CONFIG_FILE=/etc/advanced-service/config.yaml
+    Environment=DATA_DIR=/var/lib/advanced-service
+    EnvironmentFile=/etc/advanced-service/environment
+    EnvironmentFile=/etc/advanced-service/secrets.env
+    StandardOutput=journal
+    StandardError=journal
+    SyslogIdentifier=advanced-service
     Type=notify
     ExitType=main
     RemainAfterExit=no
@@ -257,12 +288,6 @@ examples {
     RuntimeMaxSec=86400s
     RuntimeRandomizedExtraSec=3600s
     WatchdogSec=30s
-    Environment=SERVICE_ENV=production
-    Environment=LOG_LEVEL=info
-    Environment=CONFIG_FILE=/etc/advanced-service/config.yaml
-    Environment=DATA_DIR=/var/lib/advanced-service
-    EnvironmentFile=/etc/advanced-service/environment
-    EnvironmentFile=/etc/advanced-service/secrets.env
     SuccessExitStatus=0
     SuccessExitStatus=SIGUSR1
     NonBlocking=no

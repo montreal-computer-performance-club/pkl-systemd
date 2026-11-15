@@ -32,7 +32,7 @@ module declix.systemd.Mount
 
 extends "./Unit.pkl"
 
-import "./Kill.pkl"
+import "./Exec.pkl"
 
 unit: UnitSection
 install: InstallSection
@@ -40,11 +40,12 @@ install: InstallSection
 /// The `[Mount]` section, which carries information about the file system
 /// mount point this unit supervises.
 ///
-/// The kill and resource control options are inherited from `Kill` and
-/// documented in systemd.kill(5) and systemd.resource-control(5).
+/// The execution environment, kill and resource control options are inherited
+/// from `Exec` and documented in systemd.exec(5), systemd.kill(5) and
+/// systemd.resource-control(5).
 mount: MountSection
 
-class MountSection extends Kill {
+class MountSection extends Exec {
   /// Takes an absolute path or a fstab-style identifier of a device node, file
   /// or other resource to mount. See mount(8) for details. If this refers to a
   /// device node, a dependency on the respective device unit is automatically

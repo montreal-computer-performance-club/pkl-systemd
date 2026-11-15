@@ -25,7 +25,7 @@ module declix.systemd.Socket
 
 extends "./Unit.pkl"
 
-import "./Kill.pkl"
+import "./Exec.pkl"
 
 unit: UnitSection
 install: InstallSection
@@ -33,11 +33,12 @@ install: InstallSection
 /// The `[Socket]` section, which carries information about the socket or FIFO
 /// the unit supervises. Socket unit files must include this section.
 ///
-/// The kill and resource control options are inherited from `Kill` and
-/// documented in systemd.kill(5) and systemd.resource-control(5).
+/// The execution environment, kill and resource control options are inherited
+/// from `Exec` and documented in systemd.exec(5), systemd.kill(5) and
+/// systemd.resource-control(5).
 socket: SocketSection
 
-class SocketSection extends Kill {
+class SocketSection extends Exec {
   /// Specifies an address to listen on for a stream (`SOCK_STREAM`) socket. The
   /// address can be written in various formats:
   ///
