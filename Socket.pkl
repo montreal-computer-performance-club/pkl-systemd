@@ -567,6 +567,20 @@ class SocketSection {
   /// message. Defaults to `false`.
   passCredentials: Boolean?
 
+  /// This controls the `SO_PASSPIDFD` socket option, which allows `AF_UNIX`
+  /// sockets to receive the pidfd of the sending process in an ancillary
+  /// message. Defaults to `false`.
+  ///
+  /// Added in version 258.
+  passPIDFD: Boolean?
+
+  /// This controls the `SO_PASSRIGHTS` socket option, which when disabled
+  /// prohibits the peer from sending `SCM_RIGHTS` ancillary messages (aka file
+  /// descriptors) via `AF_UNIX` sockets. Defaults to `true`.
+  ///
+  /// Added in version 258.
+  acceptFileDescriptors: Boolean?
+
   /// This controls the `SO_PASSSEC` socket option, which allows `AF_UNIX`
   /// sockets to receive the security context of the sending process in an
   /// ancillary message. Defaults to `false`.
@@ -788,6 +802,103 @@ class SocketSection {
   ///
   /// Added in version 255.
   pollLimitBurst: UInt?
+
+  /// Takes a boolean, or `patient`. May only be used when `Accept=no`. If
+  /// enabled, job mode `lenient` instead of `replace` is used when triggering
+  /// the service, which means currently activating/running units that conflict
+  /// with the service won't be disturbed/brought down. Furthermore, if a
+  /// conflict exists, the socket unit will wait for current job queue to
+  /// complete and potentially defer the activation by then. An upper limit of
+  /// total time to wait can be configured via `DeferTriggerMaxSec=`. If set to
+  /// `true`, the socket unit will fail if all jobs have finished or the timeout
+  /// has been reached but the conflict remains. If `patient`, always wait until
+  /// `DeferTriggerMaxSec=` elapses. Defaults to `false`.
+  ///
+  /// This setting is particularly useful if the socket unit should stay active
+  /// across switch-root/soft-reboot operations while the triggered service is
+  /// stopped.
+  ///
+  /// Added in version 258.
+  deferTrigger: (Boolean | "patient")?
+
+  /// Configures the maximum time to defer the triggering when `DeferTrigger=`
+  /// is enabled. If the service cannot be activated within the specified time,
+  /// the socket will be considered failed and get terminated. Takes a Pkl
+  /// duration, such as `5.min`. Pass `0.s` to disable the timeout logic (the
+  /// default).
+  ///
+  /// Added in version 258.
+  deferTriggerMaxSec: Duration?
+
+  /// Set an extended attribute on the file-system inode an `AF_UNIX` socket is
+  /// bound to, i.e. the socket node visible in the file system at the specified
+  /// listening path; this only applies to `AF_UNIX` sockets. See `XAttrListen=`
+  /// and `XAttrAccept=` to set extended attributes on the listening socket and
+  /// on accepted connection sockets instead.
+  ///
+  /// The value must be in the form `NAME=VALUE`. The extended attribute's name
+  /// must be in the `user.` namespace, i.e. begin with the four characters
+  /// `user.`. Specifiers are expanded in both the name and the value, see
+  /// systemd.unit(5) for details on the available specifiers. Each element of
+  /// the listing is rendered as a separate `XAttrEntryPoint=` line, to set
+  /// multiple extended attributes.
+  ///
+  /// This is primarily useful to tag sockets so that they can be discovered and
+  /// classified by other tools. For example, Varlink entrypoint sockets are
+  /// supposed to be tagged with `user.varlink=entrypoint` via
+  /// `XAttrEntryPoint=`, which makes them discoverable via `varlinkctl
+  /// list-sockets`, see varlinkctl(1).
+  ///
+  /// This setting requires kernel support for extended attributes on socket
+  /// inodes (available since Linux 7.0). Extended attributes that cannot be
+  /// applied are logged at debug level and otherwise ignored.
+  ///
+  /// Added in version 262.
+  xAttrEntryPoint: Listing<String>?
+
+  /// Set an extended attribute on the listening socket. See `XAttrEntryPoint=`
+  /// and `XAttrAccept=` to set extended attributes on the file-system inode an
+  /// `AF_UNIX` socket is bound to and on accepted connection sockets instead.
+  ///
+  /// The value must be in the form `NAME=VALUE`. The extended attribute's name
+  /// must be in the `user.` namespace, i.e. begin with the four characters
+  /// `user.`. Specifiers are expanded in both the name and the value, see
+  /// systemd.unit(5) for details on the available specifiers. Each element of
+  /// the listing is rendered as a separate `XAttrListen=` line, to set multiple
+  /// extended attributes.
+  ///
+  /// This is primarily useful to tag sockets so that they can be discovered and
+  /// classified by other tools.
+  ///
+  /// This setting requires kernel support for extended attributes on socket
+  /// inodes (available since Linux 7.0). Extended attributes that cannot be
+  /// applied are logged at debug level and otherwise ignored.
+  ///
+  /// Added in version 262.
+  xAttrListen: Listing<String>?
+
+  /// Set an extended attribute on the connection sockets accepted off the
+  /// listening socket. This is thus only relevant in combination with
+  /// `Accept=yes`. See `XAttrEntryPoint=` and `XAttrListen=` to set extended
+  /// attributes on the file-system inode an `AF_UNIX` socket is bound to and on
+  /// the listening socket instead.
+  ///
+  /// The value must be in the form `NAME=VALUE`. The extended attribute's name
+  /// must be in the `user.` namespace, i.e. begin with the four characters
+  /// `user.`. Specifiers are expanded in both the name and the value, see
+  /// systemd.unit(5) for details on the available specifiers. Each element of
+  /// the listing is rendered as a separate `XAttrAccept=` line, to set multiple
+  /// extended attributes.
+  ///
+  /// This is primarily useful to tag sockets so that they can be discovered and
+  /// classified by other tools.
+  ///
+  /// This setting requires kernel support for extended attributes on socket
+  /// inodes (available since Linux 7.0). Extended attributes that cannot be
+  /// applied are logged at debug level and otherwise ignored.
+  ///
+  /// Added in version 262.
+  xAttrAccept: Listing<String>?
 }
 
 local typealias BindIPv6Mode = "default" | "both" | "ipv6-only"

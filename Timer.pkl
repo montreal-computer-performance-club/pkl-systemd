@@ -267,6 +267,37 @@ class TimerSection {
   /// Added in version 247.
   fixedRandomDelay: Boolean?
 
+  /// Offsets the timer by a stable, randomly-selected, and evenly distributed
+  /// amount of time between 0 and the specified time value. Defaults to 0,
+  /// indicating that no such offset shall be applied. The offset is chosen
+  /// deterministically, and is derived the same way as `FixedRandomDelay=`. The
+  /// offset is added on top of the next determined elapsing time. This setting
+  /// only has an effect on timers configured with `OnCalendar=`, and it can be
+  /// combined with `RandomizedDelaySec=`.
+  ///
+  /// Much like `RandomizedDelaySec=`, this setting is for distributing timer
+  /// events to prevent them from firing all at once. However, this setting is
+  /// most useful to prevent resource congestion on a remote service, from a
+  /// fleet of similarly-configured clients. Unlike `RandomizedDelaySec=`, this
+  /// setting applies its offset with no regard to manager startup time. This
+  /// maintains the periodicity of configured `OnCalendar=` events across
+  /// manager restarts.
+  ///
+  /// For example, let's say you're running a backup service and have a fleet of
+  /// laptops that wish to make backups weekly. To distribute load on the backup
+  /// service, each laptop should randomly pick a weekday to upload its backups.
+  /// This could be achieved by setting `OnCalendar=` to `weekly`, and then
+  /// configuring a `RandomizedDelaySec=` of `5 days` with `FixedRandomDelay=`
+  /// enabled. Let's say that some laptop randomly chooses a delay of 4 days. If
+  /// this laptop is restarted more often than that, then the timer will never
+  /// fire: on each fresh boot, the 4 day delay is restarted and will not be
+  /// finished by the time of the next shutdown. Instead, you should use
+  /// `RandomizedOffsetSec=`, which will maintain the configured weekly cadence
+  /// of timer events, even across reboots.
+  ///
+  /// Added in version 258.
+  randomizedOffsetSec: Duration?
+
   /// When true, the service unit will be triggered when the system clock
   /// (`CLOCK_REALTIME`) jumps relative to the monotonic clock
   /// (`CLOCK_MONOTONIC`). This option can be used alone or in combination with

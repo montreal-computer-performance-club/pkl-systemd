@@ -162,6 +162,15 @@ The `podman.pkl` module re-exports every Quadlet unit type, mirroring `systemd.p
 | `podman/Image.pkl` | Pull an image | [Image units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#image-units-image) | [redis-image](examples/podman/redis-image.pkl), [private-registry-image](examples/podman/private-registry-image.pkl) |
 | `podman/Quadlet.pkl` | Base module with the `[Quadlet]` section | [Quadlet section](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#quadlet-section-quadlet) | |
 
+## Supported systemd Versions
+
+The modules cover the options of every systemd version between these two:
+
+- **Oldest**: the version shipped by the oldest Red Hat Enterprise Linux release still in full support. This is currently RHEL 9, with systemd 252.
+- **Newest**: the version shipped by the latest stable Fedora release. This is currently Fedora 45, with systemd 262.
+
+An option that only exists in part of this range is still modelled, and it is up to you to use the options that work with the systemd version you target. The documentation of an option ends with "Added in version N" when the manual records it. Options that are already deprecated in the oldest supported version are not modelled.
+
 ## Type System
 
 ### Property Names
