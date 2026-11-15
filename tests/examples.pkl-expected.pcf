@@ -177,6 +177,7 @@ examples {
     WantedBy=default.target
     
     [Service]
+    KillMode=control-group
     Type=forking
     PIDFile=%t/%n.pid
     ExecStartPre=/usr/bin/rm -f %t/%n.pid %t/%n.cid
@@ -184,7 +185,6 @@ examples {
     ExecStop=/usr/bin/sh -c "podman rm -f `cat %t/%n.cid`"
     Restart=always
     TimeoutStopSec=70s
-    KillMode=control-group
     Environment=PODMAN_SYSTEMD_UNIT=%n
     
     """
@@ -221,6 +221,12 @@ examples {
     Also=advanced-service-backup.service
     
     [Service]
+    KillMode=mixed
+    KillSignal=SIGTERM
+    SendSIGHUP=yes
+    SendSIGKILL=yes
+    FinalKillSignal=SIGKILL
+    WatchdogSignal=SIGTERM
     Type=notify
     ExitType=main
     RemainAfterExit=no
@@ -251,12 +257,6 @@ examples {
     RuntimeMaxSec=86400s
     RuntimeRandomizedExtraSec=3600s
     WatchdogSec=30s
-    WatchdogSignal=SIGTERM
-    KillMode=mixed
-    KillSignal=SIGTERM
-    FinalKillSignal=SIGKILL
-    SendSIGHUP=yes
-    SendSIGKILL=yes
     Environment=SERVICE_ENV=production
     Environment=LOG_LEVEL=info
     Environment=CONFIG_FILE=/etc/advanced-service/config.yaml
