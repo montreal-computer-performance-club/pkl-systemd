@@ -12,9 +12,9 @@ unit = new {
 
 slice = new {
   // CPU resource limits
-  cPUAccounting = true
-  cPUWeight = 200 // Lower than default (100-400 range typical)
-  cPUQuota = "50%" // Limit to 50% of one CPU core
+  cpuAccounting = true
+  cpuWeight = 200 // Lower than default (100-400 range typical)
+  cpuQuota = "50%" // Limit to 50% of one CPU core
 
   // Memory resource limits
   memoryAccounting = true
@@ -27,8 +27,8 @@ slice = new {
   tasksMax = "1000" // Maximum number of tasks/processes
 
   // IO resource limits
-  iOAccounting = true
-  iOWeight = 100 // Default IO priority
+  ioAccounting = true
+  ioWeight = 100 // Default IO priority
 
   // Memory pressure management
   managedOOMSwap = "kill"

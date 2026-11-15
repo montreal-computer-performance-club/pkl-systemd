@@ -249,7 +249,7 @@ facts {
     testService.output.text.contains("RestartMode=direct")
     testService.output.text.contains("KillMode=mixed")
     testService.output.text.contains("NotifyAccess=exec")
-    testService.output.text.contains("OomPolicy=kill")
+    testService.output.text.contains("OOMPolicy=kill")
   }
 
   ["Unit boolean properties render as yes/no"] {

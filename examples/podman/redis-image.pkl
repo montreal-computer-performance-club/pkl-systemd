@@ -7,7 +7,7 @@ unit {
 
 image {
   image = "docker.io/library/redis:7-alpine"
-  tLSVerify = true
+  tlsVerify = true
 }
 
 install {

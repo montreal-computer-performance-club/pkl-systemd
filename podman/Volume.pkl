@@ -58,7 +58,8 @@ class VolumeSection {
   /// specified value is not passed to the mount operation. The specified GID
   /// will own the volume's mount point directory and affects the volume chown
   /// operation.
-  gID: UInt?
+  @Key { name = "GID" }
+  gid: UInt?
 
   /// This key contains a list of arguments passed directly between `podman` and
   /// `volume` in the generated file. It can be used to access Podman features
@@ -133,7 +134,8 @@ class VolumeSection {
   /// specified value is not passed to the mount operation. The specified UID
   /// will own the volume's mount point directory and affects the volume chown
   /// operation.
-  uID: UInt?
+  @Key { name = "UID" }
+  uid: UInt?
 
   /// The host (numeric) UID, or user name to use as the owner for the volume.
   /// Differently than `UID`, the specified value is passed to the mount

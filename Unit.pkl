@@ -14,6 +14,8 @@
 /// externally created processes.
 abstract module declix.systemd.Unit
 
+import "pkl:reflect"
+
 class UnitSection {
   /// A brief, meaningful, human-readable text identifying the unit. This may be
   /// used by **systemd** (and suitable UIs) as a user-visible label for the
@@ -779,6 +781,22 @@ class InstallSection {
   defaultInstance: String?
 }
 
+/// Sets the name of the unit file key that a property is rendered as.
+///
+/// By default, a property is rendered under its own name with the first letter
+/// in upper case, so `restartSec` becomes `RestartSec=`. Annotate a property
+/// when the key cannot be derived that way, for example because it starts with
+/// an acronym:
+///
+/// ```
+/// @Key { name = "PIDFile" }
+/// pidFile: String?
+/// ```
+class Key extends Annotation {
+  /// The key exactly as it must appear in the unit file, without the `=`.
+  name: String
+}
+
 local class UnitFileRenderer extends ValueRenderer {
   function renderDocument(value: Any): String = renderSections(value.toMap())
 
@@ -795,32 +813,50 @@ local class UnitFileRenderer extends ValueRenderer {
     let (content = renderSectionProperties(section))
       "[\(name.capitalize())]\n" + content + if (content == "") "" else "\n"
 
-  function renderSectionProperties(section: Any): String =
-    section
-      .toMap()
-      .entries
-      .filter((entry) -> entry.value != null)
-      .map((entry) -> renderProperty(entry.key, entry.value))
-      .filter((rendered) -> rendered != "")
-      .join("\n")
+  /// The unit file key of each property of [section] that has a [Key]
+  /// annotation, including inherited properties.
+  function keyNames(section: Any): Map<String, String> =
+    if (section is Typed)
+      reflect
+        .Class(section.getClass())
+        .allProperties
+        .mapValues((_, property) ->
+          property.annotations.filterIsInstance(Key).firstOrNull?.name
+        )
+        .filter((_, name) -> name != null)
+    else
+      Map()
 
+  function renderSectionProperties(section: Any): String =
+    let (names = keyNames(section))
+      section
+        .toMap()
+        .entries
+        .filter((entry) -> entry.value != null)
+        .map((entry) ->
+          renderProperty(names.getOrNull(entry.key) ?? entry.key.capitalize(), entry.value)
+        )
+        .filter((rendered) -> rendered != "")
+        .join("\n")
+
+  /// Renders a property under the unit file key [name].
   function renderProperty(name: String, value: Any): String =
     if (value is Mapping)
       new Listing {
         for (key in value.toMap().keys) {
-          "\(name.capitalize())=\(key)=" + renderValue(value.toMap()[key])
+          "\(name)=\(key)=" + renderValue(value.toMap()[key])
         }
       }.join("\n")
     else if (value is Listing && !value.isEmpty)
       new Listing {
         for (item in value) {
-          "\(name.capitalize())=" + renderValue(item)
+          "\(name)=" + renderValue(item)
         }
       }.join("\n")
     else if (value is Listing && value.isEmpty)
       ""
     else if (value is String || value is Number || value is Boolean || value is Duration)
-      "\(name.capitalize())=" + renderValue(value)
+      "\(name)=" + renderValue(value)
     else
       throw("unexpected value type \(value.getClass()) for property \(name)")
 

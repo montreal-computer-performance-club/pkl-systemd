@@ -15,10 +15,10 @@ network {
   internal = true
 
   // Enable IPv6
-  iPv6 = true
+  ipv6 = true
 
   // Custom DNS servers
-  dNS {
+  dns {
     "172.20.0.1"
     "8.8.8.8"
   }

@@ -19,11 +19,14 @@
 /// classes that accept these options, such as `SliceSection` in `Slice.pkl`.
 abstract module declix.systemd.ResourceControl
 
+import "./Unit.pkl"
+
 
 /// The `CPUAccounting=` setting is deprecated since systemd 258, because CPU
 /// accounting is always available on the unified cgroup hierarchy and such
 /// setting has no effect.
-cPUAccounting: Boolean?
+@Unit.Key { name = "CPUAccounting" }
+cpuAccounting: Boolean?
 
 /// This setting controls the `cpu` controller in the unified hierarchy.
 ///
@@ -61,7 +64,8 @@ cPUAccounting: Boolean?
 /// so users should be careful to not mistake one for the other.
 ///
 /// Added in version 232.
-cPUWeight: UInt?
+@Unit.Key { name = "CPUWeight" }
+cpuWeight: UInt?
 
 /// This setting controls the `cpu` controller in the unified hierarchy.
 ///
@@ -121,7 +125,8 @@ startupCPUWeight: UInt?
 /// more than 20% CPU time on one CPU.
 ///
 /// Added in version 213.
-cPUQuota: String?
+@Unit.Key { name = "CPUQuota" }
+cpuQuota: String?
 
 /// This setting controls the `cpu` controller in the unified hierarchy.
 ///
@@ -141,7 +146,8 @@ cPUQuota: String?
 /// measured in periods of 10ms.
 ///
 /// Added in version 242.
-cPUQuotaPeriodSec: Duration?
+@Unit.Key { name = "CPUQuotaPeriodSec" }
+cpuQuotaPeriodSec: Duration?
 
 /// This setting controls the `cpuset` controller in the unified hierarchy.
 ///
@@ -204,7 +210,8 @@ startupAllowedCPUs: String?
 /// This setting requires `AllowedCPUs=` to also be set.
 ///
 /// Added in version 261.
-cPUSetPartition: ("member" | "root" | "isolated")?
+@Unit.Key { name = "CPUSetPartition" }
+cpuSetPartition: ("member" | "root" | "isolated")?
 
 /// This setting controls the `memory` controller in the unified hierarchy.
 ///
@@ -725,7 +732,8 @@ managedOOMPreference: ManagedOOMPreference?
 /// a measurable performance impact.
 ///
 /// Added in version 261.
-oOMRules: String?
+@Unit.Key { name = "OOMRules" }
+oomRules: String?
 
 /// This setting controls the `pids` controller in the unified hierarchy.
 ///
@@ -770,7 +778,8 @@ tasksMax: String?
 /// be controlled with `DefaultIOAccounting=` in systemd-system.conf(5).
 ///
 /// Added in version 230.
-iOAccounting: Boolean?
+@Unit.Key { name = "IOAccounting" }
+ioAccounting: Boolean?
 
 /// This setting controls the `io` controller in the unified hierarchy.
 ///
@@ -791,7 +800,8 @@ iOAccounting: Boolean?
 /// during runtime.
 ///
 /// Added in version 230.
-iOWeight: UInt?
+@Unit.Key { name = "IOWeight" }
+ioWeight: UInt?
 
 /// This setting controls the `io` controller in the unified hierarchy.
 ///
@@ -840,7 +850,8 @@ startupIOWeight: UInt?
 /// devices.
 ///
 /// Added in version 230.
-iODeviceWeight: String?
+@Unit.Key { name = "IODeviceWeight" }
+ioDeviceWeight: String?
 
 /// This setting controls the `io` controller in the unified hierarchy.
 ///
@@ -864,7 +875,8 @@ iODeviceWeight: String?
 /// apply.
 ///
 /// Added in version 230.
-iOReadBandwidthMax: String?
+@Unit.Key { name = "IOReadBandwidthMax" }
+ioReadBandwidthMax: String?
 
 /// This setting controls the `io` controller in the unified hierarchy.
 ///
@@ -888,7 +900,8 @@ iOReadBandwidthMax: String?
 /// apply.
 ///
 /// Added in version 230.
-iOWriteBandwidthMax: String?
+@Unit.Key { name = "IOWriteBandwidthMax" }
+ioWriteBandwidthMax: String?
 
 /// This setting controls the `io` controller in the unified hierarchy.
 ///
@@ -911,7 +924,8 @@ iOWriteBandwidthMax: String?
 /// apply.
 ///
 /// Added in version 230.
-iOReadIOPSMax: String?
+@Unit.Key { name = "IOReadIOPSMax" }
+ioReadIOPSMax: String?
 
 /// This setting controls the `io` controller in the unified hierarchy.
 ///
@@ -934,7 +948,8 @@ iOReadIOPSMax: String?
 /// apply.
 ///
 /// Added in version 230.
-iOWriteIOPSMax: String?
+@Unit.Key { name = "IOWriteIOPSMax" }
+ioWriteIOPSMax: String?
 
 /// This setting controls the `io` controller in the unified hierarchy.
 ///
@@ -957,7 +972,8 @@ iOWriteIOPSMax: String?
 /// apply.
 ///
 /// Added in version 240.
-iODeviceLatencyTargetSec: String?
+@Unit.Key { name = "IODeviceLatencyTargetSec" }
+ioDeviceLatencyTargetSec: String?
 
 /// Control access to specific device nodes by the executed processes. Each
 /// element takes two space-separated strings: a device node specifier
@@ -1051,7 +1067,8 @@ devicePolicy: DevicePolicy?
 /// services, not for per-user services.
 ///
 /// Added in version 235.
-iPAccounting: Boolean?
+@Unit.Key { name = "IPAccounting" }
+ipAccounting: Boolean?
 
 /// Turn on network traffic filtering for IP packets sent and received over
 /// `AF_INET` and `AF_INET6` sockets. Each element takes a space separated
@@ -1117,7 +1134,8 @@ iPAccounting: Boolean?
 /// the service unit, as it applies to the whole control group.
 ///
 /// Added in version 235.
-iPAddressAllow: Listing<String>?
+@Unit.Key { name = "IPAddressAllow" }
+ipAddressAllow: Listing<String>?
 
 /// Turn on network traffic filtering for IP packets sent and received over
 /// `AF_INET` and `AF_INET6` sockets. Each element takes a space separated
@@ -1184,7 +1202,8 @@ iPAddressAllow: Listing<String>?
 /// the service unit, as it applies to the whole control group.
 ///
 /// Added in version 235.
-iPAddressDeny: Listing<String>?
+@Unit.Key { name = "IPAddressDeny" }
+ipAddressDeny: Listing<String>?
 
 /// Configures restrictions on the ability of unit processes to invoke bind(2)
 /// on a socket. This setting lists the addresses a socket is allowed to be
@@ -1511,7 +1530,8 @@ bindNetworkInterface: String?
 /// services running in per-user instances of the service manager.
 ///
 /// Added in version 255.
-nFTSet: String?
+@Unit.Key { name = "NFTSet" }
+nftSet: String?
 
 /// Add custom network traffic filters implemented as BPF programs, applying
 /// to all IP packets received over `AF_INET` and `AF_INET6` sockets (ingress
@@ -1552,7 +1572,8 @@ nFTSet: String?
 /// this setting.
 ///
 /// Added in version 243.
-iPIngressFilterPath: Listing<String>?
+@Unit.Key { name = "IPIngressFilterPath" }
+ipIngressFilterPath: Listing<String>?
 
 /// Add custom network traffic filters implemented as BPF programs, applying
 /// to all IP packets sent over `AF_INET` and `AF_INET6` sockets (egress
@@ -1593,7 +1614,8 @@ iPIngressFilterPath: Listing<String>?
 /// this setting.
 ///
 /// Added in version 243.
-iPEgressFilterPath: Listing<String>?
+@Unit.Key { name = "IPEgressFilterPath" }
+ipEgressFilterPath: Listing<String>?
 
 /// Attaches custom BPF programs to the cgroup of a unit. (This generalizes
 /// the functionality exposed via `IPEgressFilterPath=` and
@@ -1643,7 +1665,8 @@ iPEgressFilterPath: Listing<String>?
 /// ```
 ///
 /// Added in version 249.
-bPFProgram: Listing<String>?
+@Unit.Key { name = "BPFProgram" }
+bpfProgram: Listing<String>?
 
 /// The name of the slice unit to place the unit in. Defaults to
 /// `system.slice` for all non-instantiated units of all unit types (except
@@ -1841,7 +1864,8 @@ memoryPressureThresholdSec: Duration?
 /// in systemd-system.conf(5).
 ///
 /// Added in version 261.
-cPUPressureWatch: (Boolean | "auto" | "skip")?
+@Unit.Key { name = "CPUPressureWatch" }
+cpuPressureWatch: (Boolean | "auto" | "skip")?
 
 /// Sets the CPU pressure threshold time for CPU pressure monitor as
 /// configured via `CPUPressureWatch=`. Specifies the maximum CPU stall time
@@ -1851,7 +1875,8 @@ cPUPressureWatch: (Boolean | "auto" | "skip")?
 /// duration such as `200.ms`.
 ///
 /// Added in version 261.
-cPUPressureThresholdSec: Duration?
+@Unit.Key { name = "CPUPressureThresholdSec" }
+cpuPressureThresholdSec: Duration?
 
 /// Controls IO pressure monitoring for invoked processes. Takes a boolean or
 /// one of `auto` and `skip`:
@@ -1884,7 +1909,8 @@ cPUPressureThresholdSec: Duration?
 /// in systemd-system.conf(5).
 ///
 /// Added in version 261.
-iOPressureWatch: (Boolean | "auto" | "skip")?
+@Unit.Key { name = "IOPressureWatch" }
+ioPressureWatch: (Boolean | "auto" | "skip")?
 
 /// Sets the IO pressure threshold time for IO pressure monitor as configured
 /// via `IOPressureWatch=`. Specifies the maximum IO stall time before an IO
@@ -1894,7 +1920,8 @@ iOPressureWatch: (Boolean | "auto" | "skip")?
 /// duration such as `200.ms`.
 ///
 /// Added in version 261.
-iOPressureThresholdSec: Duration?
+@Unit.Key { name = "IOPressureThresholdSec" }
+ioPressureThresholdSec: Duration?
 
 /// This setting is used to enable coredump forwarding for containers that
 /// belong to this unit's cgroup. Units with `CoredumpReceive=yes` must also

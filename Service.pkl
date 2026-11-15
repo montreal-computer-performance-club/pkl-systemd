@@ -256,6 +256,7 @@ class ServiceSection {
   /// `Type=notify`, `Type=notify-reload` or `Type=simple` where possible, which
   /// does not require use of PID files to determine the main process of a
   /// service and avoids needless forking.
+  @Key { name = "PIDFile" }
   pidFile: String?
 
   /// Takes a D-Bus destination name that this service shall use. This option is
@@ -1474,6 +1475,7 @@ class ServiceSection {
   /// this file are written to the `ep0` file after it is opened.
   ///
   /// Added in version 227.
+  @Key { name = "USBFunctionDescriptors" }
   usbFunctionDescriptors: String?
 
   /// Configure the location of a file containing USB FunctionFS strings.
@@ -1483,6 +1485,7 @@ class ServiceSection {
   /// opened.
   ///
   /// Added in version 227.
+  @Key { name = "USBFunctionStrings" }
   usbFunctionStrings: String?
 
   /// Takes a boolean value (`true` or `false`). If `true`, the root directory,
@@ -1532,6 +1535,7 @@ class ServiceSection {
   /// state of the unit after `systemd-oomd` kills a cgroup associated with it.
   ///
   /// Added in version 243.
+  @Key { name = "OOMPolicy" }
   oomPolicy: OOMPolicy?
 
   /// Each element of the listing takes the form `path[:fd-name:options]`,
@@ -1598,7 +1602,8 @@ class ServiceSection {
   /// services running in per-user instances of the service manager.
   ///
   /// Added in version 262.
-  lUOSession: Listing<String>?
+  @Key { name = "LUOSession" }
+  luoSession: Listing<String>?
 }
 
 local typealias ServiceType =

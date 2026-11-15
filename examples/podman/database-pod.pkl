@@ -18,16 +18,16 @@ pod {
   }
 
   // Custom DNS configuration
-  dNS { "10.0.0.1" }
-  dNSSearch {
+  dns { "10.0.0.1" }
+  dnsSearch {
     "internal.example.com"
     "db.example.com"
   }
 
   // User namespace mapping for security
   userNS = "keep-id"
-  uIDMap { "0:100000:65536" }
-  gIDMap { "0:100000:65536" }
+  uidMap { "0:100000:65536" }
+  gidMap { "0:100000:65536" }
 
   // Persistent volumes
   volume {

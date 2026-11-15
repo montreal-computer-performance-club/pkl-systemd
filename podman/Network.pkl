@@ -42,7 +42,8 @@ class NetworkSection {
   /// Set network-scoped DNS resolver/nameserver for containers in this network.
   ///
   /// This key can be listed multiple times.
-  dNS: Listing<String>?
+  @Key { name = "DNS" }
+  dns: Listing<String>?
 
   /// If enabled, disables the DNS plugin for this network.
   ///
@@ -84,7 +85,8 @@ class NetworkSection {
   /// Currently `host-local`, `dhcp` and `none` are supported.
   ///
   /// This is equivalent to the Podman `--ipam-driver` option
-  iPAMDriver: IPAMDriver?
+  @Key { name = "IPAMDriver" }
+  ipamDriver: IPAMDriver?
 
   /// Allocate container IP from a range. The range must be a either a complete
   /// subnet in CIDR notation or be in the `<startIP>-<endIP>` syntax which
@@ -94,12 +96,14 @@ class NetworkSection {
   /// This is equivalent to the Podman `--ip-range` option
   ///
   /// This key can be listed multiple times.
-  iPRange: Listing<String>?
+  @Key { name = "IPRange" }
+  ipRange: Listing<String>?
 
   /// Enable IPv6 (Dual Stack) networking.
   ///
   /// This is equivalent to the Podman `--ipv6` option
-  iPv6: Boolean?
+  @Key { name = "IPv6" }
+  ipv6: Boolean?
 
   /// This option maps the *network_interface* option in the network config, see
   /// **podman network inspect**. Depending on the driver, this can have

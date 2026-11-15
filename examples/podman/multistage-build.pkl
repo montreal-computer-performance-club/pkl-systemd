@@ -41,7 +41,7 @@ build {
   }
 
   pull = "always"
-  tLSVerify = true
+  tlsVerify = true
 
   podmanArgs {
     "--squash"

@@ -78,14 +78,16 @@ class BuildSection {
   /// This key can be listed multiple times.
   ///
   /// This is equivalent to the `--dns` option of `podman build`.
-  dNS: Listing<String>?
+  @Key { name = "DNS" }
+  dns: Listing<String>?
 
   /// Set custom DNS options.
   ///
   /// This key can be listed multiple times.
   ///
   /// This is equivalent to the `--dns-option` option of `podman build`.
-  dNSOption: Listing<String>?
+  @Key { name = "DNSOption" }
+  dnsOption: Listing<String>?
 
   /// Set custom DNS search domains. Use **DNSSearch=.** to remove the search
   /// domain.
@@ -93,7 +95,8 @@ class BuildSection {
   /// This key can be listed multiple times.
   ///
   /// This is equivalent to the `--dns-search` option of `podman build`.
-  dNSSearch: Listing<String>?
+  @Key { name = "DNSSearch" }
+  dnsSearch: Listing<String>?
 
   /// Add a value (e.g. env=*value*) to the built image. This uses the same
   /// format as [services in systemd](https://www.freedesktop.org/software/syste
@@ -236,7 +239,8 @@ class BuildSection {
   /// Require HTTPS and verification of certificates when contacting registries.
   ///
   /// This is equivalent to the `--tls-verify` option of `podman build`.
-  tLSVerify: Boolean?
+  @Key { name = "TLSVerify" }
+  tlsVerify: Boolean?
 
   /// Set the target build stage to build. Commands in the Containerfile after
   /// the target stage are skipped.

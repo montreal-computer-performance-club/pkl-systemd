@@ -10,9 +10,9 @@ image {
   image = "private.company.com/apps/webapp:v2.1.0"
   authFile = "/etc/containers/registries/auth.json"
   certDir = "/etc/containers/registries/certs.d"
-  tLSVerify = true
+  tlsVerify = true
   arch = "amd64"
-  oS = "linux"
+  os = "linux"
   retry = 3
   retryDelay = 10.s
 

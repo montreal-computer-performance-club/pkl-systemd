@@ -112,18 +112,21 @@ class ContainerSection {
   /// Set network-scoped DNS resolver/nameserver for containers in this network.
   ///
   /// This key can be listed multiple times.
-  dNS: Listing<String>?
+  @Key { name = "DNS" }
+  dns: Listing<String>?
 
   /// Set custom DNS options.
   ///
   /// This key can be listed multiple times.
-  dNSOption: Listing<String>?
+  @Key { name = "DNSOption" }
+  dnsOption: Listing<String>?
 
   /// Set custom DNS search domains. Use **DNSSearch=.** to remove the search
   /// domain.
   ///
   /// This key can be listed multiple times.
-  dNSSearch: Listing<String>?
+  @Key { name = "DNSSearch" }
+  dnsSearch: Listing<String>?
 
   /// Drop these capabilities from the default podman capability set, or `all`
   /// to drop all capabilities.
@@ -184,7 +187,8 @@ class ContainerSection {
   /// Equivalent to the Podman `--gidmap` option.
   ///
   /// This key can be listed multiple times.
-  gIDMap: Listing<String>?
+  @Key { name = "GIDMap" }
+  gidMap: Listing<String>?
 
   /// This key contains a list of arguments passed directly between `podman` and
   /// `run` in the generated file. It can be used to access Podman features
@@ -312,11 +316,13 @@ class ContainerSection {
 
   /// Specify a static IPv4 address for the container, for example
   /// **10.88.64.128**. Equivalent to the Podman `--ip` option.
-  iP: String?
+  @Key { name = "IP" }
+  ip: String?
 
   /// Specify a static IPv6 address for the container, for example
   /// **fd46:db93:aa76:ac37::10**. Equivalent to the Podman `--ip6` option.
-  iP6: String?
+  @Key { name = "IP6" }
+  ip6: String?
 
   /// The image to run in the container. It is recommended to use a fully
   /// qualified image name rather than a short name, both for performance and
@@ -635,7 +641,8 @@ class ContainerSection {
   /// Equivalent to the Podman `--uidmap` option.
   ///
   /// This key can be listed multiple times.
-  uIDMap: Listing<String>?
+  @Key { name = "UIDMap" }
+  uidMap: Listing<String>?
 
   /// Ulimit options. Sets the ulimits values inside of the container.
   ///

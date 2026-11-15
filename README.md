@@ -175,13 +175,19 @@ An option that only exists in part of this range is still modelled, and it is up
 
 ### Property Names
 
-A property is named after its unit file key with the first letter in lower case, and nothing else changes. Keys that start with an acronym therefore look unusual, but they render exactly as systemd and Quadlet expect them:
+A property is named after its unit file key, in camel case. A key that starts with an acronym has the whole acronym in lower case, while acronyms inside the name keep the capitalization systemd and Quadlet use:
 
 ```pkl
-slice = new { cPUWeight = 200 }   // CPUWeight=200
-container { dNS { "10.0.0.1" } }  // DNS=10.0.0.1
-pod { uIDMap { "0:100000:65536" } } // UIDMap=0:100000:65536
+service = new { restartSec = 5.s }          // RestartSec=5s
+service = new { pidFile = "/run/app.pid" }  // PIDFile=/run/app.pid
+service = new { sendSIGHUP = true }         // SendSIGHUP=yes
+slice = new { cpuWeight = 200 }             // CPUWeight=200
+slice = new { ioReadIOPSMax = "/dev/sda 1K" } // IOReadIOPSMax=/dev/sda 1K
+container { dns { "10.0.0.1" } }            // DNS=10.0.0.1
+pod { uidMap { "0:100000:65536" } }         // UIDMap=0:100000:65536
 ```
+
+A property whose key cannot be obtained by putting its first letter in upper case carries a `@Key` annotation that gives the key to render.
 
 ### Repeatable Properties
 

@@ -108,7 +108,8 @@ class ImageSection {
   /// Override the OS, defaults to hosts, of the image to be pulled.
   ///
   /// This is equivalent to the Podman `--os` option.
-  oS: String?
+  @Key { name = "OS" }
+  os: String?
 
   /// This key contains a list of arguments passed directly to the end of the
   /// `podman image pull` command in the generated file (right before the image
@@ -146,7 +147,8 @@ class ImageSection {
   /// Require HTTPS and verification of certificates when contacting registries.
   ///
   /// This is equivalent to the Podman `--tls-verify` option.
-  tLSVerify: Boolean?
+  @Key { name = "TLSVerify" }
+  tlsVerify: Boolean?
 
   /// Override the default architecture variant of the container image.
   ///

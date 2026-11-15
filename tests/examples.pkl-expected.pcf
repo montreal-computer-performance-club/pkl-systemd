@@ -178,7 +178,7 @@ examples {
     
     [Service]
     Type=forking
-    PidFile=%t/%n.pid
+    PIDFile=%t/%n.pid
     ExecStartPre=/usr/bin/rm -f %t/%n.pid %t/%n.cid
     ExecReload=podman restart testService
     ExecStop=/usr/bin/sh -c "podman rm -f `cat %t/%n.cid`"
@@ -225,7 +225,7 @@ examples {
     ExitType=main
     RemainAfterExit=no
     GuessMainPID=no
-    PidFile=/run/advanced-service/service.pid
+    PIDFile=/run/advanced-service/service.pid
     BusName=com.example.AdvancedService
     ExecStart=/usr/bin/advanced-service --daemon --config=/etc/advanced-service/config.yaml
     ExecStartPre=/usr/bin/mkdir -p /run/advanced-service
@@ -270,7 +270,7 @@ examples {
     FileDescriptorStoreMax=10
     FileDescriptorStorePreserve=restart
     RootDirectoryStartOnly=no
-    OomPolicy=stop
+    OOMPolicy=stop
     
     """
   }

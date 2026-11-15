@@ -13,5 +13,5 @@ scope = new {
   tasksMax = "2000"
 
   // Kill the whole session if one of its processes is killed by the OOM killer
-  oOMPolicy = "kill"
+  oomPolicy = "kill"
 }
