@@ -1,3 +1,11 @@
+// SPDX-License-Identifier: MIT AND LGPL-2.1-or-later
+//
+// The documentation comments in this file are adapted from the systemd man
+// pages, mainly systemd.unit(5), copyright the systemd contributors and
+// licensed under LGPL-2.1-or-later. The text was converted to Markdown and
+// edited to fit this module. The original is available at
+// https://github.com/systemd/systemd/tree/main/man
+
 /// A [unit file](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html)
 /// is a plain text ini-style file that encodes information about a service, a
 /// socket, a device, a mount point, an automount point, a swap file or

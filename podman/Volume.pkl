@@ -1,3 +1,11 @@
+// SPDX-License-Identifier: MIT AND Apache-2.0
+//
+// The documentation comments in this file are adapted from
+// podman-systemd.unit(5), copyright the Podman contributors and licensed under
+// Apache-2.0. The text was edited to fit this module. The original is
+// available at
+// https://github.com/containers/podman/blob/main/docs/source/markdown/podman-systemd.unit.5.md
+
 /// A volume unit creates a Podman volume with `podman volume create` when the
 /// service starts. Other units reference it as `Volume=<name>.volume:/path`.
 ///
